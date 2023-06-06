@@ -1,7 +1,10 @@
 #include <iostream>
+#include <map>
 #include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <mysql/mysql.h>
+#include <fstream>
 
 #include "../include/server.h"
 #include "../../shared/common.h"
@@ -67,6 +70,33 @@ void Server::start() {
     }
 }
 
+void Server::connectdb() {
+    // Read database configuration from config file
+    std::ifstream config_file("../config/config.txt");
+    std::string line;
+    std::map<std::string, std::string> config_map;
+    while (std::getline(config_file, line)) {
+        size_t pos = line.find('=');
+        if (pos != std::string::npos) {
+            std::string key = line.substr(0, pos);
+            std::string value = line.substr(pos + 1);
+            config_map[key] = value;
+        }
+    }
+
+    std::string database_host = config_map["database_host"];
+    std::string database_name = config_map["database_name"];
+    std::string database_user = config_map["database_user"];
+    std::string database_password = config_map["database_password"];
+
+    // Connect to the MySQL database
+    _conn_db = mysql_init(NULL);
+    if (!mysql_real_connect(_conn_db, database_host.c_str(), database_user.c_str(), database_password.c_str(), database_name.c_str(), 0, NULL, 0)) {
+        std::cerr << "Error: " << mysql_error(_conn_db) << std::endl;
+        exit(1);
+    }
+}
+
 void Server::listen() {
     // listen for incoming connection
     if (::listen(_listen_fd, _backlog) == -1) {
@@ -95,6 +125,7 @@ void Server::accept() {
 
 void Server::stop() {
     std::cout << "Stopping server..." << std::endl;
+    mysql_close(_conn_db);
     close(_listen_fd);
     exit(0);
 }

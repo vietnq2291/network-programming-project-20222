@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
     int port = atoi(argv[1]);
     
     Server my_server(port, 10);
-
+    my_server.connectdb();
     my_server.start();
 
     return 0;

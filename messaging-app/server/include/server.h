@@ -1,5 +1,6 @@
 #include <iostream>
 #include <arpa/inet.h>
+#include <mysql/mysql.h>
 
 
 #ifndef SERVER_H
@@ -10,6 +11,7 @@ public:
     Server(int port, int backlog);
     
     void start();
+    void connectdb();
     void listen();
     void accept();
     void process_message(int conn_fd);
@@ -27,6 +29,7 @@ private:
     int _port;
     int _backlog;
 
+    MYSQL *_conn_db;
 
     fd_set _master;
     fd_set _read_fds;
