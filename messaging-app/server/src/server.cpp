@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <vector>
 #include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -7,6 +8,7 @@
 #include <fstream>
 
 #include "../include/server.h"
+#include "../include/messagebuffer.h"
 #include "../../shared/common.h"
 
 Server::Server(int port, int backlog) {
@@ -63,7 +65,7 @@ void Server::start() {
                 if (i == _listen_fd) {
                     accept();
                 } else {
-                    process_message(i);
+                    receive_message(i);
                 }
             }
         }
@@ -130,11 +132,11 @@ void Server::stop() {
     exit(0);
 }
 
-void Server::process_message(int conn_fd) {
+void Server::receive_message(int conn_fd) {
     int bytes_received;
-    char data[BUFF_SIZE];
+    Message message;
 
-    if ((bytes_received = recv(conn_fd, data, sizeof(data), 0)) <= 0) {
+    if ((bytes_received = recv(conn_fd, &message, sizeof(message), 0)) <= 0) {
         if (bytes_received == 0) {
             std::cout << "Socket " << conn_fd << " hung up" << std::endl;
         } else {
@@ -143,14 +145,53 @@ void Server::process_message(int conn_fd) {
         close(conn_fd);
         FD_CLR(conn_fd, &_master);
     } else {
-        data[bytes_received] = '\0';
-        std::cout << "Received message from socket " << conn_fd << ": " << data << std::endl;
-        // send to all clients
-        for (int i = 0; i <= _fdmax; i++) {
-            if (FD_ISSET(i, &_master)) {
-                if (i != _listen_fd && i != conn_fd) {
-                    if (send(i, data, bytes_received, 0) == -1) {
-                        std::cerr << "Can not send message to socket " << i << std::endl;
+        if (message.type == MessageType::DATA) {
+            message.chat_header.sender = conn_fd;
+            process_data_message(message);
+        } else if (message.type == MessageType::REQUEST) {
+            message.request_header.sender = conn_fd;
+        }
+    }
+}
+
+void Server::process_data_message(Message& message) {
+    MessageBuffer *message_buffer_ptr = nullptr;
+    bool found = false;
+
+    // check if message is a part of a previous message
+    for (auto it = _message_buffers.begin(); it != _message_buffers.end(); it++) {
+        if ((*it).find(message) == true) {
+            (*it).add_message(message);
+
+            if ((*it).get_fin() == 0) 
+                return;
+
+            found = true;
+            message_buffer_ptr = &(*it);
+            _message_buffers.erase(it);
+            break;
+        }
+    }
+    if (found == false) {
+        MessageBuffer new_message_buffer(message);
+        _message_buffers.push_back(new_message_buffer);
+        if (message.chat_header.fin == 0) 
+            return;
+        message_buffer_ptr = &new_message_buffer;
+    }
+
+    // TODO: insert into database...
+
+    // sent to all clients (for testing purpose)
+    std::cout << "Socket " << (*message_buffer_ptr).get_sender() << " sent message" << std::endl;
+    Message msg;
+    for (int i = 0; i <= _fdmax; i++) {
+        if (FD_ISSET(i, &_master)) {
+            if (i != _listen_fd && i != (*message_buffer_ptr).get_sender()) {
+                while ((*message_buffer_ptr).get_next_message(msg)) {
+                    if (send(i, &msg, sizeof(msg), 0) < 0) {
+                        std::cerr << "Can not send message" << std::endl;
+                        stop();
                     }
                 }
             }

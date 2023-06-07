@@ -5,6 +5,7 @@
 #include <sys/select.h>
 
 #include "../include/client.h"
+#include "../include/messagebuffer.h"
 #include "../../shared/common.h"
 
 Client::Client(int port, std::string ip) {
@@ -38,7 +39,7 @@ void Client::connect() {
 }
 
 void Client::start() {
-    char buff[BUFF_SIZE];
+    std::string buff;
     
     while (true) {
         // clear the set ahead of time
@@ -54,22 +55,19 @@ void Client::start() {
         // wait until either socket has data ready to be recv()
         int rv = select(maxfd + 1, &_read_fds, NULL, NULL, NULL);
 
-        if (rv == -1)
-        {
+        if (rv == -1) {
             perror("select"); // error occurred in select()
-        }
-        else
-        {
+        } else {
             // one or both of the descriptors have data
             if (FD_ISSET(STDIN_FILENO, &_read_fds))
             {
-                std::cin.getline(buff, BUFF_SIZE);
-                send_message(buff);
+                std::getline(std::cin, buff);
+                send_data_message(buff, 0, ChatType::PRIVATE_CHAT, DataType::TEXT);
             }
 
             if (FD_ISSET(_conn_fd, &_read_fds))
             {
-                receive_message(buff);
+                receive_message();
             }
         }
     }
@@ -81,22 +79,28 @@ void Client::stop() {
     exit(0);
 }
 
-void Client::send_message(char *buff) {
-    if (send(_conn_fd, buff, strlen(buff), 0) < 0) {
-        std::cerr << "Can not send message" << std::endl;
-        stop();
+void Client::send_data_message(std::string buff, int receiver, ChatType chat_type, DataType data_type) {
+    MessageBuffer msg_buffer(buff, 0, receiver, chat_type, data_type, time(NULL)); // set sender = 0 because this attribute is not used in client
+    Message msg;
+
+    while (msg_buffer.get_next_message(msg)) {
+        if (send(_conn_fd, &msg, sizeof(msg), 0) < 0) {
+            std::cerr << "Can not send message" << std::endl;
+            stop();
+        }
     }
 }
 
-void Client::receive_message(char *buff) {
-
-    int bytes_received = recv(_conn_fd, buff, BUFF_SIZE - 1, 0);
+void Client::receive_message() {
+    Message msg;
+    int bytes_received = recv(_conn_fd, &msg, sizeof(msg), 0);
+    
     if (bytes_received < 0) {
         std::cerr << "Error: receive failed!" << std::endl;
     } else if (bytes_received == 0) {
         std::cerr << "Error: server closed connection!" << std::endl;
+        stop();
     } else {
-        buff[bytes_received] = '\0';
-        std::cout << "Reply: " << buff << std::endl;
+        std::cout << "Received message: (fin, seq, data) = " << "(" << msg.chat_header.fin << ", " << msg.chat_header.seq << ", " << msg.data << ")" << std::endl;
     }
 }

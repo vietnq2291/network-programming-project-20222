@@ -1,6 +1,8 @@
 #include <iostream>
 #include <arpa/inet.h>
 
+#include "../../shared/common.h"
+
 #ifndef CLIENT_H
 #define CLIENT_H
 
@@ -10,8 +12,8 @@ public:
 
     void connect();
     void start();
-    void send_message(char *buff);
-    void receive_message(char *buff);
+    void send_data_message(std::string buff, int receiver, ChatType chat_type, DataType data_type);
+    void receive_message();
     void stop();
 
 private:
