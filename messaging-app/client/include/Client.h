@@ -13,6 +13,7 @@ public:
     void connect();
     void start();
     void send_data_message(std::string buff, int receiver, ChatType chat_type, DataType data_type);
+    void send_request_message(std::string buff);
     void receive_message();
     void stop();
 

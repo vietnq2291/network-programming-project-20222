@@ -9,6 +9,7 @@
 class Message {
 public:
     Message(std::string data, int sender, int receiver, ChatType chat_type, DataType data_type, time_t timestamp);
+    Message(std::string data, RequestType request_type);
 
     // Get the next MessagePacket struct in the list
     bool get_next_packet(MessagePacket& packet);

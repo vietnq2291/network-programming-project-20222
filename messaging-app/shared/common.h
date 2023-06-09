@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-const int DATA_SIZE = 5;
+const int DATA_SIZE = 50;
 
 enum class MessageType {
     DATA,
@@ -26,7 +26,7 @@ enum class RequestType {
 enum class ResponseType {
     SUCCESS,
     FAILURE,
-    ERROR
+    ERROR,
 };
 
 enum class DataType {
@@ -64,7 +64,11 @@ typedef struct {
     ResponseType response_type;
 } ResponseHeader;
 
-typedef struct {
+struct MessagePacket_t {
+    MessagePacket_t() : type(), data_length(0) {};
+    
+    MessagePacket_t(MessageType message_type) : type(message_type), data_length(0) {}
+
     MessageType type;
     union {
         ChatHeader chat_header;
@@ -73,7 +77,9 @@ typedef struct {
     };
     int data_length;
     char data[DATA_SIZE];
-} MessagePacket;
+};
+
+typedef struct MessagePacket_t MessagePacket;
 
 
 #endif // COMMON_H

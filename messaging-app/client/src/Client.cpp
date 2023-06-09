@@ -62,7 +62,18 @@ void Client::start() {
             if (FD_ISSET(STDIN_FILENO, &_read_fds))
             {
                 std::getline(std::cin, buff);
-                send_data_message(buff, 0, ChatType::PRIVATE_CHAT, DataType::TEXT);
+                // buff is like <type> <data>
+                // if type = R, then call send_request_message()
+                // if type = C, then call send_chat_message()
+
+                // check first character of buff to determine message type
+                if (buff[0] == 'R') {
+                    send_request_message(buff);
+                } else if (buff[0] == 'C') {
+                    send_data_message(buff, 0, ChatType::PRIVATE_CHAT, DataType::TEXT);
+                } else {
+                    std::cout << "Invalid message type" << std::endl;
+                }
             }
 
             if (FD_ISSET(_conn_fd, &_read_fds))
@@ -102,5 +113,23 @@ void Client::receive_message() {
         stop();
     } else {
         std::cout << "Received message: (fin, seq, data) = " << "(" << packet.chat_header.fin << ", " << packet.chat_header.seq << ", " << packet.data << ")" << std::endl;
+    }
+}
+
+void Client::send_request_message(std::string buff) {
+    Message *message_ptr;
+    MessagePacket packet;
+
+    if (buff[2] == 'L') {
+        // buff is like: R L <username> <password>
+        std::string auth_data = buff.substr(4, buff.length() - 4);
+        message_ptr = new Message(auth_data, RequestType::LOGIN);
+    }
+
+    while ((*message_ptr).get_next_packet(packet)) {
+        if (send(_conn_fd, &packet, sizeof(packet), 0) < 0) {
+            std::cerr << "Can not send message" << std::endl;
+            stop();
+        }
     }
 }

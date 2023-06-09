@@ -150,6 +150,7 @@ void Server::receive_message(int conn_fd) {
             process_data_message(packet);
         } else if (packet.type == MessageType::REQUEST) {
             packet.request_header.sender = conn_fd;
+            process_request_message(packet);
         }
     }
 }
@@ -199,5 +200,71 @@ void Server::process_data_message(MessagePacket& packet) {
     }
 }
 
-// void Server::process_request_message(Message& message) {   
-// }
+void Server::process_request_message(MessagePacket& request_packet) {
+    switch (request_packet.request_header.request_type) {
+        case RequestType::LOGIN:
+            handle_login(request_packet);
+            break;
+        default:
+            break;
+    }
+}
+
+void Server::handle_login(MessagePacket& request_packet) {
+    // parse username and password
+    std::string auth_data(request_packet.data, request_packet.data + request_packet.data_length);
+    std::string username = auth_data.substr(0, auth_data.find(' '));
+    std::string password = auth_data.substr(auth_data.find(' ') + 1);
+
+    // check if username and password are valid
+    MessagePacket response_packet(MessageType::RESPONSE);
+    if (_online_user_list.find(username) != _online_user_list.end()) {
+        // user is already logged in
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Account is already logged in");
+        response_packet.data_length = strlen(response_packet.data);
+    } else {
+        // user is not logged in
+        std::string query = "SELECT * FROM Account WHERE username = '" + username + "'";
+        if (mysql_query(_conn_db, query.c_str())) {
+            std::cerr << "Error: " << mysql_error(_conn_db) << std::endl;
+            stop();
+        }
+        MYSQL_RES *result = mysql_store_result(_conn_db);
+        if (result == NULL) {
+            std::cerr << "Error: " << mysql_error(_conn_db) << std::endl;
+            stop();
+        }
+        int num_fields = mysql_num_fields(result);
+        
+        MYSQL_ROW row;
+        if ((row = mysql_fetch_row(result))) {
+            if (row[2] == password) {
+                // password is correct
+                response_packet.response_header.response_type = ResponseType::SUCCESS;
+                strcpy(response_packet.data, "Login success");
+                response_packet.data_length = strlen(response_packet.data);
+                
+                // add user to online user list
+                User new_user(username);
+                _online_user_list.insert(std::pair<std::string, User>(username, new_user));
+            } else {
+                // password is incorrect
+                response_packet.response_header.response_type = ResponseType::FAILURE;
+                strcpy(response_packet.data, "Password is incorrect");
+                response_packet.data_length = strlen(response_packet.data);
+            }
+        } else {
+            // user does not exist
+            response_packet.response_header.response_type = ResponseType::FAILURE;
+            strcpy(response_packet.data, "Account does not exist");
+            response_packet.data_length = strlen(response_packet.data);
+        }
+        mysql_free_result(result);
+    }
+
+    if (send(request_packet.request_header.sender, &response_packet, sizeof(response_packet), 0) < 0) {
+        std::cerr << "Can not send message" << std::endl;
+        stop();
+    }
+}

@@ -32,6 +32,19 @@ Message::Message(std::string data, int sender, int receiver, ChatType chat_type,
     }
 }
 
+Message::Message(std::string data, RequestType request_type) {
+    _current_index = 0;
+    
+    MessagePacket packet;
+    packet.type = MessageType::REQUEST;
+    packet.request_header.request_type = request_type;
+    packet.request_header.sender = 0;
+    memset(packet.data, 0, DATA_SIZE);
+    memcpy(packet.data, data.c_str(), data.length());
+    packet.data_length = data.length();
+    _packet_list.push_back(packet);
+}
+
 bool Message::get_next_packet(MessagePacket& packet) {
     if (_current_index >= _packet_list.size()) {
         return false; // No more messages to send

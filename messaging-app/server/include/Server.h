@@ -5,8 +5,12 @@
 #include <arpa/inet.h>
 #include <mysql/mysql.h>
 #include <queue>
+#include <map>
+#include <variant>
+#include <string>
 
 #include "Message.h"
+#include "User.h"
 
 class Server {
 public:
@@ -18,8 +22,8 @@ public:
     void accept();
     void receive_message(int conn_fd);
     void process_data_message(MessagePacket& packet);
-    // void process_request_message(MessagePacket& packet);
-    // void handle_login();
+    void process_request_message(MessagePacket& packet);
+    void handle_login(MessagePacket& packet);
     // void handle_signup();
     // void handle_create_group();
     // void handle_leave_group();
@@ -40,6 +44,7 @@ private:
     int _fdmax;
 
     std::vector<Message> _message_list;
+    std::map<std::variant<int, std::string>, User> _online_user_list;
 };
 
 #endif // SERVER_H
