@@ -6,7 +6,7 @@
 #include <mysql/mysql.h>
 #include <queue>
 
-#include "messagebuffer.h"
+#include "Message.h"
 
 class Server {
 public:
@@ -17,8 +17,8 @@ public:
     void listen();
     void accept();
     void receive_message(int conn_fd);
-    void process_data_message(Message& message);
-    void process_request_message(Message& message);
+    void process_data_message(MessagePacket& packet);
+    // void process_request_message(MessagePacket& packet);
     // void handle_login();
     // void handle_signup();
     // void handle_create_group();
@@ -39,7 +39,7 @@ private:
     fd_set _read_fds;
     int _fdmax;
 
-    std::vector<MessageBuffer> _message_buffers;
+    std::vector<Message> _message_list;
 };
 
 #endif // SERVER_H

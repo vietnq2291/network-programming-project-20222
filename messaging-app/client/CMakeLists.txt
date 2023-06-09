@@ -7,4 +7,4 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # add the source files
-add_executable(messaging-client src/main.cpp src/client.cpp src/messagebuffer.cpp)
+add_executable(messaging-client src/main.cpp src/Client.cpp src/Message.cpp)

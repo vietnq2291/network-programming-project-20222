@@ -1,10 +1,10 @@
+#ifndef CLIENT_H
+#define CLIENT_H
+
 #include <iostream>
 #include <arpa/inet.h>
 
 #include "../../shared/common.h"
-
-#ifndef CLIENT_H
-#define CLIENT_H
 
 class Client {
 public:
@@ -25,4 +25,4 @@ private:
     fd_set _read_fds;
 };
 
-#endif
+#endif // CLIENT_H

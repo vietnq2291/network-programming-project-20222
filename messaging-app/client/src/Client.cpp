@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include <sys/select.h>
 
-#include "../include/client.h"
-#include "../include/messagebuffer.h"
+#include "../include/Client.h"
+#include "../include/Message.h"
 #include "../../shared/common.h"
 
 Client::Client(int port, std::string ip) {
@@ -80,11 +80,11 @@ void Client::stop() {
 }
 
 void Client::send_data_message(std::string buff, int receiver, ChatType chat_type, DataType data_type) {
-    MessageBuffer msg_buffer(buff, 0, receiver, chat_type, data_type, time(NULL)); // set sender = 0 because this attribute is not used in client
-    Message msg;
+    Message message(buff, 0, receiver, chat_type, data_type, time(NULL)); // set sender = 0 because this attribute is not used for message sent from client to server
+    MessagePacket packet;
 
-    while (msg_buffer.get_next_message(msg)) {
-        if (send(_conn_fd, &msg, sizeof(msg), 0) < 0) {
+    while (message.get_next_packet(packet)) {
+        if (send(_conn_fd, &packet, sizeof(packet), 0) < 0) {
             std::cerr << "Can not send message" << std::endl;
             stop();
         }
@@ -92,8 +92,8 @@ void Client::send_data_message(std::string buff, int receiver, ChatType chat_typ
 }
 
 void Client::receive_message() {
-    Message msg;
-    int bytes_received = recv(_conn_fd, &msg, sizeof(msg), 0);
+    MessagePacket packet;
+    int bytes_received = recv(_conn_fd, &packet, sizeof(packet), 0);
     
     if (bytes_received < 0) {
         std::cerr << "Error: receive failed!" << std::endl;
@@ -101,6 +101,6 @@ void Client::receive_message() {
         std::cerr << "Error: server closed connection!" << std::endl;
         stop();
     } else {
-        std::cout << "Received message: (fin, seq, data) = " << "(" << msg.chat_header.fin << ", " << msg.chat_header.seq << ", " << msg.data << ")" << std::endl;
+        std::cout << "Received message: (fin, seq, data) = " << "(" << packet.chat_header.fin << ", " << packet.chat_header.seq << ", " << packet.data << ")" << std::endl;
     }
 }

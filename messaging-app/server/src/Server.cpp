@@ -7,8 +7,8 @@
 #include <mysql/mysql.h>
 #include <fstream>
 
-#include "../include/server.h"
-#include "../include/messagebuffer.h"
+#include "../include/Server.h"
+#include "../include/Message.h"
 #include "../../shared/common.h"
 
 Server::Server(int port, int backlog) {
@@ -134,9 +134,9 @@ void Server::stop() {
 
 void Server::receive_message(int conn_fd) {
     int bytes_received;
-    Message message;
+    MessagePacket packet;
 
-    if ((bytes_received = recv(conn_fd, &message, sizeof(message), 0)) <= 0) {
+    if ((bytes_received = recv(conn_fd, &packet, sizeof(packet), 0)) <= 0) {
         if (bytes_received == 0) {
             std::cout << "Socket " << conn_fd << " hung up" << std::endl;
         } else {
@@ -145,51 +145,51 @@ void Server::receive_message(int conn_fd) {
         close(conn_fd);
         FD_CLR(conn_fd, &_master);
     } else {
-        if (message.type == MessageType::DATA) {
-            message.chat_header.sender = conn_fd;
-            process_data_message(message);
-        } else if (message.type == MessageType::REQUEST) {
-            message.request_header.sender = conn_fd;
+        if (packet.type == MessageType::DATA) {
+            packet.chat_header.sender = conn_fd;
+            process_data_message(packet);
+        } else if (packet.type == MessageType::REQUEST) {
+            packet.request_header.sender = conn_fd;
         }
     }
 }
 
-void Server::process_data_message(Message& message) {
-    MessageBuffer *message_buffer_ptr = nullptr;
+void Server::process_data_message(MessagePacket& packet) {
+    Message *message_ptr = nullptr;
     bool found = false;
 
-    // check if message is a part of a previous message
-    for (auto it = _message_buffers.begin(); it != _message_buffers.end(); it++) {
-        if ((*it).find(message) == true) {
-            (*it).add_message(message);
+    // check if packet is a part of a previous message
+    for (auto it = _message_list.begin(); it != _message_list.end(); it++) {
+        if ((*it).find(packet) == true) {
+            (*it).add_packet(packet);
 
             if ((*it).get_fin() == 0) 
                 return;
 
             found = true;
-            message_buffer_ptr = &(*it);
-            _message_buffers.erase(it);
+            message_ptr = &(*it);
+            _message_list.erase(it);
             break;
         }
     }
     if (found == false) {
-        MessageBuffer new_message_buffer(message);
-        _message_buffers.push_back(new_message_buffer);
-        if (message.chat_header.fin == 0) 
+        Message new_message(packet);
+        _message_list.push_back(new_message);
+        if (packet.chat_header.fin == 0) 
             return;
-        message_buffer_ptr = &new_message_buffer;
+        message_ptr = &new_message;
     }
 
     // TODO: insert into database...
 
     // sent to all clients (for testing purpose)
-    std::cout << "Socket " << (*message_buffer_ptr).get_sender() << " sent message" << std::endl;
-    Message msg;
+    std::cout << "Socket " << (*message_ptr).get_sender() << " sent message" << std::endl;
+    MessagePacket cur_packet;
     for (int i = 0; i <= _fdmax; i++) {
         if (FD_ISSET(i, &_master)) {
-            if (i != _listen_fd && i != (*message_buffer_ptr).get_sender()) {
-                while ((*message_buffer_ptr).get_next_message(msg)) {
-                    if (send(i, &msg, sizeof(msg), 0) < 0) {
+            if (i != _listen_fd && i != (*message_ptr).get_sender()) {
+                while ((*message_ptr).get_next_packet(cur_packet)) {
+                    if (send(i, &cur_packet, sizeof(cur_packet), 0) < 0) {
                         std::cerr << "Can not send message" << std::endl;
                         stop();
                     }
@@ -198,3 +198,6 @@ void Server::process_data_message(Message& message) {
         }
     }
 }
+
+// void Server::process_request_message(Message& message) {   
+// }

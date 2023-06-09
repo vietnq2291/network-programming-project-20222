@@ -1,26 +1,22 @@
-#ifndef MESSAGEBUFFER_H
-#define MESSAGEBUFFER_H
+#ifndef MESSAGE_H
+#define MESSAGE_H
 
-#include <unistd.h>
 #include <vector>
 #include <string>
 #include "../../shared/common.h"
 
 
-class MessageBuffer {
+class Message {
 public:
-    MessageBuffer(Message message);
+    Message(MessagePacket packet);
 
-    void add_message(Message message);
+    void add_packet(MessagePacket packet);
 
-    // Get the next Message struct to send over the socket
-    bool get_next_message(Message& message);
+    // Get the next MessagePacket struct to send over the socket
+    bool get_next_packet(MessagePacket& packet);
 
-    // Get the total number of Message structs
-    int get_message_count() const; 
-
-    // Check if the MessageBuffer contains a Message with the same header
-    bool find(const Message& message) const;
+    // Check if the Message contains a Message with the same header
+    bool find(MessagePacket packet) const;
 
     // Getters
     ChatType get_chat_type() const { return _chat_type; }
@@ -32,7 +28,7 @@ public:
 
 
 private:
-    std::vector<Message> _messages; // Vector of Message structs
+    std::vector<MessagePacket> _packet_list; // List of MessagePacket structs
     int _current_index; // Index of the next Message to send
 
     ChatType _chat_type;
@@ -43,4 +39,4 @@ private:
     int _fin; // finish flag: 1 if last message received, 0 otherwise
 };
 
-#endif // MESSAGEBUFFER_H
+#endif // MESSAGE_H

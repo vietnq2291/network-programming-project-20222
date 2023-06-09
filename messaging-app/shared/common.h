@@ -73,7 +73,7 @@ typedef struct {
     };
     int data_length;
     char data[DATA_SIZE];
-} Message;
+} MessagePacket;
 
 
 #endif // COMMON_H
