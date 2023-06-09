@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <arpa/inet.h>
-#include <mysql/mysql.h>
 #include <queue>
 #include <map>
 #include <variant>
@@ -11,6 +10,7 @@
 
 #include "Message.h"
 #include "User.h"
+#include "SQLQuery.h"
 
 class Server {
 public:
@@ -24,7 +24,7 @@ public:
     void process_data_message(MessagePacket& packet);
     void process_request_message(MessagePacket& packet);
     void handle_login(MessagePacket& packet);
-    // void handle_signup();
+    void handle_signup(MessagePacket& packet);
     // void handle_create_group();
     // void handle_leave_group();
     // void handle_private_chat();
@@ -37,7 +37,7 @@ private:
     int _port;
     int _backlog;
 
-    MYSQL *_conn_db;
+    SQLQuery _sql_query;
 
     fd_set _master;
     fd_set _read_fds;

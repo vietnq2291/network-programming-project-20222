@@ -121,9 +121,13 @@ void Client::send_request_message(std::string buff) {
     MessagePacket packet;
 
     if (buff[2] == 'L') {
-        // buff is like: R L <username> <password>
+        // buff = R L <username> <password>
         std::string auth_data = buff.substr(4, buff.length() - 4);
         message_ptr = new Message(auth_data, RequestType::LOGIN);
+    } else if (buff[2] == 'R') {
+        // buff = R R <username> <password> <display_name>
+        std::string signup_data = buff.substr(4, buff.length() - 4);
+        message_ptr = new Message(signup_data, RequestType::SIGNUP);
     }
 
     while ((*message_ptr).get_next_packet(packet)) {
