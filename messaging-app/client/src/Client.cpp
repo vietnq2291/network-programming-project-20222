@@ -128,6 +128,8 @@ void Client::send_request_message(std::string buff) {
         // buff = R R <username> <password> <display_name>
         std::string signup_data = buff.substr(4, buff.length() - 4);
         message_ptr = new Message(signup_data, RequestType::SIGNUP);
+    } else if (buff[2] == 'X') {
+        message_ptr = new Message(RequestType::LOGOUT);        
     }
 
     while ((*message_ptr).get_next_packet(packet)) {

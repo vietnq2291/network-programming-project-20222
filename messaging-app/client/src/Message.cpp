@@ -14,7 +14,7 @@ Message::Message(std::string data, int sender, int receiver, ChatType chat_type,
         int chunk_size = std::min(length - offset, DATA_SIZE);
 
         MessagePacket packet;
-        packet.type = MessageType::DATA;
+        packet.type = MessageType::CHAT;
         packet.chat_header.chat_type = chat_type;
         packet.chat_header.data_type = data_type;
         packet.chat_header.sender = sender;
@@ -33,15 +33,29 @@ Message::Message(std::string data, int sender, int receiver, ChatType chat_type,
 }
 
 Message::Message(std::string data, RequestType request_type) {
+    _init();
+
+    MessagePacket& packet = _packet_list.back();
+    packet.request_header.request_type = request_type;
+    memcpy(packet.data, data.c_str(), data.length());
+    packet.data_length = data.length();
+}
+
+Message::Message(RequestType request_type) {
+    _init();
+
+    MessagePacket& packet = _packet_list.back();
+    packet.request_header.request_type = request_type;
+}
+
+void Message::_init(){
     _current_index = 0;
     
     MessagePacket packet;
     packet.type = MessageType::REQUEST;
-    packet.request_header.request_type = request_type;
     packet.request_header.sender = 0;
     memset(packet.data, 0, DATA_SIZE);
-    memcpy(packet.data, data.c_str(), data.length());
-    packet.data_length = data.length();
+    packet.data_length = 0;
     _packet_list.push_back(packet);
 }
 

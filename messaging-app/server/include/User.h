@@ -17,6 +17,7 @@ public:
     bool authenticate(std::string password, SQLQuery sql_query, MessagePacket& response_packet);
 
     int get_id() { return _id; }
+    std::string get_username() { return _username; }
 
 private:
     int _id;

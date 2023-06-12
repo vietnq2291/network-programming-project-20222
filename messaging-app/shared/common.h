@@ -4,9 +4,10 @@
 const int DATA_SIZE = 50;
 
 enum class MessageType {
-    DATA,
+    CHAT,
     REQUEST,
-    RESPONSE
+    RESPONSE,
+    PUSH
 };
 
 enum class RequestType {

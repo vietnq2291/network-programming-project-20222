@@ -25,6 +25,7 @@ public:
     void process_request_message(MessagePacket& packet);
     void handle_login(MessagePacket& packet);
     void handle_signup(MessagePacket& packet);
+    void handle_logout(MessagePacket& packet);
     // void handle_create_group();
     // void handle_leave_group();
     // void handle_private_chat();
@@ -45,6 +46,7 @@ private:
 
     std::vector<Message> _message_list;
     std::map<std::variant<int, std::string>, User> _online_user_list;
+    std::map<int, int> _socket_to_user_id;
 };
 
 #endif // SERVER_H

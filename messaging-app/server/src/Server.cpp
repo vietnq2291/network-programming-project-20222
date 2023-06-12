@@ -145,7 +145,7 @@ void Server::receive_message(int conn_fd) {
         close(conn_fd);
         FD_CLR(conn_fd, &_master);
     } else {
-        if (packet.type == MessageType::DATA) {
+        if (packet.type == MessageType::CHAT) {
             packet.chat_header.sender = conn_fd;
             process_data_message(packet);
         } else if (packet.type == MessageType::REQUEST) {
@@ -208,35 +208,49 @@ void Server::process_request_message(MessagePacket& request_packet) {
         case RequestType::SIGNUP:
             handle_signup(request_packet);
             break;
+        case RequestType::LOGOUT:
+            handle_logout(request_packet);
+            break;
         default:
             break;
     }
 }
 
 void Server::handle_login(MessagePacket& request_packet) {
+    MessagePacket response_packet(MessageType::RESPONSE);
+
     // parse username and password
     std::string auth_data(request_packet.data, request_packet.data + request_packet.data_length);
     std::istringstream iss(auth_data);
     std::string username, password;
     iss >> username >> password;
 
-    // check if username and password are valid
-    MessagePacket response_packet(MessageType::RESPONSE);
-    if (_online_user_list.find(username) != _online_user_list.end()) {
-        // user is already logged in
+    // check if client is already logged in
+    if (_socket_to_user_id.find(request_packet.request_header.sender) != _socket_to_user_id.end()) {
         response_packet.response_header.response_type = ResponseType::FAILURE;
-        strcpy(response_packet.data, "Account is already logged in");
+        strcpy(response_packet.data, "You are already logged in");
         response_packet.data_length = strlen(response_packet.data);
     } else {
-        User user(username);
-        if (user.authenticate(password, _sql_query, response_packet) == false) {
-            stop();
-        }
-        
-        if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
-            // add user to online user list
-            _online_user_list.insert(std::pair<std::string, User>(username, user));
-            _online_user_list.insert(std::pair<int, User>(user.get_id(), user));
+        // check if username and password are valid
+        if (_online_user_list.find(username) != _online_user_list.end()) {
+            // user is already logged in
+            response_packet.response_header.response_type = ResponseType::FAILURE;
+            strcpy(response_packet.data, "Account is already logged in on another device");
+            response_packet.data_length = strlen(response_packet.data);
+        } else {
+            User user(username);
+            if (user.authenticate(password, _sql_query, response_packet) == false) {
+                stop();
+            }
+            
+            if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+                // add user to online user list
+                _online_user_list.insert(std::pair<std::string, User>(username, user));
+                _online_user_list.insert(std::pair<int, User>(user.get_id(), user));
+
+                // map socket to user
+                _socket_to_user_id.insert(std::pair<int, int>(request_packet.request_header.sender, user.get_id()));
+            }
         }
     }
 
@@ -254,11 +268,45 @@ void Server::handle_signup(MessagePacket& request_packet) {
     iss >> username >> password >> display_name;
 
     MessagePacket response_packet(MessageType::RESPONSE);
-    User *user = User::signup(username, password, display_name, _sql_query, response_packet);
-    if (user != NULL) {
-        // add user to online user list
-        _online_user_list.insert(std::pair<std::string, User>(username, *user));
-        _online_user_list.insert(std::pair<int, User>(user->get_id(), *user));
+
+    // check if client is already logged in
+    if (_socket_to_user_id.find(request_packet.request_header.sender) != _socket_to_user_id.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "You are already logged in");
+        response_packet.data_length = strlen(response_packet.data);
+    } else {
+        User *user = User::signup(username, password, display_name, _sql_query, response_packet);
+    }
+
+    if (send(request_packet.request_header.sender, &response_packet, sizeof(response_packet), 0) < 0) {
+        std::cerr << "Can not send message" << std::endl;
+        stop();
+    }
+}
+
+void Server::handle_logout(MessagePacket& request_packet) {
+    MessagePacket response_packet(MessageType::RESPONSE);
+
+    int conn_fd = request_packet.request_header.sender;
+    auto it = _online_user_list.find(_socket_to_user_id[conn_fd]);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "You are not logged in");
+        response_packet.data_length = strlen(response_packet.data);
+    } else {
+        int user_id = (*it).second.get_id();
+        std::string username = (*it).second.get_username();
+
+        // remove user from online user list
+        _online_user_list.erase(username);
+        _online_user_list.erase(user_id);
+
+        // remove socket to user mapping
+        _socket_to_user_id.erase(conn_fd);
+
+        response_packet.response_header.response_type = ResponseType::SUCCESS;
+        strcpy(response_packet.data, "Logout successfully");
+        response_packet.data_length = strlen(response_packet.data); 
     }
 
     if (send(request_packet.request_header.sender, &response_packet, sizeof(response_packet), 0) < 0) {
