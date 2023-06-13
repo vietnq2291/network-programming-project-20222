@@ -139,6 +139,7 @@ void Server::receive_message(int conn_fd) {
     if ((bytes_received = recv(conn_fd, &packet, sizeof(packet), 0)) <= 0) {
         if (bytes_received == 0) {
             std::cout << "Socket " << conn_fd << " hung up" << std::endl;
+            remove_client(conn_fd);
         } else {
             std::cerr << "Can not receive message from socket " << conn_fd << std::endl;
         }
@@ -146,13 +147,38 @@ void Server::receive_message(int conn_fd) {
         FD_CLR(conn_fd, &_master);
     } else {
         if (packet.type == MessageType::CHAT) {
-            packet.chat_header.sender = conn_fd;
             process_data_message(packet);
         } else if (packet.type == MessageType::REQUEST) {
-            packet.request_header.sender = conn_fd;
-            process_request_message(packet);
+            process_request_message(packet, conn_fd);
         }
     }
+
+     // debug
+    std::cout << "Online users:\n";
+    for (auto it = _online_user_list.begin(); it != _online_user_list.end(); it++) {
+        std::cout << it->second->get_id() << " " << it->second->get_username() << std::endl;
+    }
+    std::cout << "user_id - socket:\n";
+    for (auto it = _user_id_to_socket.begin(); it != _user_id_to_socket.end(); it++) {
+        std::cout << it->first << " " << it->second << std::endl;
+    }
+}
+
+void Server::remove_client(int conn_fd) {
+    // remove user if it is logged in
+    for (auto it = _user_id_to_socket.begin(); it != _user_id_to_socket.end(); it++) {
+        if (it->second == conn_fd) {
+            int user_id = it->first;
+            std::string username = _online_user_list[user_id]->get_username();
+
+            _online_user_list.erase(user_id);
+            _online_user_list.erase(username);
+            _user_id_to_socket.erase(it);
+            break;
+        }
+    }
+    FD_CLR(conn_fd, &_master);
+    close(conn_fd);
 }
 
 void Server::process_data_message(MessagePacket& packet) {
@@ -183,43 +209,63 @@ void Server::process_data_message(MessagePacket& packet) {
 
     // TODO: insert into database...
 
+    // forward message to receiver
+    switch (packet.chat_header.chat_type) {
+        case ChatType::PRIVATE_CHAT:
+            std::cout << "send from (user id, socket): (" << (*message_ptr).get_sender() << ", " << _user_id_to_socket[packet.chat_header.receiver] << ") to user id: " << packet.chat_header.receiver << std::endl;
+            send_chat_message(*message_ptr, _user_id_to_socket[packet.chat_header.receiver]);
+            break;
+    }
+
     // sent to all clients (for testing purpose)
-    std::cout << "Socket " << (*message_ptr).get_sender() << " sent message" << std::endl;
-    MessagePacket cur_packet;
-    for (int i = 0; i <= _fdmax; i++) {
-        if (FD_ISSET(i, &_master)) {
-            if (i != _listen_fd && i != (*message_ptr).get_sender()) {
-                while ((*message_ptr).get_next_packet(cur_packet)) {
-                    if (send(i, &cur_packet, sizeof(cur_packet), 0) < 0) {
-                        std::cerr << "Can not send message" << std::endl;
-                        stop();
-                    }
-                }
+    // std::cout << "Socket " << (*message_ptr).get_sender() << " sent message" << std::endl;
+    // MessagePacket cur_packet;
+    // for (int i = 0; i <= _fdmax; i++) {
+    //     if (FD_ISSET(i, &_master)) {
+    //         if (i != _listen_fd && i != (*message_ptr).get_sender()) {
+    //             while ((*message_ptr).get_next_packet(cur_packet)) {
+    //                 if (send(i, &cur_packet, sizeof(cur_packet), 0) < 0) {
+    //                     std::cerr << "Can not send message" << std::endl;
+    //                     stop();
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+}
+
+void Server::send_chat_message(Message& message, int conn_fd) {
+    MessagePacket packet;
+    if (FD_ISSET(conn_fd, &_master)) {
+        while (message.get_next_packet(packet)) {
+            if (send(conn_fd, &packet, sizeof(packet), 0) < 0) {
+                std::cerr << "Can not send message" << std::endl;
+                stop();
             }
         }
     }
 }
 
-void Server::process_request_message(MessagePacket& request_packet) {
+void Server::process_request_message(MessagePacket& request_packet, int conn_fd) {
     switch (request_packet.request_header.request_type) {
         case RequestType::LOGIN:
-            handle_login(request_packet);
+            handle_login(request_packet, conn_fd);
             break;
         case RequestType::SIGNUP:
-            handle_signup(request_packet);
+            handle_signup(request_packet, conn_fd);
             break;
         case RequestType::LOGOUT:
-            handle_logout(request_packet);
+            handle_logout(request_packet, conn_fd);
             break;
         case RequestType::UPDATE_ACCOUNT:
-            handle_update_account(request_packet);
+            handle_update_account(request_packet, conn_fd);
             break;
         default:
             break;
     }
 }
 
-void Server::handle_login(MessagePacket& request_packet) {
+void Server::handle_login(MessagePacket& request_packet, int conn_fd) {
     MessagePacket response_packet(MessageType::RESPONSE);
 
     // parse username and password
@@ -239,23 +285,23 @@ void Server::handle_login(MessagePacket& request_packet) {
             stop();
         }
         
-        if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+        if (response_packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {
             // add user to online user list
             _online_user_list.insert(std::pair<std::string, User*>(username, user));
             _online_user_list.insert(std::pair<int, User*>(user->get_id(), user));
 
             // map socket to user
-            _socket_to_user_id.insert(std::pair<int, int>(request_packet.request_header.sender, user->get_id()));
+            _user_id_to_socket[user->get_id()] = conn_fd;
         }
     }
 
-    if (send(request_packet.request_header.sender, &response_packet, sizeof(response_packet), 0) < 0) {
+    if (send(conn_fd, &response_packet, sizeof(response_packet), 0) < 0) {
         std::cerr << "Can not send message" << std::endl;
         stop();
     }
 }
 
-void Server::handle_signup(MessagePacket& request_packet) {
+void Server::handle_signup(MessagePacket& request_packet, int conn_fd) {
     // parse username and password and display_name
     std::string auth_data(request_packet.data, request_packet.data + request_packet.data_length);
     std::string username, password, display_name;
@@ -265,17 +311,17 @@ void Server::handle_signup(MessagePacket& request_packet) {
 
     User *user = User::signup(username, password, display_name, _sql_query, response_packet);
 
-    if (send(request_packet.request_header.sender, &response_packet, sizeof(response_packet), 0) < 0) {
+    if (send(conn_fd, &response_packet, sizeof(response_packet), 0) < 0) {
         std::cerr << "Can not send message" << std::endl;
         stop();
     }
 }
 
-void Server::handle_logout(MessagePacket& request_packet) {
+void Server::handle_logout(MessagePacket& request_packet, int conn_fd) {
     MessagePacket response_packet(MessageType::RESPONSE);
 
-    int conn_fd = request_packet.request_header.sender;
-    auto it = _online_user_list.find(_socket_to_user_id[conn_fd]);
+    int user_id = request_packet.request_header.sender;
+    auto it = _online_user_list.find(user_id);
     if (it == _online_user_list.end()) {
         response_packet.response_header.response_type = ResponseType::FAILURE;
         strcpy(response_packet.data, "Can not find user");
@@ -289,25 +335,25 @@ void Server::handle_logout(MessagePacket& request_packet) {
         _online_user_list.erase(user_id);
 
         // remove socket to user mapping
-        _socket_to_user_id.erase(conn_fd);
+        _user_id_to_socket.erase(user_id);
 
         response_packet.response_header.response_type = ResponseType::SUCCESS;
         strcpy(response_packet.data, "Logout successfully");
         response_packet.data_length = strlen(response_packet.data); 
     }
 
-    if (send(request_packet.request_header.sender, &response_packet, sizeof(response_packet), 0) < 0) {
+    if (send(conn_fd, &response_packet, sizeof(response_packet), 0) < 0) {
         std::cerr << "Can not send message" << std::endl;
         stop();
     }
 }
 
-void Server::handle_update_account(MessagePacket& request_packet) {
+void Server::handle_update_account(MessagePacket& request_packet, int conn_fd) {
     MessagePacket response_packet(MessageType::RESPONSE);
 
     // get user id
-    int conn_fd = request_packet.request_header.sender;
-    auto it = _online_user_list.find(_socket_to_user_id[conn_fd]);
+    int user_id = request_packet.request_header.sender;
+    auto it = _online_user_list.find(user_id);
     if (it == _online_user_list.end()) {
         response_packet.response_header.response_type = ResponseType::FAILURE;
         strcpy(response_packet.data, "You are not logged in");
@@ -319,7 +365,7 @@ void Server::handle_update_account(MessagePacket& request_packet) {
         it->second->update_account(field, data, _sql_query, response_packet);
     }
 
-    if (send(request_packet.request_header.sender, &response_packet, sizeof(response_packet), 0) < 0) {
+    if (send(conn_fd, &response_packet, sizeof(response_packet), 0) < 0) {
         std::cerr << "Can not send message" << std::endl;
         stop();
     }

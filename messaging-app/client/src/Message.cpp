@@ -32,8 +32,8 @@ Message::Message(std::string data, int sender, int receiver, ChatType chat_type,
     }
 }
 
-Message::Message(std::string data, RequestType request_type) {
-    _init();
+Message::Message(std::string data, int sender, RequestType request_type) {
+    _init_request(sender, request_type);
 
     MessagePacket& packet = _packet_list.back();
     packet.request_header.request_type = request_type;
@@ -41,19 +41,19 @@ Message::Message(std::string data, RequestType request_type) {
     packet.data_length = data.length();
 }
 
-Message::Message(RequestType request_type) {
-    _init();
+Message::Message(int sender, RequestType request_type) {
+    _init_request(sender, request_type);
 
     MessagePacket& packet = _packet_list.back();
-    packet.request_header.request_type = request_type;
 }
 
-void Message::_init(){
+void Message::_init_request(int sender, RequestType request_type){
     _current_index = 0;
     
     MessagePacket packet;
     packet.type = MessageType::REQUEST;
-    packet.request_header.sender = 0;
+    packet.request_header.request_type = request_type;
+    packet.request_header.sender = sender;
     memset(packet.data, 0, DATA_SIZE);
     packet.data_length = 0;
     _packet_list.push_back(packet);

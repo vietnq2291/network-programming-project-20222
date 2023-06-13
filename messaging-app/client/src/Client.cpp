@@ -12,6 +12,8 @@
 Client::Client(int port, std::string ip) {
     _server_port = port;
     _server_ip = ip;
+    _user_id = -1;
+    _display_name = "";
 
     /* ----- setup client socket ----- */
     // create socket
@@ -71,7 +73,23 @@ void Client::start() {
                 if (buff[0] == 'R') {
                     send_request_message(buff);
                 } else if (buff[0] == 'C') {
-                    send_data_message(buff, 0, ChatType::PRIVATE_CHAT, DataType::TEXT);
+                    // buff = C <chat_type> <receiver> <message>
+                    // where <chat_type> = G (group chat) or P (private chat)
+
+                    std::cout << "id is " << buff.substr(4, buff.find(' ', 4) - 4) << std::endl;
+                    std::cout << "chat type is " << buff[2] << std::endl;
+                    
+                    ChatType chat_type;
+                    if (buff[2] == 'G') {
+                        chat_type = ChatType::GROUP_CHAT;
+                    } else if (buff[2] == 'P') {
+                        chat_type = ChatType::PRIVATE_CHAT;
+                    } else {
+                        std::cout << "Invalid chat type" << std::endl;
+                    }
+                    int receiver_id = std::stoi(buff.substr(4, buff.find(' ', 4) - 4));
+                    buff = buff.substr(buff.find(' ', 4) + 1);
+                    send_data_message(buff, receiver_id, ChatType::PRIVATE_CHAT, DataType::TEXT);
                 } else {
                     std::cout << "Invalid message type" << std::endl;
                 }
@@ -92,7 +110,7 @@ void Client::stop() {
 }
 
 void Client::send_data_message(std::string buff, int receiver, ChatType chat_type, DataType data_type) {
-    Message message(buff, 0, receiver, chat_type, data_type, time(NULL)); // set sender = 0 because this attribute is not used for message sent from client to server
+    Message message(buff, _user_id, receiver, chat_type, data_type, time(NULL)); // set sender = 0 because this attribute is not used for message sent from client to server
     MessagePacket packet;
 
     while (message.get_next_packet(packet)) {
@@ -113,7 +131,13 @@ void Client::receive_message() {
         std::cerr << "Error: server closed connection!" << std::endl;
         stop();
     } else {
-        std::cout << "Received message: (fin, seq, data) = " << "(" << packet.chat_header.fin << ", " << packet.chat_header.seq << ", " << packet.data << ")" << std::endl;
+        std::cout << "Received message: (sender, fin, seq, data) = " << "(" << packet.chat_header.sender << ", " << packet.chat_header.fin << ", " << packet.chat_header.seq << ", " << packet.data << ")" << std::endl;
+        
+        if (packet.type == MessageType::RESPONSE) {
+            if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {
+                std::tie(_user_id, _display_name) = parse_user_info_data(packet.data);
+            }
+        }
     }
 }
 
@@ -127,7 +151,7 @@ void Client::send_request_message(std::string buff) {
         std::string username = data.substr(0, data.find(' '));
         std::string password = data.substr(data.find(' ') + 1, data.length() - data.find(' ') - 1);
         std::string auth_data = encode_auth_data(username, password);
-        message_ptr = new Message(auth_data, RequestType::LOGIN);
+        message_ptr = new Message(auth_data, _user_id, RequestType::LOGIN);
     } else if (buff[2] == 'R') {
         // buff = R R <username> <password> <display_name>
         std::string data = buff.substr(4, buff.length() - 4);
@@ -136,13 +160,13 @@ void Client::send_request_message(std::string buff) {
         std::string display_name = password.substr(password.find(' ') + 1, password.length() - password.find(' ') - 1);
         password = password.substr(0, password.find(' '));
         std::string signup_data = encode_signup_data(username, password, display_name);
-        message_ptr = new Message(signup_data, RequestType::SIGNUP);
+        message_ptr = new Message(signup_data, _user_id, RequestType::SIGNUP);
     } else if (buff[2] == 'X') {
-        message_ptr = new Message(RequestType::LOGOUT);        
+        message_ptr = new Message(_user_id, RequestType::LOGOUT);        
     } else if (buff[2] == 'U') {
         std::string data = buff.substr(4, buff.length() - 4);
         std::string update_data = encode_update_account_data(data);
-        message_ptr = new Message(update_data, RequestType::UPDATE_ACCOUNT);
+        message_ptr = new Message(update_data, _user_id, RequestType::UPDATE_ACCOUNT);
     }
 
     while ((*message_ptr).get_next_packet(packet)) {

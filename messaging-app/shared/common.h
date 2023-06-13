@@ -29,6 +29,7 @@ enum class ResponseType {
     SUCCESS,
     FAILURE,
     ERROR,
+    LOGIN_SUCCESS,
 };
 
 enum class DataType {

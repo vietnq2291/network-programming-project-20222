@@ -26,8 +26,8 @@ bool User::authenticate(std::string password, SQLQuery sql_query, MessagePacket&
             _id = atoi(row[0]);
             _display_name = row[3];
 
-            response_packet.response_header.response_type = ResponseType::SUCCESS;
-            strcpy(response_packet.data, "Login success");
+            response_packet.response_header.response_type = ResponseType::LOGIN_SUCCESS;
+            sprintf(response_packet.data, "%ld:%s%ld:%s", strlen(row[0]), row[0], strlen(row[3]), row[3]);
             response_packet.data_length = strlen(response_packet.data);
         } else {
             // password is incorrect
