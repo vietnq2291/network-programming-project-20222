@@ -46,3 +46,7 @@ MYSQL_RES *SQLQuery::get_result() {
 bool SQLQuery::is_insert_successful() {
     return mysql_affected_rows(_conn) == 1;
 }
+
+bool SQLQuery::is_update_successful() {
+    return mysql_affected_rows(_conn) >= 1;
+}

@@ -13,6 +13,7 @@ public:
     void query(std::string query, MessagePacket& response_packet);
     MYSQL_RES *get_result();
     bool is_insert_successful();
+    bool is_update_successful();
     void free_result();
     void disconnect();
 

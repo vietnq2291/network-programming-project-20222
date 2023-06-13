@@ -14,6 +14,7 @@ enum class RequestType {
     SIGNUP,
     LOGIN,
     LOGOUT,
+    UPDATE_ACCOUNT,
     ONLINE_USERS,
     CREATE_GROUP,
     INVITE_TO_GROUP,

@@ -139,6 +139,10 @@ void Client::send_request_message(std::string buff) {
         message_ptr = new Message(signup_data, RequestType::SIGNUP);
     } else if (buff[2] == 'X') {
         message_ptr = new Message(RequestType::LOGOUT);        
+    } else if (buff[2] == 'U') {
+        std::string data = buff.substr(4, buff.length() - 4);
+        std::string update_data = encode_update_account_data(data);
+        message_ptr = new Message(update_data, RequestType::UPDATE_ACCOUNT);
     }
 
     while ((*message_ptr).get_next_packet(packet)) {

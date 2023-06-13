@@ -37,3 +37,18 @@ std::tuple<std::string, std::string, std::string> parse_signup_data(const std::s
 
     return std::make_tuple(username, password, display_name);
 }
+
+std::tuple<std::string, std::string> parse_update_account_data(const std::string& data) {
+    // data is of the form: <type><data_len>:<data>, where type is either 'P' (password) or 'N' (display name)
+    size_t data_delim = data.find(':');
+    int data_len = std::stoi(data.substr(1, data_delim - 1));
+    std::string data_value = data.substr(data_delim + 1, data_len);
+
+    std::string field;
+    if (data[0] == 'P')
+        field = "password";
+    else if (data[0] == 'N')
+        field = "display_name";
+
+    return std::make_tuple(field, data_value);
+}
