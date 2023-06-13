@@ -6,6 +6,7 @@
 
 #include "../include/Client.h"
 #include "../include/Message.h"
+#include "../include/Utils.h"
 #include "../../shared/common.h"
 
 Client::Client(int port, std::string ip) {
@@ -122,11 +123,19 @@ void Client::send_request_message(std::string buff) {
 
     if (buff[2] == 'L') {
         // buff = R L <username> <password>
-        std::string auth_data = buff.substr(4, buff.length() - 4);
+        std::string data = buff.substr(4, buff.length() - 4);
+        std::string username = data.substr(0, data.find(' '));
+        std::string password = data.substr(data.find(' ') + 1, data.length() - data.find(' ') - 1);
+        std::string auth_data = encode_auth_data(username, password);
         message_ptr = new Message(auth_data, RequestType::LOGIN);
     } else if (buff[2] == 'R') {
         // buff = R R <username> <password> <display_name>
-        std::string signup_data = buff.substr(4, buff.length() - 4);
+        std::string data = buff.substr(4, buff.length() - 4);
+        std::string username = data.substr(0, data.find(' '));
+        std::string password = data.substr(data.find(' ') + 1, data.length() - data.find(' ') - 1);
+        std::string display_name = password.substr(password.find(' ') + 1, password.length() - password.find(' ') - 1);
+        password = password.substr(0, password.find(' '));
+        std::string signup_data = encode_signup_data(username, password, display_name);
         message_ptr = new Message(signup_data, RequestType::SIGNUP);
     } else if (buff[2] == 'X') {
         message_ptr = new Message(RequestType::LOGOUT);        

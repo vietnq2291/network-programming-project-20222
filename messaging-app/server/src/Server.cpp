@@ -6,10 +6,10 @@
 #include <unistd.h>
 #include <mysql/mysql.h>
 #include <fstream>
-#include <sstream>
 
 #include "../include/Server.h"
 #include "../include/Message.h"
+#include "../include/Utils.h"
 #include "../include/SQLQuery.h"
 #include "../../shared/common.h"
 
@@ -221,9 +221,8 @@ void Server::handle_login(MessagePacket& request_packet) {
 
     // parse username and password
     std::string auth_data(request_packet.data, request_packet.data + request_packet.data_length);
-    std::istringstream iss(auth_data);
     std::string username, password;
-    iss >> username >> password;
+    std::tie(username, password) = parse_auth_data(auth_data);
 
     // check if client is already logged in
     if (_socket_to_user_id.find(request_packet.request_header.sender) != _socket_to_user_id.end()) {
@@ -263,9 +262,8 @@ void Server::handle_login(MessagePacket& request_packet) {
 void Server::handle_signup(MessagePacket& request_packet) {
     // parse username and password and display_name
     std::string auth_data(request_packet.data, request_packet.data + request_packet.data_length);
-    std::istringstream iss(auth_data);
     std::string username, password, display_name;
-    iss >> username >> password >> display_name;
+    std::tie(username, password, display_name) = parse_signup_data(auth_data);
 
     MessagePacket response_packet(MessageType::RESPONSE);
 
