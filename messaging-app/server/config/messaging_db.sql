@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 06, 2023 at 03:13 PM
+-- Generation Time: Jun 16, 2023 at 04:14 PM
 -- Server version: 8.0.33-0ubuntu0.22.04.2
--- PHP Version: 8.2.6
+-- PHP Version: 8.2.7
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -32,7 +32,6 @@ CREATE TABLE `Account` (
   `username` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
   `display_name` varchar(100) NOT NULL,
-  `status` char(20) NOT NULL,
   `time_created` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -45,7 +44,8 @@ CREATE TABLE `Account` (
 CREATE TABLE `Chat` (
   `id` int NOT NULL,
   `type` char(20) NOT NULL,
-  `time_created` timestamp NULL DEFAULT NULL
+  `time_created` timestamp NULL DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -131,19 +131,19 @@ ALTER TABLE `Message`
 -- AUTO_INCREMENT for table `Account`
 --
 ALTER TABLE `Account`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `Chat`
 --
 ALTER TABLE `Chat`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `Message`
 --
 ALTER TABLE `Message`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- Constraints for dumped tables
