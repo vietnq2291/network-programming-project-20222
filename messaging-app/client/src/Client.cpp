@@ -188,6 +188,35 @@ void Client::receive_message() {
             if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {
                 std::tie(_user_id, _display_name) = parse_user_info_data(packet.data);
             }
+        } else if (packet.type == MessageType::CHAT) {
+            //print all data of packet for debug
+            std::string chat_type, data_type;
+            if (packet.chat_header.chat_type == ChatType::GROUP_CHAT) {
+                chat_type = "GROUP_CHAT";
+            } else if (packet.chat_header.chat_type == ChatType::PRIVATE_CHAT) {
+                chat_type = "PRIVATE_CHAT";
+            } else {
+                chat_type = "UNKNOWN";
+            }
+            if (packet.chat_header.data_type == DataType::TEXT) {
+                data_type = "TEXT";
+            } else if (packet.chat_header.data_type == DataType::FILE) {
+                data_type = "FILE";
+            } else {
+                data_type = "UNKNOWN";
+            }
+            std::cout << "Received message: (type, chat_type, data_type, sender, chat_id, timestamp, data) = " << "(" << "CHAT" <<
+                                                                                                    ", " << chat_type << 
+                                                                                                    ", " << data_type << 
+                                                                                                    ", " << packet.chat_header.sender << 
+                                                                                                    ", " << packet.chat_header.chat_id << 
+                                                                                                    ", " << packet.chat_header.timestamp << 
+                                                                                                    ", " << packet.fin <<
+                                                                                                    ", " << packet.seq <<
+                                                                                                    ", " << packet.data_length <<
+                                                                                                    ", " << packet.data << ")" << std::endl;
+        } else {
+            std::cout << "Invalid message type" << std::endl;
         }
     }
 }

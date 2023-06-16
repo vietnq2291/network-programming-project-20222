@@ -53,6 +53,30 @@ std::tuple<std::string, std::string> parse_update_account_data(const std::string
     return std::make_tuple(field, data_value);
 }
 
+std::tuple<std::string, std::vector<std::string>> parse_create_group_data(const std::string& data) {
+    // data is of the form: <group_name_len>:<group_name><num_members>:<member1_len>:<member1>...<memberN_len>:<memberN>
+    size_t group_name_delim = data.find(':');
+    size_t num_members_delim = data.find(':', group_name_delim + 1);
+
+    int group_name_len = std::stoi(data.substr(0, group_name_delim));
+    int num_members = std::stoi(data.substr(group_name_len + group_name_delim + 1, num_members_delim - (group_name_len + group_name_delim + 1)));
+    std::string group_name = data.substr(group_name_delim + 1, group_name_len);
+
+    std::vector<std::string> members;
+    size_t prev_member_last = num_members_delim;
+    size_t member_delim;
+    for (int i = 0; i < num_members; i++) {
+        member_delim = data.find(':', prev_member_last + 1);
+        int member_len = std::stoi(data.substr(prev_member_last + 1, member_delim - (prev_member_last + 1)));
+        std::string member = data.substr(member_delim + 1, member_len);
+        members.push_back(member);
+        prev_member_last = member_delim + member_len;
+
+    }
+
+    return std::make_tuple(group_name, members);
+}
+
 
 int read_command_line_arguments(int argc, char *argv[], int &port, int &backlog) {
     /* return 0 if the arguments are valid

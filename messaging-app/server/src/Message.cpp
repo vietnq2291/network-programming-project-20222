@@ -1,9 +1,10 @@
 #include <cstring>
+#include <iostream>
+
 #include "../include/Message.h"
 #include "../include/SQLQuery.h"
 #include "../../shared/common.h"
 
-#include <iostream>
 
 Message::Message() {
     _current_index = 0;

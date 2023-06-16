@@ -235,42 +235,75 @@ void Server::process_chat_message(Message& message, int conn_fd) {
         return;
     }
 
-    // TODO: Forward message to receiver
+    // Forward message to receiver
+    int sender = message.get_chat_sender();
+    int chat_id = message.get_chat_id();
+    std::string query = "SELECT `m`.`user_id` FROM `Chat` `c` JOIN `Membership` `m` ON `c`.`id` = `m`.`chat_id` WHERE `m`.`chat_id` = " + std::to_string(chat_id) + " AND `m`.`user_id` != " + std::to_string(sender) + ";";
+    
+    _sql_query.query(query, response_packet);
+    if (_sql_query.is_select_successful() == true) {
+        if (_sql_query.is_result_empty() == true) {
+            response_packet.response_header.response_type = ResponseType::FAILURE;
+            strcpy(response_packet.data, "Can not find receiver of chat");
+            response_packet.data_length = strlen(response_packet.data);
 
-    // send response to sender
-    // if (send(packet.chat_header.sender, &response_packet, sizeof(response_packet), 0) < 0) {
-    //     std::cerr << "Can not send response to sender" << std::endl;
-    //     stop();
-    // }
+            log(LogType::WARNING, response_packet.data, conn_fd);
+        } else {
+            MYSQL_RES *result = _sql_query.get_result();
+            MYSQL_ROW row;
+            bool is_sent = true;
 
-    // sent to all clients (for testing purpose)
-    // std::cout << "Socket " << (*message_ptr).get_sender() << " sent message" << std::endl;
-    // MessagePacket cur_packet;
-    // for (int i = 0; i <= _fdmax; i++) {
-    //     if (FD_ISSET(i, &_master)) {
-    //         if (i != _listen_fd && i != (*message_ptr).get_sender()) {
-    //             while ((*message_ptr).get_next_packet(cur_packet)) {
-    //                 if (send(i, &cur_packet, sizeof(cur_packet), 0) < 0) {
-    //                     std::cerr << "Can not send message" << std::endl;
-    //                     stop();
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-}
+            while ((row = mysql_fetch_row(result)) != NULL) {
+                int receiver = std::stoi(row[0]);
+                int receiver_socket = _user_id_to_socket[receiver];
 
-// set default value for message argument
-void Server::send_message(Message& message, int conn_fd) {
-    MessagePacket packet;
-    if (FD_ISSET(conn_fd, &_master)) {
-        while (message.get_next_packet(packet)) {
-            if (send(conn_fd, &packet, sizeof(packet), 0) < 0) {
-                std::cerr << "Can not send message" << std::endl;
-                stop();
+                if(send_message(message, receiver_socket) == false) {
+                    is_sent = false;
+                }
+            }
+
+            if (is_sent == false) {
+                response_packet.response_header.response_type = ResponseType::FAILURE;
+                strcpy(response_packet.data, "Can not send message to receiver");
+                response_packet.data_length = strlen(response_packet.data);
+
+                log(LogType::WARNING, response_packet.data, conn_fd);
+            } else {
+                response_packet.response_header.response_type = ResponseType::SUCCESS;
+                strcpy(response_packet.data, "Message sent");
+                response_packet.data_length = strlen(response_packet.data);
+
+                log(LogType::INFO, response_packet.data, conn_fd);
             }
         }
+    } else {
+        response_packet.response_header.response_type = ResponseType::ERROR;
+        strcpy(response_packet.data, "Failed to query database");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::ERROR, response_packet.data, conn_fd);
     }
+    _sql_query.free_result();
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+}
+
+bool Server::send_message(Message& message, int conn_fd) {
+    MessagePacket packet;
+    if (FD_ISSET(conn_fd, &_master) && conn_fd != 0) {
+        while (message.get_next_packet(packet)) {
+            if (send(conn_fd, &packet, sizeof(packet), 0) < 0) {
+                log(LogType::ERROR, "Can not send message", conn_fd);
+                return false;
+            }
+        }
+    } else {
+        log(LogType::ERROR, "Socket is not set", conn_fd);
+        return false;
+    }
+
+    return true;
 }
 
 void Server::process_request_message(Message& message, int conn_fd) {
@@ -289,6 +322,9 @@ void Server::process_request_message(Message& message, int conn_fd) {
             break;
         case RequestType::CREATE_PRIVATE_CHAT:
             handle_create_private_chat(message, conn_fd);
+            break;
+        case RequestType::CREATE_GROUP_CHAT:
+            handle_create_group_chat(message, conn_fd);
             break;
         default:
             break;
@@ -485,6 +521,82 @@ void Server::handle_create_private_chat(Message& message, int conn_fd) {
                 response_packet.data_length = strlen(response_packet.data);
 
                 log(LogType::WARNING, response_packet.data, conn_fd);
+            }
+        } else {
+            response_packet.response_header.response_type = ResponseType::FAILURE;
+            strcpy(response_packet.data, "Failed to query database");
+            response_packet.data_length = strlen(response_packet.data);
+            
+            log(LogType::ERROR, response_packet.data, conn_fd);
+        }
+
+        _sql_query.free_result();
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);   
+}
+
+void Server::handle_create_group_chat(Message& message, int conn_fd) {
+    MessagePacket response_packet(MessageType::RESPONSE);
+    Message response_message;  
+
+    log(LogType::INFO, "Send create group chat request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "You are not logged in");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);
+    } else {
+        std::string user_id_str = std::to_string(user_id);
+        std::string group_name;
+        std::vector<std::string> members;
+        std::tie(group_name, members) = parse_create_group_data(message.get_data());
+
+        // add new chat
+        std::string query = "INSERT INTO `Chat` (`type`, `time_created`, `name`) VALUES ('GROUP', NOW(), '" + group_name + "');";
+        query += "SELECT LAST_INSERT_ID();";
+        MYSQL_RES *result;
+
+        _sql_query.query(query, response_packet);
+        if (_sql_query.is_insert_successful() == true) {
+            _sql_query.next_result(); // skip the first result to get last insert id
+            if (_sql_query.is_select_successful() == false) {
+                response_packet.response_header.response_type = ResponseType::ERROR;
+                strcpy(response_packet.data, "Can not create group chat");
+                response_packet.data_length = strlen(response_packet.data);
+
+                log(LogType::ERROR, "Can not create group chat", conn_fd);
+            } else {
+                result = _sql_query.get_result();
+                MYSQL_ROW row = mysql_fetch_row(result);
+                int chat_id = std::stoi(row[0]);
+
+                // add membership
+                query = "INSERT INTO `Membership` (`user_id`, `chat_id`) VALUES ";
+                for (auto& member : members) {
+                    query += "(" + member + ", " + std::to_string(chat_id) + "), ";
+                }
+                query += "(" + user_id_str + ", " + std::to_string(chat_id) + ");";
+
+                _sql_query.query(query, response_packet);
+                if (_sql_query.is_insert_successful() == false) {
+                    response_packet.response_header.response_type = ResponseType::ERROR;
+                    strcpy(response_packet.data, "Can not add members to group chat");
+                    response_packet.data_length = strlen(response_packet.data);
+
+                    log(LogType::ERROR, "Can not add members to group chat", conn_fd);
+                } else {
+                    response_packet.response_header.response_type = ResponseType::SUCCESS;
+                    sprintf(response_packet.data, "%d", chat_id);
+                    response_packet.data_length = strlen(response_packet.data);
+
+                    log(LogType::INFO, response_packet.data, conn_fd);
+                }
             }
         } else {
             response_packet.response_header.response_type = ResponseType::FAILURE;

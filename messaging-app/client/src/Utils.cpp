@@ -44,7 +44,7 @@ std::tuple<int, std::string> parse_user_info_data(const std::string info_data) {
 }
 
 std::string encode_create_group_chat(const std::string group_name, const std::vector<std::string> members) {
-    // output is of the form: <group_name_len>:<group_name><num_members>:<member1_len>:<member1>...<memberN_len>:<memberN>
+    // output is of the form: <group_name_len>:<group_name><num_members>:<member1_len>:<member1>...<memberN_len>:<memberN>:
 
     std::stringstream ss;
     ss << group_name.length() << ":" << group_name << members.size() << ":";

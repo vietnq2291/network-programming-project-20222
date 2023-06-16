@@ -47,12 +47,6 @@ enum class ChatType {
     GROUP_CHAT
 };
 
-enum class AccountStatus {
-    ACTIVE,
-    BLOCKED
-};
-
-
 typedef struct {
     ChatType chat_type;
     DataType data_type;

@@ -29,6 +29,8 @@ public:
     ChatType get_chat_type() const { return _template_packet.chat_header.chat_type; }
     RequestType get_request_type() const { return _template_packet.request_header.request_type; }
     int get_request_sender() const { return _template_packet.request_header.sender; }
+    int get_chat_sender() const { return _template_packet.chat_header.sender; }
+    int get_chat_id() const { return _template_packet.chat_header.chat_id; }
 
     std::string get_data() const { return _data; }
 

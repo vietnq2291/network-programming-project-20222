@@ -29,7 +29,7 @@ void SQLQuery::disconnect() {
 
 void SQLQuery::query(std::string query, MessagePacket& response_packet) {
     if (mysql_query(_conn, query.c_str())) {
-        std::cerr << "Error: " << mysql_error(_conn) << std::endl;
+        log(LogType::ERROR, std::string(mysql_error(_conn)));
         response_packet.response_header.response_type = ResponseType::ERROR;
         strcpy(response_packet.data, "Internal server error");
         response_packet.data_length = strlen(response_packet.data);
@@ -61,7 +61,7 @@ bool SQLQuery::is_select_successful() {
 }
 
 bool SQLQuery::is_insert_successful() {
-    return mysql_affected_rows(_conn) == 1;
+    return mysql_affected_rows(_conn) >= 1;
 }
 
 bool SQLQuery::is_update_successful() {
