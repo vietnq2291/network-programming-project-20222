@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cstring>
 #include <mysql/mysql.h>
-#include <arpa/inet.h>
 
 #include "../include/User.h"
 #include "../../shared/common.h"
@@ -15,8 +14,10 @@ bool User::authenticate(std::string password, SQLQuery sql_query, MessagePacket&
     MYSQL_RES *result;
 
     sql_query.query(query, response_packet);
-    if ((result = sql_query.get_result()) == NULL) {
+    if (sql_query.is_select_successful() == false) {
         return false;
+    } else {
+        result = sql_query.get_result();
     }
 
     MYSQL_ROW row;
@@ -42,7 +43,7 @@ bool User::authenticate(std::string password, SQLQuery sql_query, MessagePacket&
         response_packet.data_length = strlen(response_packet.data);
     }
     
-    mysql_free_result(result);
+    sql_query.free_result();
     return true;
 }
 
@@ -58,12 +59,16 @@ bool User::update_account(std::string field, std::string value, SQLQuery sql_que
         response_packet.response_header.response_type = ResponseType::SUCCESS;
         strcpy(response_packet.data, "Update successful");
         response_packet.data_length = strlen(response_packet.data);
+
+        sql_query.free_result();
         return true;
     } else {
         // update failed
         response_packet.response_header.response_type = ResponseType::FAILURE;
         strcpy(response_packet.data, "Update failed");
         response_packet.data_length = strlen(response_packet.data);
+
+        sql_query.free_result();
         return false;
     }
 }
@@ -74,8 +79,10 @@ User *User::signup(std::string username, std::string password, std::string displ
     MYSQL_RES *result;
 
     sql_query.query(query, response_packet);
-    if ((result = sql_query.get_result()) == NULL) {
+    if (sql_query.is_select_successful() == false) {
         return NULL;
+    } else {
+        result = sql_query.get_result();
     }
 
     User *user = NULL;
@@ -87,7 +94,7 @@ User *User::signup(std::string username, std::string password, std::string displ
         response_packet.data_length = strlen(response_packet.data);
     } else {
         // username is not taken
-        query = "INSERT INTO Account (username, password, display_name, status, time_created) VALUES ('" 
+        query = "INSERT INTO `Account` (`username`, `password`, `display_name`, `status`, `time_created`) VALUES ('" 
                 + username + "', '" + password + "', '" + display_name + "', '" + "ACTIVE" 
                 + "', FROM_UNIXTIME(" + std::to_string(time(0)) + "))";
 
@@ -106,6 +113,6 @@ User *User::signup(std::string username, std::string password, std::string displ
         }
     }
 
-    mysql_free_result(result);
+    sql_query.free_result();
     return user;
 }

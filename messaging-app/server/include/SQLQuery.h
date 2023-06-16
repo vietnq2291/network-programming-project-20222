@@ -9,13 +9,16 @@
 class SQLQuery {
 public:
     SQLQuery();
-    bool connect(std::string host, std::string user, std::string password, std::string database);
+    bool connect(std::string host, std::string user, std::string password, std::string database, std::string is_multi_statements);
     void query(std::string query, MessagePacket& response_packet);
     MYSQL_RES *get_result();
+    bool next_result();
+    bool is_result_empty();
+    bool is_select_successful();
     bool is_insert_successful();
     bool is_update_successful();
-    void free_result();
     void disconnect();
+    void free_result();
 
 
 private:

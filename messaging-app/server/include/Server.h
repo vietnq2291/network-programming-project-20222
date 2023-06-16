@@ -20,26 +20,27 @@ public:
     void connectdb();
     void listen();
     void accept();
-    void remove_client(int conn_fd);
-    void receive_message(int conn_fd);
-    void process_data_message(MessagePacket& packet);
-    void process_request_message(MessagePacket& packet, int conn_fd);
-    void handle_login(MessagePacket& packet, int conn_fd);
-    void handle_signup(MessagePacket& packet, int conn_fd);
-    void handle_logout(MessagePacket& packet, int conn_fd);
-    void handle_update_account(MessagePacket& packet, int conn_fd);
-    void send_chat_message(Message& message, int conn_fd);
-    // void handle_create_group();
-    // void handle_leave_group();
-    // void handle_private_chat();
-    void handle_group_chat();
     void stop();
+    void remove_client(int conn_fd);
+
+    void receive_message(int conn_fd);
+    void process_chat_message(Message& message, int conn_fd);
+    void process_request_message(Message& message, int conn_fd);
+    
+    void handle_login(Message& message, int conn_fd);
+    void handle_signup(Message& message, int conn_fd);
+    void handle_logout(Message& message, int conn_fd);
+    void handle_update_account(Message& message, int conn_fd);
+    void send_message(Message& message, int conn_fd);
+    void handle_create_private_chat(Message& message, int conn_fd);
+    // void handle_create_group_chat(Message& message, int conn_fd);
 
 private:
     int _listen_fd;
     struct sockaddr_in _addr;
     int _port;
     int _backlog;
+    int _num_clients;
 
     SQLQuery _sql_query;
 

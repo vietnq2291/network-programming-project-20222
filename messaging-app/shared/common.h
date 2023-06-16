@@ -1,6 +1,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+const int DEFAULT_PORT = 5050;
+const char DEFAULT_IP[] = "127.0.0.1";
+
+const int DEFAULT_BACKLOG = 10;
 const int DATA_SIZE = 50;
 
 enum class MessageType {
@@ -16,7 +20,8 @@ enum class RequestType {
     LOGOUT,
     UPDATE_ACCOUNT,
     ONLINE_USERS,
-    CREATE_GROUP,
+    CREATE_PRIVATE_CHAT,
+    CREATE_GROUP_CHAT,
     INVITE_TO_GROUP,
     LEAVE_GROUP,
     ADD_FRIEND,
@@ -52,10 +57,8 @@ typedef struct {
     ChatType chat_type;
     DataType data_type;
     int sender;
-    int receiver;
+    int chat_id;
     time_t timestamp;
-    int fin; // finish flag: 1 if last message, 0 otherwise
-    int seq; // sequence number (from 0 to last message)
 } ChatHeader;
 
 typedef struct {
@@ -78,6 +81,8 @@ struct MessagePacket_t {
         RequestHeader request_header;
         ResponseHeader response_header;
     };
+    int fin; // finish flag: 1 if last message, 0 otherwise
+    int seq; // sequence number (from 0 to last message)
     int data_length;
     char data[DATA_SIZE];
 };
