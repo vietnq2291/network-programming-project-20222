@@ -21,6 +21,9 @@ SET time_zone = "+00:00";
 -- Database: `messaging_db`
 --
 
+CREATE DATABASE IF NOT EXISTS `messaging_db`;
+USE `messaging_db`;
+
 -- --------------------------------------------------------
 
 --
