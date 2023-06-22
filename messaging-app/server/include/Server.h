@@ -48,7 +48,7 @@ private:
     fd_set _read_fds;
     int _fdmax;
 
-    std::vector<Message> _message_list;
+    std::vector<Message*> _message_list;
     std::map<std::variant<int, std::string>, User*> _online_user_list;
     std::map<int, int> _user_id_to_socket;
 };

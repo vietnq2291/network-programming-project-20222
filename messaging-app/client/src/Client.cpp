@@ -175,6 +175,10 @@ void Client::receive_message() {
                 response_type = "LOGIN_SUCCESS";
             } else if (packet.response_header.response_type == ResponseType::ERROR) {
                 response_type = "ERROR";
+            } else if (packet.response_header.response_type == ResponseType::CREATE_PRIVATE_CHAT_SUCCESS) {
+                response_type = "CREATE_PRIVATE_CHAT_SUCCESS";
+            } else if (packet.response_header.response_type == ResponseType::CREATE_GROUP_CHAT_SUCCESS) {
+                response_type = "CREATE_GROUP_CHAT_SUCCESS";
             } else {
                 response_type = "UNKNOWN";
             }

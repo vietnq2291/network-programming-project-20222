@@ -94,8 +94,8 @@ User *User::signup(std::string username, std::string password, std::string displ
         response_packet.data_length = strlen(response_packet.data);
     } else {
         // username is not taken
-        query = "INSERT INTO `Account` (`username`, `password`, `display_name`, `status`, `time_created`) VALUES ('" 
-                + username + "', '" + password + "', '" + display_name + "', '" + "ACTIVE" 
+        query = "INSERT INTO `Account` (`username`, `password`, `display_name`, `time_created`) VALUES ('" 
+                + username + "', '" + password + "', '" + display_name
                 + "', FROM_UNIXTIME(" + std::to_string(time(0)) + "))";
 
         sql_query.query(query, response_packet);

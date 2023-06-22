@@ -165,15 +165,14 @@ void Server::receive_message(int conn_fd) {
 
         // check if packet is a part of a previous message
         for (auto it = _message_list.begin(); it != _message_list.end(); it++) {
-            if ((*it).is_match_header(packet) == true) {
-                (*it).add_packet(packet);
+            if ((**it).is_match_header(packet) == true) {
+                (**it).add_packet(packet);
 
-
-                if ((*it).is_complete() == false)
+                if ((**it).is_complete() == false)
                     return;
 
                 found = true;
-                message_ptr = &(*it);
+                message_ptr = *it;
                 _message_list.erase(it);
                 break;
             }
@@ -181,10 +180,10 @@ void Server::receive_message(int conn_fd) {
         if (found == false) {
             message_ptr = new Message(packet);
             if (message_ptr->is_complete() == false) {
-                _message_list.push_back(*message_ptr);
+                _message_list.push_back(message_ptr);
                 return;
             }
-        }
+        }   
 
         if (packet.type == MessageType::CHAT) {
             process_chat_message(*message_ptr, conn_fd);
@@ -462,6 +461,7 @@ void Server::handle_update_account(Message& message, int conn_fd) {
 void Server::handle_create_private_chat(Message& message, int conn_fd) {
     MessagePacket response_packet(MessageType::RESPONSE);
     Message response_message;  
+    std::vector<int> user_id_list;
 
     log(LogType::INFO, "Send create private chat request to server", conn_fd);
 
@@ -476,70 +476,91 @@ void Server::handle_create_private_chat(Message& message, int conn_fd) {
     } else {
         std::string user_id_str = std::to_string(user_id);
         std::string other_user_id_str = message.get_data();
+        user_id_list.push_back(user_id);
 
-        std::string query = "SELECT `c`.`id` FROM `Membership` `m1` JOIN `Membership` `m2` ON `m1`.`chat_id` = `m2`.`chat_id` JOIN `Chat` `c` ON `m1`.`chat_id` = `c`.`id` WHERE `m1`.`user_id` = " + user_id_str + " AND `m2`.`user_id`= " + other_user_id_str + " AND `c`.`type` = 'PRIVATE';";
-        MYSQL_RES *result;
+        if (std::stoi(other_user_id_str) == user_id) {
+            response_packet.response_header.response_type = ResponseType::FAILURE;
+            strcpy(response_packet.data, "You can not create private chat with yourself");
+            response_packet.data_length = strlen(response_packet.data);
 
-        _sql_query.query(query, response_packet);
-        if (_sql_query.is_select_successful() == true) {
-            if (_sql_query.is_result_empty() == true) {
-                // add new chat
-                query = "INSERT INTO `Chat` (`type`, `time_created`) VALUES ('PRIVATE', NOW());";
-                query += "SELECT LAST_INSERT_ID();";
+            log(LogType::WARNING, response_packet.data, conn_fd);
+        } else {
+            user_id_list.push_back(std::stoi(other_user_id_str));
 
-                _sql_query.query(query, response_packet);
-                if (_sql_query.is_insert_successful() == false) {
-                    log(LogType::ERROR, "Can not create private chat", conn_fd);
-                } else {
-                    _sql_query.next_result(); // skip the first result to get last insert id
-                    if (_sql_query.is_select_successful() == false) {
+            std::string query = "SELECT `c`.`id` FROM `Membership` `m1` JOIN `Membership` `m2` ON `m1`.`chat_id` = `m2`.`chat_id` JOIN `Chat` `c` ON `m1`.`chat_id` = `c`.`id` WHERE `m1`.`user_id` = " + user_id_str + " AND `m2`.`user_id`= " + other_user_id_str + " AND `c`.`type` = 'PRIVATE';";
+            MYSQL_RES *result;
+
+            _sql_query.query(query, response_packet);
+            if (_sql_query.is_select_successful() == true) {
+                if (_sql_query.is_result_empty() == true) {
+                    // add new chat
+                    query = "INSERT INTO `Chat` (`type`, `time_created`) VALUES ('PRIVATE', NOW());";
+                    query += "SELECT LAST_INSERT_ID();";
+
+                    _sql_query.query(query, response_packet);
+                    if (_sql_query.is_insert_successful() == false) {
                         log(LogType::ERROR, "Can not create private chat", conn_fd);
                     } else {
-                        result = _sql_query.get_result();
-                        MYSQL_ROW row = mysql_fetch_row(result);
-                        int chat_id = std::stoi(row[0]);
-
-                        // add membership
-                        query = "INSERT INTO `Membership` (`user_id`, `chat_id`) VALUES (" + user_id_str + ", " + std::to_string(chat_id) + ");";
-                        query += "INSERT INTO `Membership` (`user_id`, `chat_id`) VALUES (" + other_user_id_str + ", " + std::to_string(chat_id) + ");";
-
-                        _sql_query.query(query, response_packet);
-                        if (_sql_query.is_insert_successful() == false) {
+                        _sql_query.next_result(); // skip the first result to get last insert id
+                        if (_sql_query.is_select_successful() == false) {
                             log(LogType::ERROR, "Can not create private chat", conn_fd);
                         } else {
-                            response_packet.response_header.response_type = ResponseType::SUCCESS;
-                            sprintf(response_packet.data, "%d", chat_id);
-                            response_packet.data_length = strlen(response_packet.data);
+                            result = _sql_query.get_result();
+                            MYSQL_ROW row = mysql_fetch_row(result);
+                            int chat_id = std::stoi(row[0]);
 
-                            log(LogType::INFO, response_packet.data, conn_fd);
+                            // add membership
+                            query = "INSERT INTO `Membership` (`user_id`, `chat_id`) VALUES (" + user_id_str + ", " + std::to_string(chat_id) + ");";
+                            query += "INSERT INTO `Membership` (`user_id`, `chat_id`) VALUES (" + other_user_id_str + ", " + std::to_string(chat_id) + ");";
+
+                            _sql_query.query(query, response_packet);
+                            if (_sql_query.is_insert_successful() == false) {
+                                log(LogType::ERROR, "Can not create private chat", conn_fd);
+                            } else {
+                                response_packet.response_header.response_type = ResponseType::SUCCESS;
+                                sprintf(response_packet.data, "%d", chat_id);
+                                response_packet.data_length = strlen(response_packet.data);
+
+                                log(LogType::INFO, response_packet.data, conn_fd);
+                            }
                         }
-                    }
-                }                
+                    }                
+                } else {
+                    response_packet.response_header.response_type = ResponseType::FAILURE;
+                    strcpy(response_packet.data, "Chat already exists");
+                    response_packet.data_length = strlen(response_packet.data);
+
+                    log(LogType::WARNING, response_packet.data, conn_fd);
+                }
             } else {
                 response_packet.response_header.response_type = ResponseType::FAILURE;
-                strcpy(response_packet.data, "Chat already exists");
+                strcpy(response_packet.data, "Failed to query database");
                 response_packet.data_length = strlen(response_packet.data);
-
-                log(LogType::WARNING, response_packet.data, conn_fd);
+                
+                log(LogType::ERROR, response_packet.data, conn_fd);
             }
-        } else {
-            response_packet.response_header.response_type = ResponseType::FAILURE;
-            strcpy(response_packet.data, "Failed to query database");
-            response_packet.data_length = strlen(response_packet.data);
-            
-            log(LogType::ERROR, response_packet.data, conn_fd);
-        }
 
-        _sql_query.free_result();
+            _sql_query.free_result();
+        }
     }
 
-    response_message.set_template_packet(response_packet);
-    send_message(response_message, conn_fd);   
+    // send response to all online users if success
+    if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+        response_packet.response_header.response_type = ResponseType::CREATE_PRIVATE_CHAT_SUCCESS;
+        response_message.set_template_packet(response_packet);
+        for (int user_id : user_id_list) {
+            send_message(response_message, _user_id_to_socket[user_id]);
+        }
+    } else {
+        response_message.set_template_packet(response_packet);
+        send_message(response_message, conn_fd);
+    }
 }
 
 void Server::handle_create_group_chat(Message& message, int conn_fd) {
     MessagePacket response_packet(MessageType::RESPONSE);
     Message response_message;  
+    std::vector<int> user_id_list;
 
     log(LogType::INFO, "Send create group chat request to server", conn_fd);
 
@@ -556,6 +577,7 @@ void Server::handle_create_group_chat(Message& message, int conn_fd) {
         std::string group_name;
         std::vector<std::string> members;
         std::tie(group_name, members) = parse_create_group_data(message.get_data());
+        user_id_list.push_back(user_id);
 
         // add new chat
         std::string query = "INSERT INTO `Chat` (`type`, `time_created`, `name`) VALUES ('GROUP', NOW(), '" + group_name + "');";
@@ -579,6 +601,7 @@ void Server::handle_create_group_chat(Message& message, int conn_fd) {
                 // add membership
                 query = "INSERT INTO `Membership` (`user_id`, `chat_id`) VALUES ";
                 for (auto& member : members) {
+                    user_id_list.push_back(std::stoi(member));
                     query += "(" + member + ", " + std::to_string(chat_id) + "), ";
                 }
                 query += "(" + user_id_str + ", " + std::to_string(chat_id) + ");";
@@ -609,8 +632,17 @@ void Server::handle_create_group_chat(Message& message, int conn_fd) {
         _sql_query.free_result();
     }
 
-    response_message.set_template_packet(response_packet);
-    send_message(response_message, conn_fd);   
+        // send response to all online users if success
+    if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+        response_packet.response_header.response_type = ResponseType::CREATE_GROUP_CHAT_SUCCESS;
+        response_message.set_template_packet(response_packet);
+        for (int user_id : user_id_list) {
+            send_message(response_message, _user_id_to_socket[user_id]);
+        }
+    } else {
+        response_message.set_template_packet(response_packet);
+        send_message(response_message, conn_fd);
+    }
 }
 
 

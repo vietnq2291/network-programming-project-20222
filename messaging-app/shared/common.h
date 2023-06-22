@@ -35,6 +35,8 @@ enum class ResponseType {
     FAILURE,
     ERROR,
     LOGIN_SUCCESS,
+    CREATE_PRIVATE_CHAT_SUCCESS,
+    CREATE_GROUP_CHAT_SUCCESS,
 };
 
 enum class DataType {
