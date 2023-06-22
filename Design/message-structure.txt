@@ -4,7 +4,7 @@ Requests:
         R L <username> <password>
 
     Register:
-        R S <username> <password> <display_name>
+        R R <username> <password> <display_name>
     Update:
         Change name:
             R U N <new_name>
@@ -14,7 +14,7 @@ Requests:
         R X
     Create new chat (for group chat or private chat):
         R C P <other_user_id>
-        R C G <group_name> <number of members> <member_1_user_id> <member_2_user_id> ...
+        R C G <group_name> <number of members except the creator> <member_1_user_id> <member_2_user_id> ...
 Chat:
     C G <chat_id> <message>
     C P <chat_id> <message>

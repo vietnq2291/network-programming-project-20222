@@ -1,0 +1,13 @@
+# Client tasks
+
+## Authentication
+- [ ] Allow user to log in only once.
+- [ ] Always remember to close the socket when the client stops.
+
+## These functionalities must be accessible only to users who are logged in:
+- [ ] Sign up.
+- [ ] Chat.
+- [ ] Logout.
+
+## Room management
+- [ ] Only a group of three or more people can create a room.
