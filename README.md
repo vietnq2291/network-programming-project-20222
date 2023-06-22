@@ -1,4 +1,4 @@
-Welcome to the messaging app! This app allows you to send messages to other users who are connected to the same server. To get started with the app, please follow the instructions below.
+Hi, welcome to the messaging app! This app allows you to send messages to other users who are connected to the same server. To get started with the app, please follow the instructions below.
 
 ## Building the app
 1. Clone the repository to your local machine.
