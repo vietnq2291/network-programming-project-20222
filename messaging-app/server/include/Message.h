@@ -27,6 +27,7 @@ public:
     bool is_complete() const { return _is_complete; }
     MessageType get_message_type() const { return _template_packet.type; }
     ChatType get_chat_type() const { return _template_packet.chat_header.chat_type; }
+    DataType get_data_type() const { return _template_packet.chat_header.data_type; }
     RequestType get_request_type() const { return _template_packet.request_header.request_type; }
     int get_request_sender() const { return _template_packet.request_header.sender; }
     int get_chat_sender() const { return _template_packet.chat_header.sender; }

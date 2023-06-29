@@ -94,7 +94,7 @@ bool Message::save(SQLQuery sql_query, MessagePacket& response_packet) {
             return false;
         } else {
             // chat_id found, save message
-            std::string data_type;
+            std::string insert_data, data_type;
             if (_template_packet.chat_header.data_type == DataType::TEXT)
                 data_type = "TEXT";
             else if (_template_packet.chat_header.data_type == DataType::FILE)

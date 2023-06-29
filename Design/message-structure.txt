@@ -15,6 +15,13 @@ Requests:
     Create new chat (for group chat or private chat):
         R C P <other_user_id>
         R C G <group_name> <number of members except the creator> <member_1_user_id> <member_2_user_id> ...
+    Friends:
+        R F R <other_username>  # request to add friend
+        R F A <other_user_id>   # accept a friend request
+        R F J <other_user_id>   # reject a friend request
+        R F U <other_user_id>   # unfriend a friend
+
 Chat:
-    C G <chat_id> <message>
-    C P <chat_id> <message>
+    C G <data_type> <chat_id> <message>
+    C P <data_type> <chat_id> <message>
+    where <data_type> = F for file, T for text

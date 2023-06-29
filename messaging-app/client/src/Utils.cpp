@@ -53,3 +53,18 @@ std::string encode_create_group_chat(const std::string group_name, const std::ve
     }
     return ss.str();
 }
+
+std::tuple<std::string, std::string> parse_file_data(const std::string file_data) {
+    // input is of the form: <file_name_length>:<file_name><file_content_length>:<file_content>
+
+    size_t name_delim = file_data.find(':');
+    size_t content_delim = file_data.find(':', name_delim + 1);
+
+    int file_name_len = std::stoi(file_data.substr(0, name_delim));
+    int file_content_len = std::stoi(file_data.substr(name_delim + 1, content_delim - (name_delim + 1)));
+
+    std::string file_name = file_data.substr(name_delim + 1, file_name_len);
+    std::string file_content = file_data.substr(content_delim + 1, file_content_len);
+
+    return std::make_tuple(file_name, file_content);
+}

@@ -16,6 +16,9 @@ public:
 
     bool authenticate(std::string password, SQLQuery sql_query, MessagePacket& response_packet);
     bool update_account(std::string field, std::string value, SQLQuery sql_query, MessagePacket& response_packet);
+    bool check_friend(std::string friend_username, SQLQuery sql_query, MessagePacket& response_packet, std::string& data, int& receiver_id);
+    bool add_friend(std::string friend_username, SQLQuery sql_query, MessagePacket& response_packet);
+    bool remove_friend(std::string friend_id, SQLQuery sql_query, MessagePacket& response_packet);
 
     int get_id() { return _id; }
     std::string get_username() { return _username; }

@@ -34,6 +34,8 @@ public:
     bool send_message(Message& message, int conn_fd);
     void handle_create_private_chat(Message& message, int conn_fd);
     void handle_create_group_chat(Message& message, int conn_fd);
+    void handle_add_friend(Message& message, int conn_fd);
+    void handle_remove_friend(Message& message, int conn_fd);
 
 private:
     int _listen_fd;

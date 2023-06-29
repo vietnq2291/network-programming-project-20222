@@ -73,20 +73,30 @@ void Client::start() {
                 if (buff[0] == 'R') {
                     send_request_message(buff);
                 } else if (buff[0] == 'C') {
-                    // buff = C <chat_type> <chat_id> <message>
+                    // buff = C <chat_type> <data_type> <chat_id> <message>
                     // where <chat_type> = G (group chat) or P (private chat)
                     
                     ChatType chat_type;
+                    DataType data_type;
                     if (buff[2] == 'G') {
                         chat_type = ChatType::GROUP_CHAT;
                     } else if (buff[2] == 'P') {
                         chat_type = ChatType::PRIVATE_CHAT;
                     } else {
                         std::cout << "Invalid chat type" << std::endl;
+                        continue;
                     }
-                    int chat_id = std::stoi(buff.substr(4, buff.find(' ', 4) - 4));
-                    buff = buff.substr(buff.find(' ', 4) + 1);
-                    send_chat_message(buff, chat_id, chat_type, DataType::TEXT);
+                    if (buff[4] == 'F') {
+                        data_type = DataType::FILE;
+                    } else if (buff[4] == 'T') {
+                        data_type = DataType::TEXT;
+                    } else {
+                        std::cout << "Invalid data type" << std::endl;
+                        continue;
+                    }
+                    int chat_id = std::stoi(buff.substr(6, buff.find(' ', 6) - 6));
+                    buff = buff.substr(buff.find(' ', 6) + 1);
+                    send_chat_message(buff, chat_id, chat_type, data_type);
                 } else {
                     std::cout << "Invalid message type" << std::endl;
                 }
@@ -107,9 +117,49 @@ void Client::stop() {
 }
 
 void Client::send_chat_message(std::string buff, int chat_id, ChatType chat_type, DataType data_type) {
-    Message message(MessageType::CHAT, chat_type, data_type, _user_id, chat_id, time(NULL), buff);
-    MessagePacket packet;
+    std::string data;
 
+    if (data_type == DataType::TEXT) {
+        // data to send is buff
+        data = buff;
+    } else if (data_type == DataType::FILE) {
+        // buff is file path, data to send is of the form <file_name_length>:<file_name><file_content_length>:<file_content>
+        FILE *fptr;
+        std::string filename;
+
+        if ((fptr = fopen(buff.c_str(), "rb")) == NULL) {
+            std::cerr << "Error: Can not open file" << std::endl;
+            return;
+        }
+
+        // get file name
+        int i = buff.length() - 1;
+        while ((buff[i] != '/') &&  (i >= 0)) {
+            filename = buff[i] + filename;
+            i--;
+        }
+
+        // get file content size
+        fseek(fptr, 0, SEEK_END);
+        int content_length = ftell(fptr);
+        rewind(fptr);
+        std::string header = std::to_string(filename.length()) + ":" + filename + std::to_string(content_length) + ":";
+
+        // read file content and add to data
+        data.resize(header.length() + content_length);
+        memcpy(&data[0], header.c_str(), header.length());
+        fread(&data[header.length()], sizeof(char), content_length, fptr);
+        fclose(fptr);        
+    } else {
+        std::cerr << "Error: Invalid data type" << std::endl;
+        return;
+    }
+
+    // create message
+    Message message(MessageType::CHAT, chat_type, data_type, _user_id, chat_id, time(NULL), data);
+
+    // send message
+    MessagePacket packet;
     while (message.get_next_packet(packet)) {
         if (send(_conn_fd, &packet, sizeof(packet), 0) < 0) {
             std::cerr << "Error: Can not send message" << std::endl;
@@ -219,6 +269,25 @@ void Client::receive_message() {
                                                                                                     ", " << packet.seq <<
                                                                                                     ", " << packet.data_length <<
                                                                                                     ", " << packet.data << ")" << std::endl;
+        } else if (packet.type == MessageType::PUSH) {
+            //print all data of packet for debug
+            std::string push_type;
+            if (packet.push_header.push_type == PushType::FRIEND_REQUEST) {
+                push_type = "FRIEND_REQUEST";
+            } else if (packet.push_header.push_type == PushType::FRIEND_ACCEPT) {
+                push_type = "FRIEND_ACCEPT";
+            } else if (packet.push_header.push_type == PushType::FRIEND_REJECT) {
+                push_type = "FRIEND_REJECT";
+            } else {
+                push_type = "UNKNOWN";
+            }
+            std::cout << "Received message: (type, push_type, sender, fin, seq, data_len, data) = " << "(" << "PUSH" <<
+                                                                                                    ", " << push_type << 
+                                                                                                    ", " << packet.push_header.sender <<
+                                                                                                    ", " << packet.fin << 
+                                                                                                    ", " << packet.seq << 
+                                                                                                    ", " << packet.data_length << 
+                                                                                                    ", " << packet.data << ")" << std::endl;
         } else {
             std::cout << "Invalid message type" << std::endl;
         }
@@ -275,6 +344,27 @@ void Client::send_request_message(std::string buff) {
             message_ptr = new Message(MessageType::REQUEST, RequestType::CREATE_GROUP_CHAT, _user_id, create_group_chat_data);
         } else {
             std::cerr << "Error: invalid chat type!" << std::endl;
+            return;
+        }
+    } else if (buff[2] == 'F') {
+        if (buff[4] == 'R') {
+            // request add friend: R F R <other_username>
+            std::string other_username = buff.substr(6);
+            message_ptr = new Message(MessageType::REQUEST, RequestType::ADD_FRIEND, _user_id, other_username);
+        } else if (buff[4] == 'U') {
+            // unfriend: R F U <other_user_id>
+            std::string other_user_id = buff.substr(6);
+            message_ptr = new Message(MessageType::REQUEST, RequestType::REMOVE_FRIEND, _user_id, other_user_id);
+        } else if (buff[4] == 'A') {
+            // accept friend request: R F A <other_user_id>
+            std::string other_user_id = buff.substr(6);
+            message_ptr = new Message(MessageType::REQUEST, RequestType::ACCEPT_FRIEND, _user_id, other_user_id);
+        } else if (buff[4] == 'J') {
+            // Reject friend request: R F J <other_user_id>
+            std::string other_user_id = buff.substr(6);
+            message_ptr = new Message(MessageType::REQUEST, RequestType::REJECT_FRIEND, _user_id, other_user_id);
+        } else {
+            std::cerr << "Error: invalid request type!" << std::endl;
             return;
         }
     }

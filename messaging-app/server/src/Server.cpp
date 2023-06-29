@@ -325,6 +325,14 @@ void Server::process_request_message(Message& message, int conn_fd) {
         case RequestType::CREATE_GROUP_CHAT:
             handle_create_group_chat(message, conn_fd);
             break;
+        case RequestType::ADD_FRIEND: 
+        case RequestType::ACCEPT_FRIEND: 
+        case RequestType::REJECT_FRIEND:
+            handle_add_friend(message, conn_fd);
+            break;
+        case RequestType::REMOVE_FRIEND:
+            handle_remove_friend(message, conn_fd);
+            break;
         default:
             break;
     }
@@ -645,4 +653,112 @@ void Server::handle_create_group_chat(Message& message, int conn_fd) {
     }
 }
 
+void Server::handle_add_friend(Message& message, int conn_fd) {
+    MessagePacket response_packet(MessageType::RESPONSE), push_packet(MessageType::PUSH);
+    Message response_message, push_message;
 
+    log(LogType::INFO, "Send add friend request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Can not find user");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);
+    } else {
+        User *user = it->second;
+        std::string data;
+        int other_user_id;
+
+        push_packet.push_header.sender = user_id;
+        if (message.get_request_type() == RequestType::ADD_FRIEND) {
+            if (user->check_friend(message.get_data(), _sql_query, response_packet, data, other_user_id) == false) {
+                log(LogType::ERROR, response_packet.data, conn_fd);
+            } else {
+                if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+                    log(LogType::INFO, response_packet.data, conn_fd);
+
+                    // send push to receiver
+                    push_packet.push_header.push_type = PushType::FRIEND_REQUEST;
+                    strcpy(push_packet.data, data.c_str());
+                    push_packet.data_length = data.length();
+                    push_message.set_template_packet(push_packet);
+
+                    send_message(push_message, _user_id_to_socket[other_user_id]);
+                } else {
+                    log(LogType::WARNING, response_packet.data, conn_fd);
+                }
+            }
+        } else if (message.get_request_type() == RequestType::REJECT_FRIEND) {
+            other_user_id = std::stoi(message.get_data());
+
+            response_packet.response_header.response_type = ResponseType::SUCCESS;
+            strcpy(response_packet.data, "Reject add friend request successfully");
+            response_packet.data_length = strlen(response_packet.data);
+
+            log(LogType::INFO, response_packet.data, conn_fd);
+
+            // send push to receiver
+            push_packet.push_header.push_type = PushType::FRIEND_REJECT;
+            push_message.set_template_packet(push_packet);
+            send_message(push_message, _user_id_to_socket[other_user_id]);
+        } else if (message.get_request_type() == RequestType::ACCEPT_FRIEND) {
+            other_user_id = std::stoi(message.get_data());
+
+            if(user->add_friend(message.get_data(), _sql_query, response_packet) == false) {
+                log(LogType::ERROR, response_packet.data, conn_fd);
+            } else {
+                if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+                    log(LogType::INFO, response_packet.data, conn_fd);
+
+                    // send push to receiver
+                    push_packet.push_header.push_type = PushType::FRIEND_ACCEPT;
+                    push_message.set_template_packet(push_packet);
+                    send_message(push_message, _user_id_to_socket[other_user_id]);
+                } else {
+                    log(LogType::WARNING, response_packet.data, conn_fd);
+                }
+            }
+        }
+        push_packet.push_header.sender = user_id;
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+}
+
+void Server::handle_remove_friend(Message& message, int conn_fd) {
+    MessagePacket response_packet(MessageType::RESPONSE);
+    Message response_message;
+
+    log(LogType::INFO, "Send remove friend request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Can not find user");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);
+    } else {
+        User *user = it->second;
+
+        if(user->remove_friend(message.get_data(), _sql_query, response_packet) == false) {
+            log(LogType::ERROR, response_packet.data, conn_fd);
+        } else {
+            if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+                log(LogType::INFO, response_packet.data, conn_fd);
+            } else if (response_packet.response_header.response_type == ResponseType::FAILURE) {
+                log(LogType::WARNING, response_packet.data, conn_fd);
+            } else {
+                log(LogType::ERROR, response_packet.data, conn_fd);
+            }
+        }
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+}

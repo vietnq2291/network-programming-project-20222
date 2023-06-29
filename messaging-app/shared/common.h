@@ -26,6 +26,7 @@ enum class RequestType {
     LEAVE_GROUP,
     ADD_FRIEND,
     ACCEPT_FRIEND,
+    REJECT_FRIEND,
     REMOVE_FRIEND,
     EXIT
 };
@@ -37,6 +38,15 @@ enum class ResponseType {
     LOGIN_SUCCESS,
     CREATE_PRIVATE_CHAT_SUCCESS,
     CREATE_GROUP_CHAT_SUCCESS,
+};
+
+enum class PushType {
+    FRIEND_REQUEST,
+    FRIEND_ACCEPT,
+    FRIEND_REJECT,
+    GROUP_INVITE,
+    GROUP_LEAVE,
+    GROUP_REMOVE
 };
 
 enum class DataType {
@@ -66,6 +76,11 @@ typedef struct {
     ResponseType response_type;
 } ResponseHeader;
 
+typedef struct {
+    PushType push_type;
+    int sender;
+} PushHeader;
+
 struct MessagePacket_t {
     MessagePacket_t() : type(), data_length(0) {};
     
@@ -76,6 +91,7 @@ struct MessagePacket_t {
         ChatHeader chat_header;
         RequestHeader request_header;
         ResponseHeader response_header;
+        PushHeader push_header;
     };
     int fin; // finish flag: 1 if last message, 0 otherwise
     int seq; // sequence number (from 0 to last message)
