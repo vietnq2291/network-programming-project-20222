@@ -269,8 +269,9 @@ void Client::receive_message() {
                                                                                                     ", " << packet.seq <<
                                                                                                     ", " << packet.data_length <<
                                                                                                     ", " << packet.data << ")" << std::endl;
+        // TODO: process packets
         } else if (packet.type == MessageType::PUSH) {
-            //print all data of packet for debug
+            // print all data of packet for debug
             std::string push_type;
             if (packet.push_header.push_type == PushType::FRIEND_REQUEST) {
                 push_type = "FRIEND_REQUEST";
@@ -288,6 +289,7 @@ void Client::receive_message() {
                                                                                                     ", " << packet.seq << 
                                                                                                     ", " << packet.data_length << 
                                                                                                     ", " << packet.data << ")" << std::endl;
+        // TODO: 
         } else {
             std::cout << "Invalid message type" << std::endl;
         }
@@ -334,6 +336,10 @@ void Client::send_request_message(std::string buff) {
             std::string group_name = data.substr(sep_idx + 1, data.find(' ', sep_idx + 1) - sep_idx - 1);
             sep_idx = data.find(' ', sep_idx + 1);
             int no_members = std::stoi(data.substr(sep_idx + 1, data.find(' ', sep_idx + 1) - sep_idx - 1));
+            if (no_members < 2) {
+                std::cerr << "Error: Number of people in a group chat must be at least three!" << std::endl;
+                return;
+            }
             std::vector<std::string> members;
             for (int i = 0; i < no_members; ++i) {
                 sep_idx = data.find(' ', sep_idx + 1);
@@ -375,35 +381,35 @@ void Client::send_request_message(std::string buff) {
             break;
         }
 
-        // //print all data of packet
-        // std::string type, request_type;
-        // if (packet.type == MessageType::REQUEST) {
-        //     type = "REQUEST";
-        // } else if (packet.type == MessageType::RESPONSE) {
-        //     type = "RESPONSE";
-        // } else if (packet.type == MessageType::CHAT) {
-        //     type = "CHAT";
-        // } else {
-        //     type = "UNKNOWN";
-        // }
-        // if (packet.request_header.request_type == RequestType::LOGIN) {
-        //     request_type = "LOGIN";
-        // } else if (packet.request_header.request_type == RequestType::SIGNUP) {
-        //     request_type = "SIGNUP";
-        // } else if (packet.request_header.request_type == RequestType::LOGOUT) {
-        //     request_type = "LOGOUT";
-        // } else if (packet.request_header.request_type == RequestType::UPDATE_ACCOUNT) {
-        //     request_type = "UPDATE_ACCOUNT";
-        // } else {
-        //     request_type = "UNKNOWN";
-        // }
+    //     //print all data of packet
+    //     std::string type, request_type;
+    //     if (packet.type == MessageType::REQUEST) {
+    //         type = "REQUEST";
+    //     } else if (packet.type == MessageType::RESPONSE) {
+    //         type = "RESPONSE";
+    //     } else if (packet.type == MessageType::CHAT) {
+    //         type = "CHAT";
+    //     } else {
+    //         type = "UNKNOWN";
+    //     }
+    //     if (packet.request_header.request_type == RequestType::LOGIN) {
+    //         request_type = "LOGIN";
+    //     } else if (packet.request_header.request_type == RequestType::SIGNUP) {
+    //         request_type = "SIGNUP";
+    //     } else if (packet.request_header.request_type == RequestType::LOGOUT) {
+    //         request_type = "LOGOUT";
+    //     } else if (packet.request_header.request_type == RequestType::UPDATE_ACCOUNT) {
+    //         request_type = "UPDATE_ACCOUNT";
+    //     } else {
+    //         request_type = "UNKNOWN";
+    //     }
 
-        // std::cout << "Sent message: (type, request_type, sender, fin, seq, data_len, data) = " << "(" << type <<
-        //                                                                                             ", " << request_type << 
-        //                                                                                             ", " << packet.request_header.sender << 
-        //                                                                                             ", " << packet.fin << 
-        //                                                                                             ", " << packet.seq << 
-        //                                                                                             ", " << packet.data_length << 
-        //                                                                                             ", " << packet.data << ")" << std::endl;
+    //     std::cout << "Sent message: (type, request_type, sender, fin, seq, data_len, data) = " << "(" << type <<
+    //                                                                                                 ", " << request_type << 
+    //                                                                                                 ", " << packet.request_header.sender << 
+    //                                                                                                 ", " << packet.fin << 
+    //                                                                                                 ", " << packet.seq << 
+    //                                                                                                 ", " << packet.data_length << 
+    //                                                                                                 ", " << packet.data << ")" << std::endl;
     }
 }

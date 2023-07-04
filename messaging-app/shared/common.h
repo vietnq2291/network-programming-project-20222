@@ -84,7 +84,7 @@ typedef struct {
 struct MessagePacket_t {
     MessagePacket_t() : type(), data_length(0) {};
     
-    MessagePacket_t(MessageType message_type) : type(message_type), data_length(0) {}
+    MessagePacket_t(MessageType message_type) : type(message_type), data_length(0) {};
 
     MessageType type;
     union {

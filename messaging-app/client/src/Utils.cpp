@@ -34,11 +34,11 @@ std::tuple<int, std::string> parse_user_info_data(const std::string info_data) {
     size_t userid_delim = info_data.find(':');
     size_t name_delim = info_data.find(':', userid_delim + 1);
 
-    int username_len = std::stoi(info_data.substr(0, userid_delim));
-    int password_len = std::stoi(info_data.substr(username_len + userid_delim + 1, name_delim - (username_len + userid_delim + 1)));
+    int userid_len = std::stoi(info_data.substr(0, userid_delim));
+    int display_name_len = std::stoi(info_data.substr(userid_len + userid_delim + 1, name_delim - (userid_len + userid_delim + 1)));
 
-    std::string user_id = info_data.substr(userid_delim + 1, username_len);
-    std::string display_name = info_data.substr(name_delim + 1, password_len);
+    std::string user_id = info_data.substr(userid_delim + 1, userid_len);
+    std::string display_name = info_data.substr(name_delim + 1, display_name_len);
 
     return std::make_tuple(std::stoi(user_id), display_name);
 }

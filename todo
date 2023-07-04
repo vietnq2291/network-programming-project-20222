@@ -1,4 +1,4 @@
-# Client tasks
+# Client & GUI tasks
 
 ## Authentication
 - [ ] Allow user to log in only once.
@@ -10,4 +10,4 @@
 - [ ] Logout.
 
 ## Room management
-- [ ] Only a group of three or more people can create a room.
+- ✅ Only a group of three or more people can create a room. 
