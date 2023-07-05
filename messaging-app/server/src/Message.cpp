@@ -36,6 +36,12 @@ void Message::set_template_packet(MessagePacket packet) {
     add_packet(packet);
 }
 
+void Message::set_data(std::string data, MessagePacket packet) {
+    set_template_packet(packet);
+    _packet_list.clear();
+    _segment_data(data);
+}
+
 bool Message::get_next_packet(MessagePacket& packet) {
     if (_current_index >= _packet_list.size()) {
         _current_index = 0; // Reset the index for the next time this Message is used
@@ -72,6 +78,28 @@ void Message::_join_data() {
     _data = "";
     for (int i = 0; i < _packet_list.size(); i++) {
         _data += _packet_list[i].data;
+    }
+}
+
+void Message::_segment_data(std::string data) {
+    int offset = 0;
+    int seq = 0;
+    int length = data.length();
+
+    while (offset < length) {
+        int chunk_size = std::min(length - offset, DATA_SIZE);
+
+        MessagePacket packet;
+        packet = _template_packet;
+        packet.fin = (offset + chunk_size == length) ? 1 : 0;
+        packet.seq = seq;
+        packet.data_length = chunk_size;
+        memset(&packet.data, 0, sizeof(packet.data));
+        memcpy(packet.data, data.c_str() + offset, chunk_size);
+
+        _packet_list.push_back(packet);
+        offset += chunk_size;
+        seq++;
     }
 }
 

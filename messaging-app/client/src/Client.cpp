@@ -229,8 +229,10 @@ void Client::receive_message() {
                 response_type = "CREATE_PRIVATE_CHAT_SUCCESS";
             } else if (packet.response_header.response_type == ResponseType::CREATE_GROUP_CHAT_SUCCESS) {
                 response_type = "CREATE_GROUP_CHAT_SUCCESS";
+            } else if (packet.response_header.response_type == ResponseType::GET_FRIEND_LIST_SUCCESS) {
+                response_type = "GET_FRIEND_LIST_SUCCESS";
             } else {
-                response_type = "UNKNOWN";
+                response_type = "UNKOWN";
             }
             std::cout << "Received message: (type, respose_type, fin, seq, data_len, data) = " << "(" << "RESPONSE" <<
                                                                                                     ", " << response_type << 
@@ -369,6 +371,9 @@ void Client::send_request_message(std::string buff) {
             // Reject friend request: R F J <other_user_id>
             std::string other_user_id = buff.substr(6);
             message_ptr = new Message(MessageType::REQUEST, RequestType::REJECT_FRIEND, _user_id, other_user_id);
+        } else if (buff[4] == 'L') {
+            // List all friends: R F L
+            message_ptr = new Message(MessageType::REQUEST, RequestType::GET_FRIEND_LIST, _user_id);
         } else {
             std::cerr << "Error: invalid request type!" << std::endl;
             return;

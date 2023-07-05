@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+#include <vector>
 #include <mysql/mysql.h>
 
 #include "../include/User.h"
@@ -165,8 +166,8 @@ bool User::check_friend(std::string friend_username, SQLQuery sql_query, Message
             strcpy(response_packet.data, "Add friend request sent");
             response_packet.data_length = strlen(response_packet.data);
 
-            // write data = <user_id_length>:<user_id><user_name_length>:<user_name><user_display_name_length>:<user_display_name>
-            data = std::to_string(std::to_string(_id).length()) + ":" + std::to_string(_id) + ":" + std::to_string(_username.length()) + ":" + _username + ":" + std::to_string(_display_name.length()) + ":" + _display_name;
+            // write data = <user_id_length>:<user_id><user_display_name_length>:<user_display_name>
+            data = std::to_string(std::to_string(_id).length()) + ":" + std::to_string(_id) + std::to_string(_display_name.length()) + ":" + _display_name;
             receiver_id = std::stoi(friend_id_str);
         }
     } else {
@@ -321,4 +322,33 @@ bool User::remove_friend(std::string friend_id, SQLQuery sql_query, MessagePacke
 
     sql_query.free_result();
     return true;
+}
+
+std::pair<bool, std::vector<std::pair<int, std::string>>> User::get_friend_list(SQLQuery sql_query, MessagePacket& response_packet) {
+    std::string query = "SELECT `id`, `display_name` FROM `Account` WHERE `id` IN (SELECT `user2_id` FROM `Friendship` WHERE `user1_id` = " + std::to_string(_id) +
+                        " UNION SELECT `user1_id` FROM `Friendship` WHERE `user2_id` = " + std::to_string(_id) + ")";
+    MYSQL_RES *result;
+    std::vector<std::pair<int, std::string>> friend_list;
+
+    sql_query.query(query, response_packet);
+    if (sql_query.is_select_successful() == false) {
+        response_packet.response_header.response_type = ResponseType::ERROR;
+        strcpy(response_packet.data, "Internal server error");
+        response_packet.data_length = strlen(response_packet.data);
+
+        return std::make_pair(false, friend_list);
+    } else {
+        result = sql_query.get_result();
+    }
+
+    MYSQL_ROW row;
+    while ((row = mysql_fetch_row(result))) {
+        std::string friend_id = row[0];
+        std::string friend_name = row[1];
+        friend_list.push_back(std::make_pair(std::stoi(friend_id), std::to_string(friend_id.length()) + ":" + friend_id + std::to_string(friend_name.length()) + ":" + friend_name));
+    }
+
+    response_packet.response_header.response_type = ResponseType::SUCCESS;
+    sql_query.free_result();    
+    return std::make_pair(true, friend_list);
 }

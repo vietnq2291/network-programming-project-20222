@@ -19,6 +19,7 @@ public:
     bool check_friend(std::string friend_username, SQLQuery sql_query, MessagePacket& response_packet, std::string& data, int& receiver_id);
     bool add_friend(std::string friend_username, SQLQuery sql_query, MessagePacket& response_packet);
     bool remove_friend(std::string friend_id, SQLQuery sql_query, MessagePacket& response_packet);
+    std::pair<bool, std::vector<std::pair<int, std::string>>> get_friend_list(SQLQuery sql_query, MessagePacket& response_packet);
 
     int get_id() { return _id; }
     std::string get_username() { return _username; }

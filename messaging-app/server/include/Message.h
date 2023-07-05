@@ -37,6 +37,7 @@ public:
 
     // Setters
     void set_template_packet(MessagePacket packet);
+    void set_data(std::string data, MessagePacket packet);
 
 
 private:
@@ -47,6 +48,7 @@ private:
 
     MessagePacket _template_packet;
     void _join_data();
+    void _segment_data(std::string data);
 };
 
 #endif // MESSAGE_H

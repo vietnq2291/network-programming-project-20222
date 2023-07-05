@@ -36,6 +36,7 @@ public:
     void handle_create_group_chat(Message& message, int conn_fd);
     void handle_add_friend(Message& message, int conn_fd);
     void handle_remove_friend(Message& message, int conn_fd);
+    void handle_get_friend_list(Message& message, int conn_fd);
 
 private:
     int _listen_fd;

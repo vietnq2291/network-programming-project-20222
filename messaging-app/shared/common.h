@@ -24,6 +24,7 @@ enum class RequestType {
     CREATE_GROUP_CHAT,
     INVITE_TO_GROUP,
     LEAVE_GROUP,
+    GET_FRIEND_LIST,
     ADD_FRIEND,
     ACCEPT_FRIEND,
     REJECT_FRIEND,
@@ -38,6 +39,7 @@ enum class ResponseType {
     LOGIN_SUCCESS,
     CREATE_PRIVATE_CHAT_SUCCESS,
     CREATE_GROUP_CHAT_SUCCESS,
+    GET_FRIEND_LIST_SUCCESS
 };
 
 enum class PushType {
@@ -82,9 +84,9 @@ typedef struct {
 } PushHeader;
 
 struct MessagePacket_t {
-    MessagePacket_t() : type(), data_length(0) {};
+    MessagePacket_t() : type(), fin(1), seq(0), data_length(0) {}
     
-    MessagePacket_t(MessageType message_type) : type(message_type), data_length(0) {};
+    MessagePacket_t(MessageType message_type) : type(message_type), fin(1), seq(0), data_length(0) {}
 
     MessageType type;
     union {
