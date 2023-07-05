@@ -16,6 +16,10 @@ bool User::authenticate(std::string password, SQLQuery sql_query, MessagePacket&
 
     sql_query.query(query, response_packet);
     if (sql_query.is_select_successful() == false) {
+        response_packet.response_header.response_type = ResponseType::ERROR;
+        strcpy(response_packet.data, "Error occurred while authenticating");
+        response_packet.data_length = strlen(response_packet.data);
+
         return false;
     } else {
         result = sql_query.get_result();
@@ -81,6 +85,10 @@ User *User::signup(std::string username, std::string password, std::string displ
 
     sql_query.query(query, response_packet);
     if (sql_query.is_select_successful() == false) {
+        response_packet.response_header.response_type = ResponseType::ERROR;
+        strcpy(response_packet.data, "Internal server error");
+        response_packet.data_length = strlen(response_packet.data);
+
         return NULL;
     } else {
         result = sql_query.get_result();
@@ -229,7 +237,7 @@ bool User::add_friend(std::string friend_id_str, SQLQuery sql_query, MessagePack
             if (sql_query.is_insert_successful()) {
                 // insert successful
                 response_packet.response_header.response_type = ResponseType::SUCCESS;
-                strcpy(response_packet.data, "Friend added");
+                strcpy(response_packet.data, "Friend added successfully");
                 response_packet.data_length = strlen(response_packet.data);
             } else {
                 // insert failed
@@ -297,7 +305,7 @@ bool User::remove_friend(std::string friend_id, SQLQuery sql_query, MessagePacke
             if (sql_query.is_delete_successful()) {
                 // delete successful
                 response_packet.response_header.response_type = ResponseType::SUCCESS;
-                strcpy(response_packet.data, "Friend removed");
+                strcpy(response_packet.data, "Unfriend successfully");
                 response_packet.data_length = strlen(response_packet.data);
             } else {
                 // delete failed
@@ -310,13 +318,13 @@ bool User::remove_friend(std::string friend_id, SQLQuery sql_query, MessagePacke
         } else {
             // friendship does not exist
             response_packet.response_header.response_type = ResponseType::FAILURE;
-            strcpy(response_packet.data, "Friend does not exist");
+            strcpy(response_packet.data, "Friendship does not exist");
             response_packet.data_length = strlen(response_packet.data);
         }
     } else {
         // friend does not exist 
         response_packet.response_header.response_type = ResponseType::FAILURE;
-        strcpy(response_packet.data, "Username does not valid");
+        strcpy(response_packet.data, "Friend account does not exist");
         response_packet.data_length = strlen(response_packet.data);
     }
 

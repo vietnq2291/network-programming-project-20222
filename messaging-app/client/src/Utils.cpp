@@ -21,10 +21,10 @@ std::string encode_signup_data(const std::string username, const std::string pas
 
 std::string encode_update_account_data(const std::string data) {
     // input: data = <type> <data>
-    // output is of the form: <type><data_len>:<data>, where type is either 'P' (password) or 'N' (display name)
+    // output is of the form: <type>:<data_len>:<data>, where type is either 'P' (password) or 'N' (display name)
 
     std::stringstream ss;
-    ss << data[0] << data.length() - 2 << ":" << data.substr(2);
+    ss << data[0] << ":" << data.length() - 2 << ":" << data.substr(2);
     return ss.str();
 }
 
@@ -44,7 +44,7 @@ std::tuple<int, std::string> parse_user_info_data(const std::string info_data) {
 }
 
 std::string encode_create_group_chat(const std::string group_name, const std::vector<std::string> members) {
-    // output is of the form: <group_name_len>:<group_name><num_members>:<member1_len>:<member1>...<memberN_len>:<memberN>:
+    // output is of the form: <group_name_len>:<group_name><num_members>:<member1_len>:<member1>...<memberN_len>:<memberN>
 
     std::stringstream ss;
     ss << group_name.length() << ":" << group_name << members.size() << ":";

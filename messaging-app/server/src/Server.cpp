@@ -510,10 +510,18 @@ void Server::handle_create_private_chat(Message& message, int conn_fd) {
 
                     _sql_query.query(query, response_packet);
                     if (_sql_query.is_insert_successful() == false) {
+                        response_packet.response_header.response_type = ResponseType::ERROR;
+                        strcpy(response_packet.data, "Can not create private chat");
+                        response_packet.data_length = strlen(response_packet.data);
+
                         log(LogType::ERROR, "Can not create private chat", conn_fd);
                     } else {
                         _sql_query.next_result(); // skip the first result to get last insert id
                         if (_sql_query.is_select_successful() == false) {
+                            response_packet.response_header.response_type = ResponseType::ERROR;
+                            strcpy(response_packet.data, "Can not create private chat");
+                            response_packet.data_length = strlen(response_packet.data);
+
                             log(LogType::ERROR, "Can not create private chat", conn_fd);
                         } else {
                             result = _sql_query.get_result();
@@ -526,13 +534,17 @@ void Server::handle_create_private_chat(Message& message, int conn_fd) {
 
                             _sql_query.query(query, response_packet);
                             if (_sql_query.is_insert_successful() == false) {
+                                response_packet.response_header.response_type = ResponseType::ERROR;
+                                strcpy(response_packet.data, "Can not create private chat");
+                                response_packet.data_length = strlen(response_packet.data);
+
                                 log(LogType::ERROR, "Can not create private chat", conn_fd);
                             } else {
                                 response_packet.response_header.response_type = ResponseType::SUCCESS;
                                 sprintf(response_packet.data, "%d", chat_id);
                                 response_packet.data_length = strlen(response_packet.data);
 
-                                log(LogType::INFO, response_packet.data, conn_fd);
+                                log(LogType::INFO, "Create private chat successfully", conn_fd);
                             }
                         }
                     }                
@@ -544,7 +556,7 @@ void Server::handle_create_private_chat(Message& message, int conn_fd) {
                     log(LogType::WARNING, response_packet.data, conn_fd);
                 }
             } else {
-                response_packet.response_header.response_type = ResponseType::FAILURE;
+                response_packet.response_header.response_type = ResponseType::ERROR;
                 strcpy(response_packet.data, "Failed to query database");
                 response_packet.data_length = strlen(response_packet.data);
                 
@@ -718,8 +730,9 @@ void Server::handle_add_friend(Message& message, int conn_fd) {
 
                     // send push to receiver
                     push_packet.push_header.push_type = PushType::FRIEND_ACCEPT;
-                    strcpy(push_packet.data, user->get_display_name().c_str());
-                    push_packet.data_length = user->get_display_name().length();
+                    data = std::to_string(std::to_string(user_id).length()) + ":" + std::to_string(user_id) + std::to_string(user->get_display_name().length()) + ":" + user->get_display_name();
+                    strcpy(push_packet.data, data.c_str());
+                    push_packet.data_length = data.length();
                     
                     push_message.set_template_packet(push_packet);
                     send_message(push_message, _user_id_to_socket[other_user_id]);
