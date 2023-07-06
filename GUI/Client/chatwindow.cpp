@@ -1,24 +1,19 @@
-#include "clientwindow.h"
+#include "chatwindow.h"
 #include "ui_clientwindow.h"
+#include "common.h"
 #include <QPixmap>
 #include <QIcon>
 
-ClientWindow::ClientWindow()
+ChatWindow::ChatWindow()
 {
+
     ui.setupUi(this);
     QPixmap pix(":/resource/img/chat.png");
     this->setWindowIcon(QIcon(pix));
     ui.sendButton->setIcon(QIcon(pix));
 
     socket = new QTcpSocket(this);
-    connect(socket, SIGNAL(readyRead()), this, SLOT(recvMsg()));
-    connect(socket, SIGNAL(connected()), this, SLOT(Conn()));
-    connect(socket, SIGNAL(disconnected()), this, SLOT(closeConn()));
-    connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketErr(QAbstractSocket::SocketError)));
 
-    connect(ui.connButton, SIGNAL(clicked()), this, SLOT(pressConnect()));
-    connect(ui.sendButton, SIGNAL(clicked()), this, SLOT(pressSendButton()));
-    connect(ui.messageBox, SIGNAL(returnPressed()), this, SLOT(pressSendEnter()));
 
     packSize = 0;
 }
@@ -28,8 +23,9 @@ void ClientWindow::pressConnect() {
     ui.convBox->append(tr("<em>Connecting...</em>"));
     ui.connButton->setEnabled(false);
 
-    socket->abort();
-    socket->connectToHost(ui.serverIP->text(), ui.serverPort->value());
+
+//    socket->abort();
+//    socket->connectToHost(ui.serverIP->text(), ui.serverPort->value());
 }
 
 void ClientWindow::pressSendButton() {

@@ -1,4 +1,4 @@
-#include "clientwindow.h"
+#include "chatwindow.h"
 #include "loginwindow.h"
 
 #include <QApplication>

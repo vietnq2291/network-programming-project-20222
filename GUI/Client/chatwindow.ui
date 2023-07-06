@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>clientWindow</class>
- <widget class="QWidget" name="clientWindow">
+ <class>ClientWindow</class>
+ <widget class="QWidget" name="ClientWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,7 +17,7 @@
    <iconset>
     <normaloff>chat.png</normaloff>chat.png</iconset>
   </property>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>

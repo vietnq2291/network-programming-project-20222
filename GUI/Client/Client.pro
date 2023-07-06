@@ -11,12 +11,23 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    Client.cpp \
+    Controller.cpp \
+    Message.cpp \
+    Utils.cpp \
+    Views.cpp \
+    chatwindow.cpp \
     loginwindow.cpp \
-    main.cpp \
-    clientwindow.cpp
+    main.cpp
 
 HEADERS += \
-    clientwindow.h \
+    Client.h \
+    Controller.h \
+    Message.h \
+    Utils.h \
+    Views.h \
+    chatwindow.h \
+    common.h \
     loginwindow.h
 
 # Default rules for deployment.
@@ -25,7 +36,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 FORMS += \
-    clientwindow.ui \
+    chatwindow.ui \
     loginwindow.ui
 
 DISTFILES += \
