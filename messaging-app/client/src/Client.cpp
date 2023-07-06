@@ -74,7 +74,7 @@ void Client::start() {
                     send_request_message(buff);
                 } else if (buff[0] == 'C') {
                     // buff = C <chat_type> <data_type> <chat_id> <message>
-                    // where <chat_type> = G (group chat) or P (private chat)
+                    // where <chat_type> = G (group chat) or P (private chat) or A (anonymous chat)
                     
                     ChatType chat_type;
                     DataType data_type;
@@ -82,6 +82,8 @@ void Client::start() {
                         chat_type = ChatType::GROUP_CHAT;
                     } else if (buff[2] == 'P') {
                         chat_type = ChatType::PRIVATE_CHAT;
+                    } else if (buff[2] == 'A') {
+                        chat_type = ChatType::ANONYMOUS_CHAT;
                     } else {
                         std::cout << "Invalid chat type" << std::endl;
                         continue;
@@ -231,6 +233,10 @@ void Client::receive_message() {
                 response_type = "CREATE_GROUP_CHAT_SUCCESS";
             } else if (packet.response_header.response_type == ResponseType::GET_FRIEND_LIST_SUCCESS) {
                 response_type = "GET_FRIEND_LIST_SUCCESS";
+            }else if (packet.response_header.response_type == ResponseType::WAIT_FOR_ANONYMOUS_CHAT) {
+                response_type = "WAIT_FOR_ANONYMOUS_CHAT";
+            }else if (packet.response_header.response_type == ResponseType::JOIN_ANONYMOUS_CHAT_SUCCESS) {
+                response_type = "JOIN_ANONYMOUS_CHAT_SUCCESS";
             } else {
                 response_type = "UNKOWN";
             }
@@ -378,6 +384,18 @@ void Client::send_request_message(std::string buff) {
             std::cerr << "Error: invalid request type!" << std::endl;
             return;
         }
+    } else if (buff[2] == 'A') {
+        if (buff[4] == 'C') {
+            // request to create anonymous chat: R A C
+            message_ptr = new Message(MessageType::REQUEST, RequestType::CREATE_ANONYMOUS_CHAT, _user_id);
+        } else if (buff[4] == 'E') {
+            // request to end anonymous chat: R A E <chat_id>
+            std::string chat_id = buff.substr(6);
+            message_ptr = new Message(MessageType::REQUEST, RequestType::END_ANONYMOUS_CHAT, _user_id, chat_id);
+        }
+    } else if (buff[2] == 'E') {
+        // request to end connection: R E
+        message_ptr = new Message(MessageType::REQUEST, RequestType::EXIT, _user_id);
     }
 
     while ((*message_ptr).get_next_packet(packet)) {

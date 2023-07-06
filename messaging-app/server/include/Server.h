@@ -11,6 +11,7 @@
 #include "Message.h"
 #include "User.h"
 #include "SQLQuery.h"
+#include "AnonymousChatRoom.h"
 
 class Server {
 public:
@@ -21,7 +22,7 @@ public:
     void listen();
     void accept();
     void stop();
-    void remove_client(int conn_fd);
+    void remove_client(int conn_fd, bool is_force);
 
     void receive_message(int conn_fd);
     void process_chat_message(Message& message, int conn_fd);
@@ -37,6 +38,9 @@ public:
     void handle_add_friend(Message& message, int conn_fd);
     void handle_remove_friend(Message& message, int conn_fd);
     void handle_get_friend_list(Message& message, int conn_fd);
+    void handle_create_anonymous_chat(Message& message, int conn_fd);
+    void handle_end_anonymous_chat(Message& message, int conn_fd, int chat_id=-1);
+    void handle_close_client_connection(int conn_fd);
 
 private:
     int _listen_fd;
@@ -54,6 +58,9 @@ private:
     std::vector<Message*> _message_list;
     std::map<std::variant<int, std::string>, User*> _online_user_list;
     std::map<int, int> _user_id_to_socket;
+
+    // additional modules
+    AnonymousChatRoom _anonymous_chat_room;
 };
 
 #endif // SERVER_H

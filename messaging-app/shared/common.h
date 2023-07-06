@@ -19,11 +19,12 @@ enum class RequestType {
     LOGIN,
     LOGOUT,
     UPDATE_ACCOUNT,
-    ONLINE_USERS,
     CREATE_PRIVATE_CHAT,
     CREATE_GROUP_CHAT,
-    INVITE_TO_GROUP,
-    LEAVE_GROUP,
+    CREATE_ANONYMOUS_CHAT,
+    END_ANONYMOUS_CHAT,
+    // INVITE_TO_GROUP,
+    // LEAVE_GROUP,
     GET_FRIEND_LIST,
     ADD_FRIEND,
     ACCEPT_FRIEND,
@@ -39,16 +40,19 @@ enum class ResponseType {
     LOGIN_SUCCESS,
     CREATE_PRIVATE_CHAT_SUCCESS,
     CREATE_GROUP_CHAT_SUCCESS,
-    GET_FRIEND_LIST_SUCCESS
+    GET_FRIEND_LIST_SUCCESS,
+    WAIT_FOR_ANONYMOUS_CHAT,
+    JOIN_ANONYMOUS_CHAT_SUCCESS,
 };
 
 enum class PushType {
     FRIEND_REQUEST,
     FRIEND_ACCEPT,
     FRIEND_REJECT,
-    GROUP_INVITE,
-    GROUP_LEAVE,
-    GROUP_REMOVE
+    ANONYMOUS_CHAT_ENDED,
+    // GROUP_INVITE,
+    // GROUP_LEAVE,
+    // GROUP_REMOVE
 };
 
 enum class DataType {
@@ -58,7 +62,8 @@ enum class DataType {
 
 enum class ChatType {
     PRIVATE_CHAT,
-    GROUP_CHAT
+    GROUP_CHAT,
+    ANONYMOUS_CHAT
 };
 
 typedef struct {
