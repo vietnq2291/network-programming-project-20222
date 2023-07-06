@@ -152,7 +152,7 @@ void Server::receive_message(int conn_fd) {
     if ((bytes_received = recv(conn_fd, &packet, sizeof(packet), 0)) <= 0) {
         if (bytes_received == 0) {
             log(LogType::INFO, "Socket " + std::to_string(conn_fd) + " disconnected");
-            remove_client(conn_fd);
+            remove_client(conn_fd, true);
         } else {
             log(LogType::ERROR, "Can not receive message from socket " + std::to_string(conn_fd));
             log(LogType::INFO, "Force disconnect socket " + std::to_string(conn_fd));
@@ -203,7 +203,14 @@ void Server::receive_message(int conn_fd) {
     }
 }
 
-void Server::remove_client(int conn_fd) {
+void Server::remove_client(int conn_fd, bool is_force) {
+    // remove any running anonymous chat room
+    int chat_id = _anonymous_chat_room.get_chat_id(conn_fd);
+    if (chat_id != -1) {
+        Message message;
+        handle_end_anonymous_chat(message, conn_fd, chat_id);
+    }
+
     // remove user if it is logged in
     for (auto it = _user_id_to_socket.begin(); it != _user_id_to_socket.end(); it++) {
         if (it->second == conn_fd) {
@@ -216,52 +223,29 @@ void Server::remove_client(int conn_fd) {
             break;
         }
     }
-    FD_CLR(conn_fd, &_master);
-    _num_clients--;
-    close(conn_fd);
+
+    if (is_force == true) {
+        FD_CLR(conn_fd, &_master);
+        _num_clients--;
+        close(conn_fd);
+    }
 }
 
 void Server::process_chat_message(Message& message, int conn_fd) {
     MessagePacket response_packet(MessageType::RESPONSE);  
     Message response_message;  
 
-    // Insert to database
-    bool is_saved = message.save(_sql_query, response_packet);
-    response_message.set_template_packet(response_packet);
-    send_message(response_message, conn_fd);
-    if (is_saved == false) {
-        log(LogType::ERROR, "Can not save message to database", conn_fd);
-        return;
-    }
+    if (message.get_chat_type() == ChatType::ANONYMOUS_CHAT){
+        int receiver_fd = _anonymous_chat_room.get_other_client_fd(message.get_chat_id(), conn_fd);
 
-    // Forward message to receiver
-    int sender = message.get_chat_sender();
-    int chat_id = message.get_chat_id();
-    std::string query = "SELECT `m`.`user_id` FROM `Chat` `c` JOIN `Membership` `m` ON `c`.`id` = `m`.`chat_id` WHERE `m`.`chat_id` = " + std::to_string(chat_id) + " AND `m`.`user_id` != " + std::to_string(sender) + ";";
-    
-    _sql_query.query(query, response_packet);
-    if (_sql_query.is_select_successful() == true) {
-        if (_sql_query.is_result_empty() == true) {
+        if (receiver_fd == -1) {
             response_packet.response_header.response_type = ResponseType::FAILURE;
-            strcpy(response_packet.data, "Can not find receiver of chat");
+            strcpy(response_packet.data, "Chat does not exist");
             response_packet.data_length = strlen(response_packet.data);
 
             log(LogType::WARNING, response_packet.data, conn_fd);
         } else {
-            MYSQL_RES *result = _sql_query.get_result();
-            MYSQL_ROW row;
-            bool is_sent = true;
-
-            while ((row = mysql_fetch_row(result)) != NULL) {
-                int receiver = std::stoi(row[0]);
-                int receiver_socket = _user_id_to_socket[receiver];
-
-                if(send_message(message, receiver_socket) == false) {
-                    is_sent = false;
-                }
-            }
-
-            if (is_sent == false) {
+            if(send_message(message, receiver_fd) == false) {
                 response_packet.response_header.response_type = ResponseType::FAILURE;
                 strcpy(response_packet.data, "Can not send message to receiver");
                 response_packet.data_length = strlen(response_packet.data);
@@ -276,13 +260,65 @@ void Server::process_chat_message(Message& message, int conn_fd) {
             }
         }
     } else {
-        response_packet.response_header.response_type = ResponseType::ERROR;
-        strcpy(response_packet.data, "Failed to query database");
-        response_packet.data_length = strlen(response_packet.data);
+        // Insert to database
+        bool is_saved = message.save(_sql_query, response_packet);
+        response_message.set_template_packet(response_packet);
+        send_message(response_message, conn_fd);
+        if (is_saved == false) {
+            log(LogType::ERROR, "Can not save message to database", conn_fd);
+            return;
+        }
 
-        log(LogType::ERROR, response_packet.data, conn_fd);
+        // Forward message to receiver
+        int sender = message.get_chat_sender();
+        int chat_id = message.get_chat_id();
+        std::string query = "SELECT `m`.`user_id` FROM `Chat` `c` JOIN `Membership` `m` ON `c`.`id` = `m`.`chat_id` WHERE `m`.`chat_id` = " + std::to_string(chat_id) + " AND `m`.`user_id` != " + std::to_string(sender) + ";";
+        
+        _sql_query.query(query, response_packet);
+        if (_sql_query.is_select_successful() == true) {
+            if (_sql_query.is_result_empty() == true) {
+                response_packet.response_header.response_type = ResponseType::FAILURE;
+                strcpy(response_packet.data, "Can not find receiver of chat");
+                response_packet.data_length = strlen(response_packet.data);
+
+                log(LogType::WARNING, response_packet.data, conn_fd);
+            } else {
+                MYSQL_RES *result = _sql_query.get_result();
+                MYSQL_ROW row;
+                bool is_sent = true;
+
+                while ((row = mysql_fetch_row(result)) != NULL) {
+                    int receiver = std::stoi(row[0]);
+                    int receiver_socket = _user_id_to_socket[receiver];
+
+                    if(send_message(message, receiver_socket) == false) {
+                        is_sent = false;
+                    }
+                }
+
+                if (is_sent == false) {
+                    response_packet.response_header.response_type = ResponseType::FAILURE;
+                    strcpy(response_packet.data, "Can not send message to receiver");
+                    response_packet.data_length = strlen(response_packet.data);
+
+                    log(LogType::WARNING, response_packet.data, conn_fd);
+                } else {
+                    response_packet.response_header.response_type = ResponseType::SUCCESS;
+                    strcpy(response_packet.data, "Message sent");
+                    response_packet.data_length = strlen(response_packet.data);
+
+                    log(LogType::INFO, response_packet.data, conn_fd);
+                }
+            }
+        } else {
+            response_packet.response_header.response_type = ResponseType::ERROR;
+            strcpy(response_packet.data, "Failed to query database");
+            response_packet.data_length = strlen(response_packet.data);
+
+            log(LogType::ERROR, response_packet.data, conn_fd);
+        }
+        _sql_query.free_result();
     }
-    _sql_query.free_result();
 
     response_message.set_template_packet(response_packet);
     send_message(response_message, conn_fd);
@@ -324,6 +360,26 @@ void Server::process_request_message(Message& message, int conn_fd) {
             break;
         case RequestType::CREATE_GROUP_CHAT:
             handle_create_group_chat(message, conn_fd);
+            break;
+        case RequestType::CREATE_ANONYMOUS_CHAT:
+            handle_create_anonymous_chat(message, conn_fd);
+            break;
+        case RequestType::END_ANONYMOUS_CHAT:
+            handle_end_anonymous_chat(message, conn_fd);
+            break;
+        case RequestType::ADD_FRIEND: 
+        case RequestType::ACCEPT_FRIEND: 
+        case RequestType::REJECT_FRIEND:
+            handle_add_friend(message, conn_fd);
+            break;
+        case RequestType::REMOVE_FRIEND:
+            handle_remove_friend(message, conn_fd);
+            break;
+        case RequestType::GET_FRIEND_LIST:
+            handle_get_friend_list(message, conn_fd);
+            break;
+        case RequestType::EXIT:
+            handle_close_client_connection(conn_fd);
             break;
         default:
             break;
@@ -499,10 +555,18 @@ void Server::handle_create_private_chat(Message& message, int conn_fd) {
 
                     _sql_query.query(query, response_packet);
                     if (_sql_query.is_insert_successful() == false) {
+                        response_packet.response_header.response_type = ResponseType::ERROR;
+                        strcpy(response_packet.data, "Can not create private chat");
+                        response_packet.data_length = strlen(response_packet.data);
+
                         log(LogType::ERROR, "Can not create private chat", conn_fd);
                     } else {
                         _sql_query.next_result(); // skip the first result to get last insert id
                         if (_sql_query.is_select_successful() == false) {
+                            response_packet.response_header.response_type = ResponseType::ERROR;
+                            strcpy(response_packet.data, "Can not create private chat");
+                            response_packet.data_length = strlen(response_packet.data);
+
                             log(LogType::ERROR, "Can not create private chat", conn_fd);
                         } else {
                             result = _sql_query.get_result();
@@ -515,13 +579,17 @@ void Server::handle_create_private_chat(Message& message, int conn_fd) {
 
                             _sql_query.query(query, response_packet);
                             if (_sql_query.is_insert_successful() == false) {
+                                response_packet.response_header.response_type = ResponseType::ERROR;
+                                strcpy(response_packet.data, "Can not create private chat");
+                                response_packet.data_length = strlen(response_packet.data);
+
                                 log(LogType::ERROR, "Can not create private chat", conn_fd);
                             } else {
                                 response_packet.response_header.response_type = ResponseType::SUCCESS;
                                 sprintf(response_packet.data, "%d", chat_id);
                                 response_packet.data_length = strlen(response_packet.data);
 
-                                log(LogType::INFO, response_packet.data, conn_fd);
+                                log(LogType::INFO, "Create private chat successfully", conn_fd);
                             }
                         }
                     }                
@@ -533,7 +601,7 @@ void Server::handle_create_private_chat(Message& message, int conn_fd) {
                     log(LogType::WARNING, response_packet.data, conn_fd);
                 }
             } else {
-                response_packet.response_header.response_type = ResponseType::FAILURE;
+                response_packet.response_header.response_type = ResponseType::ERROR;
                 strcpy(response_packet.data, "Failed to query database");
                 response_packet.data_length = strlen(response_packet.data);
                 
@@ -645,4 +713,295 @@ void Server::handle_create_group_chat(Message& message, int conn_fd) {
     }
 }
 
+void Server::handle_add_friend(Message& message, int conn_fd) {
+    MessagePacket response_packet(MessageType::RESPONSE), push_packet(MessageType::PUSH);
+    Message response_message, push_message;
 
+    log(LogType::INFO, "Send add friend request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Can not find user");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);
+    } else {
+        User *user = it->second;
+        std::string data;
+        int other_user_id;
+
+        push_packet.push_header.sender = user_id;
+        if (message.get_request_type() == RequestType::ADD_FRIEND) {
+            if (user->check_friend(message.get_data(), _sql_query, response_packet, data, other_user_id) == false) {
+                log(LogType::ERROR, response_packet.data, conn_fd);
+            } else {
+                if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+                    log(LogType::INFO, response_packet.data, conn_fd);
+
+                    // send push to receiver
+                    push_packet.push_header.push_type = PushType::FRIEND_REQUEST;
+                    strcpy(push_packet.data, data.c_str());
+                    push_packet.data_length = data.length();
+                    push_message.set_template_packet(push_packet);
+
+                    send_message(push_message, _user_id_to_socket[other_user_id]);
+                } else {
+                    log(LogType::WARNING, response_packet.data, conn_fd);
+                }
+            }
+        } else if (message.get_request_type() == RequestType::REJECT_FRIEND) {
+            other_user_id = std::stoi(message.get_data());
+
+            response_packet.response_header.response_type = ResponseType::SUCCESS;
+            strcpy(response_packet.data, "Reject add friend request successfully");
+            response_packet.data_length = strlen(response_packet.data);
+
+            log(LogType::INFO, response_packet.data, conn_fd);
+
+            // send push to receiver
+            push_packet.push_header.push_type = PushType::FRIEND_REJECT;
+            push_message.set_template_packet(push_packet);
+            send_message(push_message, _user_id_to_socket[other_user_id]);
+        } else if (message.get_request_type() == RequestType::ACCEPT_FRIEND) {
+            other_user_id = std::stoi(message.get_data());
+
+            if(user->add_friend(message.get_data(), _sql_query, response_packet) == false) {
+                log(LogType::ERROR, response_packet.data, conn_fd);
+            } else {
+                if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+                    log(LogType::INFO, response_packet.data, conn_fd);
+
+                    // send push to receiver
+                    push_packet.push_header.push_type = PushType::FRIEND_ACCEPT;
+                    data = std::to_string(std::to_string(user_id).length()) + ":" + std::to_string(user_id) + std::to_string(user->get_display_name().length()) + ":" + user->get_display_name();
+                    strcpy(push_packet.data, data.c_str());
+                    push_packet.data_length = data.length();
+                    
+                    push_message.set_template_packet(push_packet);
+                    send_message(push_message, _user_id_to_socket[other_user_id]);
+                } else {
+                    log(LogType::WARNING, response_packet.data, conn_fd);
+                }
+            }
+        }
+        push_packet.push_header.sender = user_id;
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+}
+
+void Server::handle_remove_friend(Message& message, int conn_fd) {
+    MessagePacket response_packet(MessageType::RESPONSE);
+    Message response_message;
+
+    log(LogType::INFO, "Send remove friend request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Can not find user");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);
+    } else {
+        User *user = it->second;
+
+        if(user->remove_friend(message.get_data(), _sql_query, response_packet) == false) {
+            log(LogType::ERROR, response_packet.data, conn_fd);
+        } else {
+            if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+                log(LogType::INFO, response_packet.data, conn_fd);
+            } else if (response_packet.response_header.response_type == ResponseType::FAILURE) {
+                log(LogType::WARNING, response_packet.data, conn_fd);
+            } else {
+                log(LogType::ERROR, response_packet.data, conn_fd);
+            }
+        }
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+}
+
+void Server::handle_get_friend_list(Message& message, int conn_fd) {
+    MessagePacket response_packet(MessageType::RESPONSE);
+    Message response_message;
+
+    log(LogType::INFO, "Send get friend list request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Can not find user");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);
+    } else {
+        User *user = it->second;
+        std::pair<bool, std::vector<std::pair<int, std::string>>> result = user->get_friend_list(_sql_query, response_packet);
+
+        if(result.first == false) {
+            log(LogType::ERROR, response_packet.data, conn_fd);
+        } else {
+            if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+                response_packet.response_header.response_type = ResponseType::GET_FRIEND_LIST_SUCCESS;            
+                log(LogType::INFO, "Get friend list successfully", conn_fd);
+
+                int num_friend = result.second.size();
+                std::string data = std::to_string(std::to_string(num_friend).length()) + ":" + std::to_string(num_friend);
+                for (int i = 0; i < num_friend; i++) {
+                    data += result.second[i].second;
+
+                    // check if user is online
+                    int uid = result.second[i].first;
+                    auto uit = _online_user_list.find(uid);
+                    data += ":" + std::to_string((uit != _online_user_list.end()) ? 1 : 0) + ":";
+                }
+                
+                response_message.set_data(data, response_packet);
+                send_message(response_message, conn_fd);
+                return;
+            } else if (response_packet.response_header.response_type == ResponseType::FAILURE) {
+                log(LogType::WARNING, response_packet.data, conn_fd);
+            } else {
+                log(LogType::ERROR, response_packet.data, conn_fd);
+            }
+        }
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+}
+
+void Server::handle_create_anonymous_chat(Message& message, int conn_fd) {
+    MessagePacket response_packet(MessageType::RESPONSE);
+    Message response_message;
+    int other_client_fd=-1;
+
+    log(LogType::INFO, "Send create anonymous chat request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Can not find user");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);
+    } else {
+        User *user = it->second;
+        int chat_id = _anonymous_chat_room.add_client(conn_fd, user);
+
+        if (chat_id == -1) {
+            response_packet.response_header.response_type = ResponseType::WAIT_FOR_ANONYMOUS_CHAT;
+            strcpy(response_packet.data, "Wait for another user to join");
+            response_packet.data_length = strlen(response_packet.data);
+
+            log(LogType::INFO, response_packet.data, conn_fd);
+        } else if (chat_id == -2) {
+            response_packet.response_header.response_type = ResponseType::FAILURE;
+            strcpy(response_packet.data, "You already requested to create anonymous chat");
+            response_packet.data_length = strlen(response_packet.data);
+
+            log(LogType::WARNING, response_packet.data, conn_fd);
+        } else {
+            other_client_fd = _anonymous_chat_room.get_other_client_fd(chat_id, conn_fd);
+
+            response_packet.response_header.response_type = ResponseType::JOIN_ANONYMOUS_CHAT_SUCCESS;
+            strcpy(response_packet.data, std::to_string(chat_id).c_str());
+            response_packet.data_length = strlen(response_packet.data);
+
+            log(LogType::INFO, "Create anonymous chat successfully", conn_fd);
+        }
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+    if (other_client_fd != -1) {
+        send_message(response_message, other_client_fd);
+    }
+}
+
+void Server::handle_end_anonymous_chat(Message& message, int conn_fd, int chat_id) {
+    /*
+    chat_id >= 0: end anonymous chat with specific chat_id, used when client closed connection but not end anonymous chat
+    chat_id = -1: end anonymous chat when client still in connection
+    */
+    MessagePacket response_packet(MessageType::RESPONSE);
+    Message response_message;
+    int other_client_fd=-1;
+
+    log(LogType::INFO, "Send end anonymous chat request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end() && chat_id < 0) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Can not find user");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);
+    } else {
+        if (chat_id == -1) {
+            chat_id = std::stoi(message.get_data());
+        }
+
+        other_client_fd = _anonymous_chat_room.get_other_client_fd(chat_id, conn_fd);
+        bool ret = _anonymous_chat_room.end_chat(chat_id);
+
+        if (ret == false || other_client_fd == -1) {
+            response_packet.response_header.response_type = ResponseType::FAILURE;
+            strcpy(response_packet.data, "Chat room does not exist");
+            response_packet.data_length = strlen(response_packet.data);
+
+            log(LogType::WARNING, response_packet.data, conn_fd);
+        } else {
+            if (it != _online_user_list.end()) {
+                // only send response if user is still connected
+                response_packet.response_header.response_type = ResponseType::SUCCESS;
+                strcpy(response_packet.data, "End anonymous chat successfully");
+                response_packet.data_length = strlen(response_packet.data);
+            }
+
+            // forward message to inform other client
+            Message push_message;
+            MessagePacket push_packet(MessageType::PUSH);
+            push_packet.push_header.push_type = PushType::ANONYMOUS_CHAT_ENDED;
+            strcpy(push_packet.data, "Anonymous chat ended");
+            push_packet.data_length = strlen(push_packet.data);
+
+            push_message.set_template_packet(push_packet);
+            send_message(push_message, other_client_fd);
+
+            log(LogType::INFO, "End anonymous chat successfully", conn_fd);
+        }
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+}
+
+void Server::handle_close_client_connection(int conn_fd) {
+    log(LogType::INFO, "Close connection", conn_fd);
+    remove_client(conn_fd, false);
+
+    // Send response to client
+    Message response_message;
+    MessagePacket response_packet(MessageType::RESPONSE);
+    response_packet.response_header.response_type = ResponseType::SUCCESS;
+    strcpy(response_packet.data, "Close connection successfully");
+    response_packet.data_length = strlen(response_packet.data);
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+
+    // Close connection
+    FD_CLR(conn_fd, &_master);
+    _num_clients--;
+    close(conn_fd);
+}

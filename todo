@@ -1,8 +1,9 @@
-# Client tasks
+# Client & GUI tasks
 
 ## Authentication
 - [ ] Allow user to log in only once.
 - [ ] Always remember to close the socket when the client stops.
+- [ ] Send request to end anonymous chat before the client send log out request.
 
 ## These functionalities must be accessible only to users who are logged in:
 - [ ] Sign up.
@@ -10,4 +11,4 @@
 - [ ] Logout.
 
 ## Room management
-- [ ] Only a group of three or more people can create a room.
+- ✅ Only a group of three or more people can create a room. 

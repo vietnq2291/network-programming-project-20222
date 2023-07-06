@@ -68,6 +68,10 @@ bool SQLQuery::is_update_successful() {
     return mysql_affected_rows(_conn) >= 1;
 }
 
+bool SQLQuery::is_delete_successful() {
+    return mysql_affected_rows(_conn) >= 1;
+}
+
 void SQLQuery::free_result() {
     while (mysql_next_result(_conn) == 0) {}
     if (_result != NULL) {        

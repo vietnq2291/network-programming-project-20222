@@ -36,6 +36,12 @@ void Message::set_template_packet(MessagePacket packet) {
     add_packet(packet);
 }
 
+void Message::set_data(std::string data, MessagePacket packet) {
+    set_template_packet(packet);
+    _packet_list.clear();
+    _segment_data(data);
+}
+
 bool Message::get_next_packet(MessagePacket& packet) {
     if (_current_index >= _packet_list.size()) {
         _current_index = 0; // Reset the index for the next time this Message is used
@@ -75,6 +81,28 @@ void Message::_join_data() {
     }
 }
 
+void Message::_segment_data(std::string data) {
+    int offset = 0;
+    int seq = 0;
+    int length = data.length();
+
+    while (offset < length) {
+        int chunk_size = std::min(length - offset, DATA_SIZE);
+
+        MessagePacket packet;
+        packet = _template_packet;
+        packet.fin = (offset + chunk_size == length) ? 1 : 0;
+        packet.seq = seq;
+        packet.data_length = chunk_size;
+        memset(&packet.data, 0, sizeof(packet.data));
+        memcpy(packet.data, data.c_str() + offset, chunk_size);
+
+        _packet_list.push_back(packet);
+        offset += chunk_size;
+        seq++;
+    }
+}
+
 bool Message::save(SQLQuery sql_query, MessagePacket& response_packet) {
     /* Save the Chat Message to the database */
     if (_template_packet.type != MessageType::CHAT) {
@@ -94,7 +122,7 @@ bool Message::save(SQLQuery sql_query, MessagePacket& response_packet) {
             return false;
         } else {
             // chat_id found, save message
-            std::string data_type;
+            std::string insert_data, data_type;
             if (_template_packet.chat_header.data_type == DataType::TEXT)
                 data_type = "TEXT";
             else if (_template_packet.chat_header.data_type == DataType::FILE)

@@ -1,20 +1,174 @@
-Commands:
+Commands & Message structure
+
+============================
+
 Requests: 
     Login:
         R L <username> <password>
+            Message(MessageType::REQUEST, RequestType::LOGIN, _user_id, auth_data)
+                auth_data = <username_len>:<username><password_len>:<password>
+
+            Message(MessageType::RESPONSE, ResponseType::ERROR)
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Password is incorrect")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Account does not exist")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Account is already logged in on another device")
+            Message(MessageType::RESPONSE, ResponseType::LOGIN_SUCCESS, info_data)
+                info_data = <user_id_len>:<user_id><display_name_len>:<display_name>
 
     Register:
         R R <username> <password> <display_name>
+            Message(MessageType::REQUEST, RequestType::SIGNUP, _user_id, signup_data)
+                signup_data = <username_len>:<username><password_len>:<password><display_name_len>:<display_name>
+
+            Message(MessageType::RESPONSE, ResponseType::ERROR)
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Username is taken")
+            Message(MessageType::RESPONSE, ResponseType::SUCCESS)
+    
     Update:
         Change name:
-            R U N <new_name>
+            R U N <new_name>                
         Change password:
             R U P <new_password>
+
+        Message(MessageType::REQUEST, RequestType::UPDATE, _user_id, update_data)
+            update_data = <type>:<data_len>:<data>
+            where type is either 'P' (password) or 'N' (display name)
+
+        Message(MessageType::RESPONSE, ResponseType::FAILURE, "You are not logged in")  # should not happen, client must prevent this
+        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Update failed")
+        Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Update successful")
+
     Logout:
         R X
+            Message(MessageType::REQUEST, RequestType::LOGOUT, _user_id)
+
+            Message(MessageType::RESPONSE, ResponseType::FAILURE)  # not logged in (should not happen, client must prevent this)
+            Message(MessageType::RESPONSE, ResponseType::SUCCESS)
+
+    Friends:
+        R F R <other_username>  # request to add friend
+            Message(MessageType::REQUEST, RequestType::ADD_FRIEND, _user_id, other_username)
+            
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find user")  # normally because user not logged in, should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Invalid friend username")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Friend is already added")
+            Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Add friend request sent")
+
+            Message(MessageType::PUSH, PushType::FRIEND_REQUEST, _user_id, sender_data)
+                sender_data = <user_id_length>:<user_id><user_display_name_length>:<user_display_name>
+        
+        R F A <other_user_id>   # accept a friend request
+            Message(MessageType::REQUEST, RequestType::ACCEPT_FRIEND, _user_id, other_user_id)
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Friend already added")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Username does not valid")
+            Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Friend added successfully")
+
+            Message(MessageType::PUSH, PushType::FRIEND_ACCEPT, _user_id, data)
+                data = <user_id_length>:<user_id><user_display_name_length>:<user_display_name>
+
+        R F J <other_user_id>   # reject a friend request
+            Message(MessageType::REQUEST, RequestType::REJECT_FRIEND, _user_id, other_user_id)
+            Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Reject add friend request successfully")
+
+            Message(MessageType::PUSH, PushType::FRIEND_REJECT, _user_id)
+
+        R F U <other_user_id>   # unfriend a friend
+            Message(MessageType::REQUEST, RequestType::REMOVE_FRIEND, _user_id, other_user_id)
+            
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Friendship does not exist")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Friend account does not exist")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find user")  # normally because user not logged in, should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Unfriend successfully")
+
+        R F L                   # get friend list
+            Message(MessageType::REQUEST, RequestType::GET_FRIEND_LIST, _user_id)
+            
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find user")  # normally because user not logged in, should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::GET_FRIEND_LIST_SUCCESS, data)
+                data = <num_friend_length>:<num_friend><friend1_user_id_length>:<friend1_user_id><friend1_display_name_length>:<friend1_display_name>:<online_status>:<friend2_user_id_length>:<friend2_user_id><friend2_display_name_length>:<friend2_display_name>:<online_status>:...<friendN_user_id_length>:<friendN_user_id><friendN_display_name_length>:<friendN_display_name>:<online_status>:
+                where online_status = 0 for offline, 1 for online
+        
     Create new chat (for group chat or private chat):
         R C P <other_user_id>
+            Message(MessageType::REQUEST, RequestType::CREATE_PRIVATE_CHAT, _user_id, data)
+                data = <other_user_id>
+
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Failed to query database")
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Can not create private chat")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "You are not logged in")  # should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "You can not create private chat with yourself") # when other_user_id == _user_id, should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Chat already exists") 
+            Message(MessageType::RESPONSE, ResponseType::CREATE_PRIVATE_CHAT_SUCCESS, data)
+                data = <chat_id>
+            
         R C G <group_name> <number of members except the creator> <member_1_user_id> <member_2_user_id> ...
+            Message(MessageType::REQUEST, RequestType::CREATE_GROUP_CHAT, _user_id, create_group_chat_data)
+                create_group_chat_data = <group_name_len>:<group_name><num_members>:<member1_len>:<member1><member2_len>:<member2>...<memberN_len>:<memberN>
+            
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Failed to query database")
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Can not create group chat")
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Can not add members to group chat")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "You are not logged in")  # should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::CREATE_GROUP_CHAT_SUCCESS, data)
+                data = <chat_id>
+    
+    Anonymous chat:
+        R A C   # request to join an anonymous chat
+            Message(MessageType::REQUEST, RequestType::CREATE_ANONYMOUS_CHAT, _user_id)
+
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find user")  # normally because user not logged in, should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "You already requested to create anonymous chat")
+            Message(MessageType::RESPONSE, ResponseType::WAIT_FOR_ANONYMOUS_CHAT, "Wait for another user to join")
+            Message(MessageType::RESPONSE, ResponseType::JOIN_ANONYMOUS_CHAT_SUCCESS, data)
+                data = <chat_id>
+
+        R A E <chat_id>  # request to end an anonymous chat
+            Message(MessageType::REQUEST, RequestType::END_ANONYMOUS_CHAT, _user_id)
+
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find user")  # normally because user not logged in, should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Chat room does not exist")
+            Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Anonymous chat ended")
+            
+            Message(MessageType::PUSH, PushType::ANONYMOUS_CHAT_ENDED, _user_id, "Anonymous chat ended")
+
+
 Chat:
-    C G <chat_id> <message>
-    C P <chat_id> <message>
+    C P T <chat_id> <message>
+        Message(MessageType::CHAT, ChatType::PRIVATE_CHAT, DataType::TEXT, _user_id, chat_id, time(NULL), data)
+
+    C G T <chat_id> <message>
+        Message(MessageType::CHAT, ChatType::GROUP_CHAT, DataType::TEXT, _user_id, chat_id, time(NULL), data) 
+
+    C P F <chat_id> <file_path>
+        Message(MessageType::CHAT, ChatType::PRIVATE_CHAT, DataType::FILE, _user_id, chat_id, time(NULL), filedata) 
+
+    C G F <chat_id> <file_path>    
+        Message(MessageType::CHAT, ChatType::GROUP_CHAT, DataType::FILE, _user_id, chat_id, time(NULL), filedata)
+  
+    where filedata = <file_name_length>:<file_name><file_content_length>:<file_content>
+    
+    # save message to database:
+        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Chat ID not found")
+        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Failed to save message to database")  
+        Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Message saved to database")
+        Message(MessageType::RESPONSE, ResponseType::ERROR, "Failed to query database")
+
+    # forward message to receiver:
+        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find receiver of chat")
+        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not send message to receiver")
+        Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Message sent")
+
+    # ------------------- #
+    C A T <chat_id> <message>
+        Message(MessageType::CHAT, ChatType::ANONYMOUS_CHAT, DataType::TEXT, _user_id, chat_id, time(NULL), data)
+    
+    C A F <chat_id> <file_path>
+        Message(MessageType::CHAT, ChatType::ANONYMOUS_CHAT, DataType::FILE, _user_id, chat_id, time(NULL), filedata)
+
+        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Chat does not exist")
+        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not send message to receiver")
+        Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Message sent")

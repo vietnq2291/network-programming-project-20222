@@ -19,13 +19,16 @@ enum class RequestType {
     LOGIN,
     LOGOUT,
     UPDATE_ACCOUNT,
-    ONLINE_USERS,
     CREATE_PRIVATE_CHAT,
     CREATE_GROUP_CHAT,
-    INVITE_TO_GROUP,
-    LEAVE_GROUP,
+    CREATE_ANONYMOUS_CHAT,
+    END_ANONYMOUS_CHAT,
+    // INVITE_TO_GROUP,
+    // LEAVE_GROUP,
+    GET_FRIEND_LIST,
     ADD_FRIEND,
     ACCEPT_FRIEND,
+    REJECT_FRIEND,
     REMOVE_FRIEND,
     EXIT
 };
@@ -37,6 +40,19 @@ enum class ResponseType {
     LOGIN_SUCCESS,
     CREATE_PRIVATE_CHAT_SUCCESS,
     CREATE_GROUP_CHAT_SUCCESS,
+    GET_FRIEND_LIST_SUCCESS,
+    WAIT_FOR_ANONYMOUS_CHAT,
+    JOIN_ANONYMOUS_CHAT_SUCCESS,
+};
+
+enum class PushType {
+    FRIEND_REQUEST,
+    FRIEND_ACCEPT,
+    FRIEND_REJECT,
+    ANONYMOUS_CHAT_ENDED,
+    // GROUP_INVITE,
+    // GROUP_LEAVE,
+    // GROUP_REMOVE
 };
 
 enum class DataType {
@@ -46,7 +62,8 @@ enum class DataType {
 
 enum class ChatType {
     PRIVATE_CHAT,
-    GROUP_CHAT
+    GROUP_CHAT,
+    ANONYMOUS_CHAT
 };
 
 typedef struct {
@@ -66,16 +83,22 @@ typedef struct {
     ResponseType response_type;
 } ResponseHeader;
 
+typedef struct {
+    PushType push_type;
+    int sender;
+} PushHeader;
+
 struct MessagePacket_t {
-    MessagePacket_t() : type(), data_length(0) {};
+    MessagePacket_t() : type(), fin(1), seq(0), data_length(0) {}
     
-    MessagePacket_t(MessageType message_type) : type(message_type), data_length(0) {}
+    MessagePacket_t(MessageType message_type) : type(message_type), fin(1), seq(0), data_length(0) {}
 
     MessageType type;
     union {
         ChatHeader chat_header;
         RequestHeader request_header;
         ResponseHeader response_header;
+        PushHeader push_header;
     };
     int fin; // finish flag: 1 if last message, 0 otherwise
     int seq; // sequence number (from 0 to last message)

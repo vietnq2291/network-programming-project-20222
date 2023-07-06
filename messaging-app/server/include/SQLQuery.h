@@ -17,6 +17,7 @@ public:
     bool is_select_successful();
     bool is_insert_successful();
     bool is_update_successful();
+    bool is_delete_successful();
     void disconnect();
     void free_result();
 
