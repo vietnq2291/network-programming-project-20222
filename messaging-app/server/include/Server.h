@@ -41,6 +41,7 @@ public:
     void handle_create_anonymous_chat(Message& message, int conn_fd);
     void handle_end_anonymous_chat(Message& message, int conn_fd, int chat_id=-1);
     void handle_close_client_connection(int conn_fd);
+    void handle_get_chat_list(Message& message, int conn_fd);
 
 private:
     int _listen_fd;

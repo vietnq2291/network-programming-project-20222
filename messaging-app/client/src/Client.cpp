@@ -233,10 +233,12 @@ void Client::receive_message() {
                 response_type = "CREATE_GROUP_CHAT_SUCCESS";
             } else if (packet.response_header.response_type == ResponseType::GET_FRIEND_LIST_SUCCESS) {
                 response_type = "GET_FRIEND_LIST_SUCCESS";
-            }else if (packet.response_header.response_type == ResponseType::WAIT_FOR_ANONYMOUS_CHAT) {
+            } else if (packet.response_header.response_type == ResponseType::WAIT_FOR_ANONYMOUS_CHAT) {
                 response_type = "WAIT_FOR_ANONYMOUS_CHAT";
-            }else if (packet.response_header.response_type == ResponseType::JOIN_ANONYMOUS_CHAT_SUCCESS) {
+            } else if (packet.response_header.response_type == ResponseType::JOIN_ANONYMOUS_CHAT_SUCCESS) {
                 response_type = "JOIN_ANONYMOUS_CHAT_SUCCESS";
+            } else if (packet.response_header.response_type == ResponseType::GET_CHAT_LIST_SUCCESS) {
+                response_type = "GET_CHAT_LIST_SUCCESS";
             } else {
                 response_type = "UNKOWN";
             }
@@ -356,6 +358,9 @@ void Client::send_request_message(std::string buff) {
             
             std::string create_group_chat_data = encode_create_group_chat(group_name, members);
             message_ptr = new Message(MessageType::REQUEST, RequestType::CREATE_GROUP_CHAT, _user_id, create_group_chat_data);
+        } else if (chat_type == "L") {
+            // list all chats: R C L
+            message_ptr = new Message(MessageType::REQUEST, RequestType::GET_CHAT_LIST, _user_id);
         } else {
             std::cerr << "Error: invalid chat type!" << std::endl;
             return;

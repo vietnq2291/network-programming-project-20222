@@ -89,8 +89,9 @@ Requests:
             Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
             Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find user")  # normally because user not logged in, should not happen, client must prevent this
             Message(MessageType::RESPONSE, ResponseType::GET_FRIEND_LIST_SUCCESS, data)
-                data = <num_friend_length>:<num_friend><friend1_user_id_length>:<friend1_user_id><friend1_display_name_length>:<friend1_display_name>:<online_status>:<friend2_user_id_length>:<friend2_user_id><friend2_display_name_length>:<friend2_display_name>:<online_status>:...<friendN_user_id_length>:<friendN_user_id><friendN_display_name_length>:<friendN_display_name>:<online_status>:
-                where online_status = 0 for offline, 1 for online
+                data = <num_friend_length>:<num_friend><friend_1><friend_2>...<friend_N>
+                    where <friend_i> = <friend_user_id_length>:<friend_user_id><friend_display_name_length>:<friend_display_name><online_status>
+                        where online_status = 0 for offline, 1 for online
         
     Create new chat (for group chat or private chat):
         R C P <other_user_id>
@@ -115,7 +116,19 @@ Requests:
             Message(MessageType::RESPONSE, ResponseType::FAILURE, "You are not logged in")  # should not happen, client must prevent this
             Message(MessageType::RESPONSE, ResponseType::CREATE_GROUP_CHAT_SUCCESS, data)
                 data = <chat_id>
-    
+        
+        R C L # get chat list
+            Message(MessageType::REQUEST, RequestType::GET_CHAT_LIST, _user_id)
+
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find user")  # normally because user not logged in, should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::GET_CHAT_LIST_SUCCESS, data)
+                data = <number_of_chats><chat_1><chat_2>...<chat_n>
+                    where <chat_k> = <chat_type><chat_id_length>:<chat_id><chat_name_length>:<chat_name>
+                        where <chat_type> = 'P' for private chat, 'G' for group chat
+                              <chat_name> = Diplay name of the chat     if chat is GROUP
+                                          = Other user's display name   if chat is PRIVATE
+                
     Anonymous chat:
         R A C   # request to join an anonymous chat
             Message(MessageType::REQUEST, RequestType::CREATE_ANONYMOUS_CHAT, _user_id)

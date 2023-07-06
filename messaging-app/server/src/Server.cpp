@@ -367,6 +367,9 @@ void Server::process_request_message(Message& message, int conn_fd) {
         case RequestType::END_ANONYMOUS_CHAT:
             handle_end_anonymous_chat(message, conn_fd);
             break;
+        case RequestType::GET_CHAT_LIST:
+            handle_get_chat_list(message, conn_fd);
+            break;
         case RequestType::ADD_FRIEND: 
         case RequestType::ACCEPT_FRIEND: 
         case RequestType::REJECT_FRIEND:
@@ -860,7 +863,7 @@ void Server::handle_get_friend_list(Message& message, int conn_fd) {
                     // check if user is online
                     int uid = result.second[i].first;
                     auto uit = _online_user_list.find(uid);
-                    data += ":" + std::to_string((uit != _online_user_list.end()) ? 1 : 0) + ":";
+                    data += std::to_string((uit != _online_user_list.end()) ? 1 : 0);
                 }
                 
                 response_message.set_data(data, response_packet);
@@ -1004,4 +1007,44 @@ void Server::handle_close_client_connection(int conn_fd) {
     FD_CLR(conn_fd, &_master);
     _num_clients--;
     close(conn_fd);
+}
+
+void Server::handle_get_chat_list(Message& message, int conn_fd) {
+    MessagePacket response_packet(MessageType::RESPONSE);
+    Message response_message;
+
+    log(LogType::INFO, "Send get chat list request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Can not find user");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);
+    } else {
+        User *user = it->second;
+        std::pair<bool, std::string> ret = user->get_chat_list(_sql_query, response_packet);
+
+        if (ret.first == false) {
+            log(LogType::WARNING, response_packet.data, conn_fd);
+        } else {
+            if (response_packet.response_header.response_type == ResponseType::SUCCESS) {
+                response_packet.response_header.response_type = ResponseType::GET_CHAT_LIST_SUCCESS;
+                log(LogType::INFO, "Get chat list successfully", conn_fd);
+
+                response_message.set_data(ret.second, response_packet);
+                send_message(response_message, conn_fd);
+                return;
+            } else if (response_packet.response_header.response_type == ResponseType::FAILURE) {
+                log(LogType::WARNING, response_packet.data, conn_fd);
+            } else {
+                log(LogType::ERROR, response_packet.data, conn_fd);
+            }
+        }
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
 }
