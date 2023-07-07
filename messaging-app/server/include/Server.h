@@ -45,6 +45,7 @@ public:
     void handle_add_to_group_chat(Message& message, int conn_fd);
     void handle_leave_group_chat(Message& message, int conn_fd);
     void handle_get_group_chat_members(Message& message, int conn_fd);
+    void handle_get_chat_messages(Message& message, int conn_fd);
 
 private:
     int _listen_fd;

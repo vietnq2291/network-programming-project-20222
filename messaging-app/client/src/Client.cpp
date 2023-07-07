@@ -249,6 +249,8 @@ void Client::receive_message() {
                 response_type = "LEAVE_GROUP_CHAT_SUCCESS";
             } else if (packet.response_header.response_type == ResponseType::GET_GROUP_CHAT_MEMBERS_SUCCESS) {
                 response_type = "GET_GROUP_CHAT_MEMBERS_SUCCESS";
+            } else if (packet.response_header.response_type == ResponseType::GET_CHAT_MESSAGES_SUCCESS) {
+                response_type = "GET_CHAT_MESSAGES_SUCCESS";
             } else {
                 response_type = "UNKOWN";
             }
@@ -429,6 +431,11 @@ void Client::send_request_message(std::string buff) {
             std::string chat_id = buff.substr(6);
             message_ptr = new Message(MessageType::REQUEST, RequestType::END_ANONYMOUS_CHAT, _user_id, chat_id);
         }
+    } else if (buff[2] == 'M') {
+        // request to get some latest messages of chat: R M <chat_id> <number of messages>
+        buff = buff.substr(4);
+        std::string get_latest_messages_data = encode_get_latest_messages(buff);
+        message_ptr = new Message(MessageType::REQUEST, RequestType::GET_CHAT_MESSAGES, _user_id, get_latest_messages_data);
     } else if (buff[2] == 'E') {
         // request to end connection: R E
         message_ptr = new Message(MessageType::REQUEST, RequestType::EXIT, _user_id);

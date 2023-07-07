@@ -98,6 +98,21 @@ std::tuple<std::string, std::vector<int>> parse_add_to_group_data(const std::str
     return {group_id, user_ids};
 }
 
+std::tuple<std::string, int> parse_get_chat_messages_request(const std::string& data) {
+    // input data: <chat_id_len>:<chat_id><num_messages>
+    std::istringstream iss(data);
+    std::string chat_id;
+    int chat_id_len, num_messages;
+    char colon;
+
+    iss >> chat_id_len >> colon;
+    chat_id.resize(chat_id_len);
+    iss.read(&chat_id[0], chat_id_len);
+
+    iss >> num_messages;
+
+    return {chat_id, num_messages};
+}
 
 
 int read_command_line_arguments(int argc, char *argv[], int &port, int &backlog) {

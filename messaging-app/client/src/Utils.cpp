@@ -77,6 +77,22 @@ std::string encode_invite_group_chat(const std::string buff) {
     return data;
 }
 
+std::string encode_get_latest_messages(const std::string buff) {
+    // buff = <chat_id> <number of messages>
+    std::istringstream iss(buff);
+    std::string chat_id;
+    int num_messages;
+    iss >> chat_id >> num_messages;
+
+    // output data = <chat_id_len>:<chat_id><num_messages>
+    std::ostringstream oss;
+    oss << chat_id.size() << ':' << chat_id
+        << num_messages;
+    std::string data = oss.str();
+
+    return data;
+}
+
 std::tuple<std::string, std::string> parse_file_data(const std::string file_data) {
     // input is of the form: <file_name_length>:<file_name><file_content_length>:<file_content>
 
