@@ -360,3 +360,36 @@ std::pair<bool, std::vector<std::pair<int, std::string>>> User::get_friend_list(
     sql_query.free_result();    
     return std::make_pair(true, friend_list);
 }
+
+std::pair<bool, std::string> User::get_chat_list(SQLQuery sql_query, MessagePacket& response_packet) {
+    std::string query = "SELECT c.id, c.type, CASE WHEN c.type = 'private' THEN (SELECT a.display_name FROM Account a JOIN Membership m ON a.id = m.user_id WHERE m.chat_id = c.id AND m.user_id != " + std::to_string(_id) + ") ELSE c.name END AS name FROM Chat c JOIN Membership m ON c.id = m.chat_id WHERE m.user_id = " + std::to_string(_id) + " ORDER BY c.id";
+    MYSQL_RES *result;
+
+    sql_query.query(query, response_packet);
+    if (sql_query.is_select_successful() == false) {
+        response_packet.response_header.response_type = ResponseType::ERROR;
+        strcpy(response_packet.data, "Internal server error");
+        response_packet.data_length = strlen(response_packet.data);
+
+        return std::make_pair(false, "");
+    } else {
+        result = sql_query.get_result();
+    }
+
+    // chat_list = <number_of_chats><chat_1><chat_2>...<chat_n>
+    MYSQL_ROW row;
+    std::string chat_list = std::to_string(mysql_num_rows(result)) + ":";
+    while ((row = mysql_fetch_row(result))) {
+        // each chat is of the form: <chat_type><chat_id_length>:<chat_id><chat_name_length>:<chat_name>
+        // where chat_type is either 'P' or 'G'
+        std::string chat_id = row[0];
+        std::string chat_type = (strcmp(row[1], "PRIVATE") == 0 ? "P" : "G");
+        std::string chat_name = row[2];
+
+        chat_list += chat_type + std::to_string(chat_id.length()) + ":" + chat_id + std::to_string(chat_name.length()) + ":" + chat_name;
+    }
+
+    response_packet.response_header.response_type = ResponseType::SUCCESS;
+    sql_query.free_result();
+    return std::make_pair(true, chat_list);
+}
