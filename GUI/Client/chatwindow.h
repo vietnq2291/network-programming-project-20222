@@ -14,7 +14,16 @@ class ChatWindow : public QWidget
 
     public:
         ChatWindow();
+        ~ChatWindow();
 
+    private slots:
+        void pressConnect();
+        void pressSendButton();
+        void pressSendEnter();
+        void recvMsg();
+        void Conn();
+        void closeConn();
+        void socketErr(QAbstractSocket::SocketError);
 
     private:
         Ui::ChatWindow ui;

@@ -3,15 +3,17 @@
 #include "Views.h"
 #include "Client.h"
 
-class controller
+class controller: public QObject
 {
 public:
+    Q_OBJECT
     controller(views *_v, client *_clt);
 
 private slots:
     void pressSendButton();
     void pressSendEnter();
     void recvMsg();
+    void logInSucc();
 
 private:
     views* v;

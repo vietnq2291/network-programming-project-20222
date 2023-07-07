@@ -7,8 +7,9 @@
 
 #include "common.h"
 
-class client
+class client: public QObject
 {
+    Q_OBJECT
 public:
     client(int port, std::string ip);
 

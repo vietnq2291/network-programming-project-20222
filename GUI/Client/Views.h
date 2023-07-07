@@ -3,10 +3,15 @@
 #include "chatwindow.h"
 #include "loginwindow.h"
 
-class views
+class views: public QObject
 {
+    Q_OBJECT
 public:
     views();
+    ~views();
+
+signals:
+    void loggedInView();
 
 private:
     ChatWindow *cw;

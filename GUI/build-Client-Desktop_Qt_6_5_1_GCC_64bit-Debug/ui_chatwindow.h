@@ -26,7 +26,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Ui_ClientWindow
+class Ui_ChatWindow
 {
 public:
     QWidget *layoutWidget;
@@ -51,15 +51,15 @@ public:
     QPushButton *sendButton;
     QLineEdit *lineEdit;
 
-    void setupUi(QWidget *ClientWindow)
+    void setupUi(QWidget *ChatWindow)
     {
-        if (ClientWindow->objectName().isEmpty())
-            ClientWindow->setObjectName("ClientWindow");
-        ClientWindow->resize(783, 505);
+        if (ChatWindow->objectName().isEmpty())
+            ChatWindow->setObjectName("ChatWindow");
+        ChatWindow->resize(783, 505);
         QIcon icon;
         icon.addFile(QString::fromUtf8("chat.png"), QSize(), QIcon::Normal, QIcon::Off);
-        ClientWindow->setWindowIcon(icon);
-        layoutWidget = new QWidget(ClientWindow);
+        ChatWindow->setWindowIcon(icon);
+        layoutWidget = new QWidget(ChatWindow);
         layoutWidget->setObjectName("layoutWidget");
         layoutWidget->setGeometry(QRect(10, 10, 761, 481));
         gridLayout = new QGridLayout(layoutWidget);
@@ -166,32 +166,32 @@ public:
         gridLayout->addWidget(lineEdit, 0, 0, 1, 1);
 
 
-        retranslateUi(ClientWindow);
+        retranslateUi(ChatWindow);
 
         tabWidget->setCurrentIndex(0);
 
 
-        QMetaObject::connectSlotsByName(ClientWindow);
+        QMetaObject::connectSlotsByName(ChatWindow);
     } // setupUi
 
-    void retranslateUi(QWidget *ClientWindow)
+    void retranslateUi(QWidget *ChatWindow)
     {
-        ClientWindow->setWindowTitle(QCoreApplication::translate("ClientWindow", "Aloo!", nullptr));
-        label_3->setText(QCoreApplication::translate("ClientWindow", "Choose a person to chat", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("ClientWindow", "Tab 1", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("ClientWindow", "Tab 2", nullptr));
-        label->setText(QCoreApplication::translate("ClientWindow", "Server IP :", nullptr));
-        serverIP->setText(QCoreApplication::translate("ClientWindow", "127.0.0.1", nullptr));
-        label_2->setText(QCoreApplication::translate("ClientWindow", "Port :", nullptr));
-        connButton->setText(QCoreApplication::translate("ClientWindow", "Connect", nullptr));
-        label_4->setText(QCoreApplication::translate("ClientWindow", "Message:", nullptr));
-        sendButton->setText(QCoreApplication::translate("ClientWindow", "Send", nullptr));
+        ChatWindow->setWindowTitle(QCoreApplication::translate("ChatWindow", "Aloo!", nullptr));
+        label_3->setText(QCoreApplication::translate("ChatWindow", "Choose a person to chat", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("ChatWindow", "Tab 1", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("ChatWindow", "Tab 2", nullptr));
+        label->setText(QCoreApplication::translate("ChatWindow", "Server IP :", nullptr));
+        serverIP->setText(QCoreApplication::translate("ChatWindow", "127.0.0.1", nullptr));
+        label_2->setText(QCoreApplication::translate("ChatWindow", "Port :", nullptr));
+        connButton->setText(QCoreApplication::translate("ChatWindow", "Connect", nullptr));
+        label_4->setText(QCoreApplication::translate("ChatWindow", "Message:", nullptr));
+        sendButton->setText(QCoreApplication::translate("ChatWindow", "Send", nullptr));
     } // retranslateUi
 
 };
 
 namespace Ui {
-    class ClientWindow: public Ui_ClientWindow {};
+    class ChatWindow: public Ui_ChatWindow {};
 } // namespace Ui
 
 QT_END_NAMESPACE
