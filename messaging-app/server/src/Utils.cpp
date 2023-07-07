@@ -78,30 +78,41 @@ std::tuple<std::string, std::vector<std::string>> parse_create_group_data(const 
     return std::make_tuple(group_name, members);
 }
 
-std::tuple<std::string, std::string, std::vector<int>> parse_invite_group_data(const std::string& data) {
-    // input data <group_id_len>:<group_id><group_name_len>:<group_name><num_users>:<user_id_1>:<user_id_2>:...:<user_id_n>
+std::tuple<std::string, std::vector<int>> parse_add_to_group_data(const std::string& data) {
+    // input data <group_id_len>:<group_id><num_users>:<user_id_1>:<user_id_2>:...:<user_id_n>
     std::istringstream iss(data);
-    std::string group_id, group_name;
+    std::string group_id;
     int group_id_len, group_name_len, num_users;
     char colon;
 
     iss >> group_id_len >> colon;
     group_id.resize(group_id_len);
-
     iss.read(&group_id[0], group_id_len);
-    iss >> group_name_len >> colon;
-    group_name.resize(group_name_len);
-    
-    iss.read(&group_name[0], group_name_len);
+
     iss >> num_users;
     std::vector<int> user_ids(num_users);
     for (int i = 0; i < num_users; ++i) {
         iss >> colon >> user_ids[i];
     }
     
-    return {group_id, group_name, user_ids};
+    return {group_id, user_ids};
 }
 
+std::tuple<std::string, int> parse_get_chat_messages_request(const std::string& data) {
+    // input data: <chat_id_len>:<chat_id><num_messages>
+    std::istringstream iss(data);
+    std::string chat_id;
+    int chat_id_len, num_messages;
+    char colon;
+
+    iss >> chat_id_len >> colon;
+    chat_id.resize(chat_id_len);
+    iss.read(&chat_id[0], chat_id_len);
+
+    iss >> num_messages;
+
+    return {chat_id, num_messages};
+}
 
 
 int read_command_line_arguments(int argc, char *argv[], int &port, int &backlog) {

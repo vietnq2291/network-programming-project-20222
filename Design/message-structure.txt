@@ -129,7 +129,7 @@ Requests:
                               <chat_name> = Diplay name of the chat     if chat is GROUP
                                           = Other user's display name   if chat is PRIVATE
                 
-    Gropu chat:
+    Group chat:
         R C A <group_id> <group_name> <number of other users> <user_id_1> <user_id_2> ... <user_id_n>       # Add other users to existing group chat
             Message(MessageType::REQUEST, RequestType::INVITE_GROUP_CHAT, _user_id, add_to_group_chat_data)
                 add_to_group_chat_data = <group_id_len>:<group_id><group_name_len>:<group_name><num_users>:<user_id_1>:<user_id_2>:...:<user_id_n>
@@ -143,8 +143,9 @@ Requests:
 
             Message(MessageType::PUSH, PushType::GROUP_JOINED, data)
                 data = <group_id_length>:<group_id><group_name_length>:<group_name>
+            Message(MessageType::PUSH, PushType::GROUP_CHAT_NEW_MEMBER, <new_member_display_name>)
         
-        R C Q <group_id>
+        R C Q <group_id>    # Leave group chat
             Message(MessageType::REQUEST, RequestType::LEAVE_GROUP_CHAT, _user_id, <group_id_str>)
 
             # Note: Client must return correct group_id because server doens't check it.
@@ -155,6 +156,28 @@ Requests:
 
             # other users in group chat will receive a PUSH message
             Message(MessageType::PUSH, PushType::GROUP_CHAT_LEFT, <left_user_display_name>)
+
+        R C M <group_id>    # get group chat members
+            Message(MessageType::REQUEST, RequestType::GET_GROUP_CHAT_MEMBERS, _user_id, <group_id_str>)
+
+            # Note: Client must return correct group_id because server doens't check it.
+            
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find user")  # normally because user not logged in, should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::GET_GROUP_CHAT_MEMBERS_SUCCESS, data)
+                data = <num_members_length>:<num_members><user_1><user_2>...
+                    where <user_i> = <user_id_length>:<user_id><display_name_length>:<display_name>
+
+    Get messages from server database:
+        R M <chat_id> <number of messages>
+            Message(MessageType::REQUEST, RequestType::GET_CHAT_MESSAGES, _user_id, get_latest_messages_data)
+                get_latest_messages_data = <chat_id_len>:<chat_id><num_messages>
+            
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
+            Message(MessageType::GET_CHAT_MESSAGES_SUCCESS, data)
+                data = <num_messages_length>:<num_messages><message_1><message_2>...
+                    where <message_i> = <msg_id_length>:<msg_id><chat_id_length>:<chat_id><chat_type><content_length>:<content><time_created_length>:<time_created><sender_id_length>:<sender_id>
+                        where <chat_type> = 'P' or 'G'
 
     Anonymous chat:
         R A C   # request to join an anonymous chat

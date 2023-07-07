@@ -367,6 +367,9 @@ void Server::process_request_message(Message& message, int conn_fd) {
         case RequestType::LEAVE_GROUP_CHAT:
             handle_leave_group_chat(message, conn_fd);
             break;
+        case RequestType::GET_GROUP_CHAT_MEMBERS:
+            handle_get_group_chat_members(message, conn_fd);
+            break;
         case RequestType::CREATE_ANONYMOUS_CHAT:
             handle_create_anonymous_chat(message, conn_fd);
             break;
@@ -376,6 +379,8 @@ void Server::process_request_message(Message& message, int conn_fd) {
         case RequestType::GET_CHAT_LIST:
             handle_get_chat_list(message, conn_fd);
             break;
+        case RequestType::GET_CHAT_MESSAGES:
+            handle_get_chat_messages(message, conn_fd);
         case RequestType::ADD_FRIEND: 
         case RequestType::ACCEPT_FRIEND: 
         case RequestType::REJECT_FRIEND:
@@ -1070,8 +1075,8 @@ void Server::handle_add_to_group_chat(Message& message, int conn_fd) {
 
         log(LogType::WARNING, response_packet.data, conn_fd);
     } else {
-        // received data = <other_user_id>:<group_chat_id>std::string data = "5:group6:mygroup3:1:2:3";
-        auto [group_id, group_name, user_ids] = parse_invite_group_data(message.get_data());
+        // received data = <group_id_len>:<group_id><num_users>:<user_id_1>:<user_id_2>:...:<user_id_n>
+        auto [group_id, user_ids] = parse_add_to_group_data(message.get_data());
 
         for (int receiver_user_id : user_ids) {
             std::string other_user_id = std::to_string(receiver_user_id);
@@ -1103,7 +1108,7 @@ void Server::handle_add_to_group_chat(Message& message, int conn_fd) {
                         response_packet.data_length = strlen(response_packet.data);
                     } else {
                         // get all user in group chat
-                        query = "SELECT `m`.`user_id`, `a`.`display_name` FROM `Membership` `m` JOIN `Account` `a` ON `m`.`user_id` = `a`.`id` WHERE `chat_id` = " + group_id;
+                        query = "SELECT `m`.`user_id`, `a`.`display_name`, `c`.`name` FROM `Membership` `m` JOIN `Account` `a` ON `m`.`user_id` = `a`.`id` JOIN `Chat` `c` ON `m`.`chat_id` = `c`.`id` WHERE `chat_id` = " + group_id;
                         _sql_query.query(query, response_packet);
 
                         if (_sql_query.is_select_successful() == false) {
@@ -1113,15 +1118,16 @@ void Server::handle_add_to_group_chat(Message& message, int conn_fd) {
                         } else {
                             res = _sql_query.get_result();
                             int num_rows = mysql_num_rows(res);
-                            int *user_ids = new int[num_rows];
+                            int *group_mem_ids = new int[num_rows];
                             int i = 0;
-                            std::string added_user_display_name;
+                            std::string added_user_display_name, group_name;
                             MYSQL_ROW row;
                             while ((row = mysql_fetch_row(res))) {
-                                user_ids[i] = std::stoi(row[0]);
+                                group_mem_ids[i] = std::stoi(row[0]);
                                 i++;
                                 if (std::stoi(row[0]) == receiver_user_id) {
                                     added_user_display_name = row[1];
+                                    group_name = row[2];
                                 }
                             }
 
@@ -1145,15 +1151,17 @@ void Server::handle_add_to_group_chat(Message& message, int conn_fd) {
                             push_message_chat_members.set_template_packet(push_packet_chat_members);
 
                             for (int i = 0; i < num_rows; i++) {
-                                int receive_fd = _user_id_to_socket[user_ids[i]];
-                                if (receive_fd == conn_fd) {
+                                if (group_mem_ids[i] == user_id) {
                                     continue;
-                                } else if (user_ids[i] == receiver_user_id) {
-                                    send_message(push_message, receive_fd);
-                                } else {
-                                    auto it_forward = _user_id_to_socket.find(user_ids[i]);
-                                    if (it_forward != _user_id_to_socket.end()) {
-                                        send_message(push_message_chat_members, receive_fd);
+                                }                               
+
+                                auto it_forward = _online_user_list.find(group_mem_ids[i]);
+                                if (it_forward != _online_user_list.end()) {
+                                    int push_fd = _user_id_to_socket[group_mem_ids[i]];
+                                    if (group_mem_ids[i] == receiver_user_id) {
+                                        send_message(push_message, push_fd);
+                                    } else {
+                                        send_message(push_message_chat_members, push_fd);
                                     }
                                 }
                                 
@@ -1246,4 +1254,129 @@ void Server::handle_leave_group_chat(Message& message, int conn_fd) {
     send_message(response_message, conn_fd);
 }
 
+void Server::handle_get_group_chat_members(Message& message, int conn_fd) {
+    MessagePacket response_packet(MessageType::RESPONSE);
+    Message response_message;
+
+    log(LogType::INFO, "Send get group chat member list request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Can not find user");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);        
+    } else {
+        std::string group_id_str = message.get_data();
+        std::string query = "SELECT `a`.`id`, `a`.`display_name` FROM `Membership` `m` JOIN `Account` `a` ON `m`.`user_id` = `a`.`id` WHERE `chat_id` = " + group_id_str;
+        _sql_query.query(query, response_packet);
+
+        if (_sql_query.is_select_successful() == false) {
+            response_packet.response_header.response_type = ResponseType::ERROR;
+            strcpy(response_packet.data, "Internal server error");
+            response_packet.data_length = strlen(response_packet.data);
+
+            log(LogType::ERROR, response_packet.data, conn_fd);
+        } else {
+            MYSQL_RES *res = _sql_query.get_result();
+            MYSQL_ROW row;
+            int num_rows = mysql_num_rows(res);
+            response_packet.response_header.response_type = ResponseType::GET_GROUP_CHAT_MEMBERS_SUCCESS;
+
+            // send data of the form: <num_members_length>:<num_members><user_1><user_2>...
+            // where <user_i> = <user_id_length>:<user_id><display_name_length>:<display_name>
+            std::string data = std::to_string(std::to_string(num_rows).length()) + ":" + std::to_string(num_rows);
+            while ((row = mysql_fetch_row(res)) != NULL) {
+                std::string user_id_str = row[0];
+                std::string display_name = row[1];
+                data += std::to_string(user_id_str.length()) + ":" + user_id_str;
+                data += std::to_string(display_name.length()) + ":" + display_name;
+            }
+
+            log(LogType::INFO, "Get group chat member list successfully", conn_fd);
+
+            response_message.set_data(data, response_packet);
+            send_message(response_message, conn_fd);
+            return;
+        }
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+}
+
+/*
+SELECT `id`, `chat_id`, `type`, `content`, `time_created`, `sender_id` FROM `Message` WHERE `sender_id` = 2 and `chat_id` = 2
+ORDER BY `id` DESC
+LIMIT 3
+*/
+
+void Server::handle_get_chat_messages(Message& message, int conn_fd) {
+    MessagePacket response_packet(MessageType::RESPONSE);
+    Message response_message;
+
+    log(LogType::INFO, "Send get chat messages request to server", conn_fd);
+
+    int user_id = message.get_request_sender();
+    auto it = _online_user_list.find(user_id);
+    if (it == _online_user_list.end()) {
+        response_packet.response_header.response_type = ResponseType::FAILURE;
+        strcpy(response_packet.data, "Can not find user");
+        response_packet.data_length = strlen(response_packet.data);
+
+        log(LogType::WARNING, response_packet.data, conn_fd);        
+    } else {
+        auto [chat_id_str, num_messages] = parse_get_chat_messages_request(message.get_data());
+        std::string query = "SELECT `id`, `chat_id`, `type`, `content`, `time_created`, `sender_id` FROM `Message` WHERE `sender_id` = " + std::to_string(user_id) 
+                            + " and `chat_id` = " + chat_id_str
+                            + " ORDER BY `id` DESC LIMIT " + std::to_string(num_messages);
+        _sql_query.query(query, response_packet);
+
+        if (_sql_query.is_select_successful() == false) {
+            response_packet.response_header.response_type = ResponseType::ERROR;
+            strcpy(response_packet.data, "Internal server error");
+            response_packet.data_length = strlen(response_packet.data);
+
+            log(LogType::ERROR, response_packet.data, conn_fd);
+        } else {
+            MYSQL_RES *res = _sql_query.get_result();
+            MYSQL_ROW row;
+            int num_rows = mysql_num_rows(res);
+
+            // send data of the form: <num_messages_length>:<num_messages><message_1><message_2>...
+            // where <message_i> = <msg_id_length>:<msg_id><chat_id_length>:<chat_id><chat_type><content_length>:<content><time_created_length>:<time_created><sender_id_length>:<sender_id>
+            // where <chat_type> = 'P' or 'G'
+            std::string data = std::to_string(std::to_string(num_rows).length()) + ":" + std::to_string(num_rows);
+            while ((row = mysql_fetch_row(res)) != NULL) {
+                std::string msg_id_str = row[0];
+                std::string chat_id_str = row[1];
+                std::string chat_type = row[2];
+                std::string content = row[3];
+                std::string time_created = row[4];
+                std::string sender_id_str = row[5];
+
+                data += std::to_string(msg_id_str.length()) + ":" + msg_id_str;
+                data += std::to_string(chat_id_str.length()) + ":" + chat_id_str;
+                data += (strcmp(chat_type.c_str(), "PRIVATE") == 0) ? "P" : "G";
+                data += std::to_string(content.length()) + ":" + content;
+                data += std::to_string(time_created.length()) + ":" + time_created;
+                data += std::to_string(sender_id_str.length()) + ":" + sender_id_str;
+            }
+
+            log(LogType::INFO, "Get chat messages successfully", conn_fd);
+
+            response_packet.response_header.response_type = ResponseType::GET_CHAT_MESSAGES_SUCCESS;
+            response_message.set_data(data, response_packet);
+            send_message(response_message, conn_fd);
+            _sql_query.free_result();
+            return;
+        }
+        _sql_query.free_result();
+    }
+
+    response_message.set_template_packet(response_packet);
+    send_message(response_message, conn_fd);
+}
 
