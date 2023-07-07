@@ -54,6 +54,30 @@ std::string encode_create_group_chat(const std::string group_name, const std::ve
     return ss.str();
 }
 
+std::string encode_invite_group_chat(const std::string buff) {
+    // buff = <group_id> <group_name> <number of other users> <user_id_1> <user_id_2> ... <user_id_n>
+    std::istringstream iss(buff);
+    std::string group_id, group_name;
+    int num_users;
+    iss >> group_id >> group_name >> num_users;
+    std::vector<std::string> user_ids(num_users);
+    for (int i = 0; i < num_users; ++i) {
+        iss >> user_ids[i];
+    }
+
+    // output data = <group_id_len>:<group_id><group_name_len>:<group_name><num_users>:<user_id_1>:<user_id_2>:...:<user_id_n>
+    std::ostringstream oss;
+    oss << group_id.size() << ':' << group_id
+        << group_name.size() << ':' << group_name
+        << num_users;
+    for (const auto& user_id : user_ids) {
+        oss << ':' << user_id;
+    }
+    std::string data = oss.str();
+
+    return data;
+}
+
 std::tuple<std::string, std::string> parse_file_data(const std::string file_data) {
     // input is of the form: <file_name_length>:<file_name><file_content_length>:<file_content>
 

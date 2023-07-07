@@ -378,7 +378,7 @@ std::pair<bool, std::string> User::get_chat_list(SQLQuery sql_query, MessagePack
 
     // chat_list = <number_of_chats><chat_1><chat_2>...<chat_n>
     MYSQL_ROW row;
-    std::string chat_list = std::to_string(mysql_num_rows(result));
+    std::string chat_list = std::to_string(mysql_num_rows(result)) + ":";
     while ((row = mysql_fetch_row(result))) {
         // each chat is of the form: <chat_type><chat_id_length>:<chat_id><chat_name_length>:<chat_name>
         // where chat_type is either 'P' or 'G'

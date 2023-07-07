@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstring>
+#include <string>
+#include <sstream>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/select.h>
@@ -239,6 +241,12 @@ void Client::receive_message() {
                 response_type = "JOIN_ANONYMOUS_CHAT_SUCCESS";
             } else if (packet.response_header.response_type == ResponseType::GET_CHAT_LIST_SUCCESS) {
                 response_type = "GET_CHAT_LIST_SUCCESS";
+            } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_SUCCESS) {
+                response_type = "ADD_TO_GROUP_CHAT_SUCCESS";
+            } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_FAILURE) {
+                response_type = "ADD_TO_GROUP_CHAT_FAILURE";
+            } else if (packet.response_header.response_type == ResponseType::LEAVE_GROUP_CHAT_SUCCESS) {
+                response_type = "LEAVE_GROUP_CHAT_SUCCESS";
             } else {
                 response_type = "UNKOWN";
             }
@@ -289,6 +297,12 @@ void Client::receive_message() {
                 push_type = "FRIEND_ACCEPT";
             } else if (packet.push_header.push_type == PushType::FRIEND_REJECT) {
                 push_type = "FRIEND_REJECT";
+            } else if (packet.push_header.push_type == PushType::GROUP_CHAT_JOINED) {
+                push_type = "GROUP_CHAT_JOINED";
+            } else if (packet.push_header.push_type == PushType::GROUP_CHAT_LEFT) {
+                push_type = "GROUP_CHAT_LEFT";
+            } else if (packet.push_header.push_type == PushType::GROUP_CHAT_NEW_MEMBER) {
+                push_type = "GROUP_CHAT_NEW_MEMBER";
             } else {
                 push_type = "UNKNOWN";
             }
@@ -358,9 +372,20 @@ void Client::send_request_message(std::string buff) {
             
             std::string create_group_chat_data = encode_create_group_chat(group_name, members);
             message_ptr = new Message(MessageType::REQUEST, RequestType::CREATE_GROUP_CHAT, _user_id, create_group_chat_data);
-        } else if (chat_type == "L") {
+        } 
+        // from here, chat_type is just a 3rd argument of R C, not ChatType class
+        else if (chat_type == "L") {
             // list all chats: R C L
             message_ptr = new Message(MessageType::REQUEST, RequestType::GET_CHAT_LIST, _user_id);
+        } else if (chat_type == "A") {
+            // send invitation to join group chat to other users: R C A <group_id> <group_name> <number of other users> <user_id_1> <user_id_2> ... <user_id_n>
+            std::string buff = data.substr(2); 
+            std::string invite_group_chat_data = encode_invite_group_chat(buff);
+            message_ptr = new Message(MessageType::REQUEST, RequestType::ADD_TO_GROUP_CHAT, _user_id, invite_group_chat_data);
+        } else if (chat_type == "Q") {
+            // quit group chat: R C Q <group_id>
+            std::string group_id = data.substr(2);
+            message_ptr = new Message(MessageType::REQUEST, RequestType::LEAVE_GROUP_CHAT, _user_id, group_id);
         } else {
             std::cerr << "Error: invalid chat type!" << std::endl;
             return;
