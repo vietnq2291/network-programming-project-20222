@@ -143,8 +143,9 @@ Requests:
 
             Message(MessageType::PUSH, PushType::GROUP_JOINED, data)
                 data = <group_id_length>:<group_id><group_name_length>:<group_name>
+            Message(MessageType::PUSH, PushType::GROUP_CHAT_NEW_MEMBER, <new_member_display_name>)
         
-        R C Q <group_id>
+        R C Q <group_id>    # Leave group chat
             Message(MessageType::REQUEST, RequestType::LEAVE_GROUP_CHAT, _user_id, <group_id_str>)
 
             # Note: Client must return correct group_id because server doens't check it.
@@ -155,6 +156,17 @@ Requests:
 
             # other users in group chat will receive a PUSH message
             Message(MessageType::PUSH, PushType::GROUP_CHAT_LEFT, <left_user_display_name>)
+
+        R C M <group_id>    # get group chat members
+            Message(MessageType::REQUEST, RequestType::GET_GROUP_CHAT_MEMBERS, _user_id, <group_id_str>)
+
+            # Note: Client must return correct group_id because server doens't check it.
+            
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find user")  # normally because user not logged in, should not happen, client must prevent this
+            Message(MessageType::RESPONSE, ResponseType::GET_GROUP_CHAT_MEMBERS_SUCCESS, data)
+                data = <num_members_length>:<num_members><user_1><user_2>...
+                    where <user_i> = <user_id_length>:<user_id><display_name_length>:<display_name>
 
     Anonymous chat:
         R A C   # request to join an anonymous chat

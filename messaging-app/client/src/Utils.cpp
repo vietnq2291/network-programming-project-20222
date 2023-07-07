@@ -55,20 +55,19 @@ std::string encode_create_group_chat(const std::string group_name, const std::ve
 }
 
 std::string encode_invite_group_chat(const std::string buff) {
-    // buff = <group_id> <group_name> <number of other users> <user_id_1> <user_id_2> ... <user_id_n>
+    // buff = <group_id> <number of other users> <user_id_1> <user_id_2> ... <user_id_n>
     std::istringstream iss(buff);
-    std::string group_id, group_name;
+    std::string group_id;
     int num_users;
-    iss >> group_id >> group_name >> num_users;
+    iss >> group_id >> num_users;
     std::vector<std::string> user_ids(num_users);
     for (int i = 0; i < num_users; ++i) {
         iss >> user_ids[i];
     }
 
-    // output data = <group_id_len>:<group_id><group_name_len>:<group_name><num_users>:<user_id_1>:<user_id_2>:...:<user_id_n>
+    // output data = <group_id_len>:<group_id><num_users>:<user_id_1>:<user_id_2>:...:<user_id_n>
     std::ostringstream oss;
     oss << group_id.size() << ':' << group_id
-        << group_name.size() << ':' << group_name
         << num_users;
     for (const auto& user_id : user_ids) {
         oss << ':' << user_id;
