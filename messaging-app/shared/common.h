@@ -114,8 +114,15 @@ struct MessagePacket_t {
     int data_length;
     char data[DATA_SIZE];
 };
-
 typedef struct MessagePacket_t MessagePacket;
+
+struct ChatMessage_t{
+    int sender;
+    time_t timestamp;
+    DataType data_type;
+    std::string data;
+};
+typedef struct ChatMessage_t ChatMessage;
 
 
 #endif // COMMON_H

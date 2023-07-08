@@ -11,7 +11,7 @@
 - [ ] Logout.
 
 ## (Client) 🚧
-- [ ] Process a stream of packets for both text & file
+- ✅ Process a stream of packets for both text & file
 - [ ] Store message history for display after the first request from server when logging in
 - [ ] Process list of friends
 

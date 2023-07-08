@@ -1,3 +1,5 @@
 note*
 *build/
 .vscode/
+*files/
+*files_rcv/

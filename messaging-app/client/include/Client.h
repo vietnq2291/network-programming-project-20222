@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <arpa/inet.h>
+#include <map>
+#include <vector>
 
 #include "../../shared/common.h"
 
@@ -27,6 +29,7 @@ private:
 
     int _user_id; // user id of the current user or -1 if the user has not logged in
     std::string _display_name; // username of the current user or "" if the user has not logged in
+    std::map<int, std::vector<ChatMessage>> chat_map;
 };
 
 #endif // CLIENT_H

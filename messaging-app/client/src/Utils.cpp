@@ -1,7 +1,6 @@
 #include "../include/Utils.h"
-#include <string>
-#include <sstream>
-#include <vector>
+
+#include "../../shared/common.h"
 
 std::string encode_auth_data(const std::string username, const std::string password) {
     // output is of the form: <username_len>:<username><password_len>:<password>
@@ -106,4 +105,48 @@ std::tuple<std::string, std::string> parse_file_data(const std::string file_data
     std::string file_content = file_data.substr(content_delim + 1, file_content_len);
 
     return std::make_tuple(file_name, file_content);
+}
+
+ChatMessage create_chat_message(MessagePacket p) {
+    ChatMessage m {
+        p.chat_header.sender,
+        p.chat_header.timestamp,
+        p.chat_header.data_type,
+        p.data
+    };
+    return m;
+}
+
+std::string format_time(std::time_t timestamp)
+{
+    std::tm* time_info = std::localtime(&timestamp);
+
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", time_info);
+
+    return std::string(buffer);
+}
+
+#include <fstream>
+
+std::string process_file(const std::string& data_string, const std::string& folder_path)
+{
+    size_t fn_delim = data_string.find(':');
+    size_t fd_delim = data_string.find(':', fn_delim + 1);
+
+    int fn_len = std::stoi(data_string.substr(0, fn_delim));
+    int fd_len = std::stoi(data_string.substr(fn_len + fn_delim + 1, fd_delim - (fn_len + fn_delim + 1)));
+
+    std::string file_name = data_string.substr(fn_delim + 1, fn_len);
+    std::string file_data = data_string.substr(fd_delim + 1, fd_len);
+
+    // Create a new file with the name of file_name and data from file_data
+    std::string file_path = folder_path + "/" + file_name;
+    std::ofstream file(file_path);
+    if (file.is_open()) {
+        file << file_data;
+        file.close();
+    }
+
+    return file_path;
 }
