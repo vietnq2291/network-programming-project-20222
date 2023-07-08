@@ -1,14 +1,19 @@
 # Client & GUI tasks
 
-## Authentication
+## (GUI) Authentication
 - [ ] Allow user to log in only once.
 - [ ] Always remember to close the socket when the client stops.
 - [ ] Send request to end anonymous chat before the client send log out request.
 
-## These functionalities must be accessible only to users who are logged in:
+## (GUI) These functionalities must be accessible only to users who are logged in:
 - [ ] Sign up.
 - [ ] Chat.
 - [ ] Logout.
 
-## Room management
+## (Client) 🚧
+- [ ] Process a stream of packets for both text & file
+- [ ] Store message history for display after the first request from server when logging in
+- [ ] Process list of friends
+
+## (Client) Room management
 - ✅ Only a group of three or more people can create a room. 
