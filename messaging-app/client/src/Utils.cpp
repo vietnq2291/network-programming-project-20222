@@ -127,8 +127,6 @@ std::string format_time(std::time_t timestamp)
     return std::string(buffer);
 }
 
-#include <fstream>
-
 std::string process_file(const std::string& data_string, const std::string& folder_path)
 {
     size_t fn_delim = data_string.find(':');
@@ -140,12 +138,22 @@ std::string process_file(const std::string& data_string, const std::string& fold
     std::string file_name = data_string.substr(fn_delim + 1, fn_len);
     std::string file_data = data_string.substr(fd_delim + 1, fd_len);
 
-    // Create a new file with the name of file_name and data from file_data
     std::string file_path = folder_path + "/" + file_name;
-    std::ofstream file(file_path);
+
+    // Convert the base64-encoded binary data to binary data
+    std::stringstream ss(file_data);
+    ss >> std::noskipws;
+    std::vector<unsigned char> binary_data;
+    std::copy(std::istream_iterator<char>(ss), std::istream_iterator<char>(), std::back_inserter(binary_data));
+
+    // Write the binary data to the file
+    std::ofstream file(file_path, std::ios::binary);
     if (file.is_open()) {
-        file << file_data;
+        file.write(reinterpret_cast<const char*>(binary_data.data()), binary_data.size());
         file.close();
+    } else {
+        std::cerr << "Error opening file: " << file_path << std::endl;
+        return "NULL";
     }
 
     return file_path;

@@ -9,6 +9,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <iterator>
 
 #include "../../shared/common.h"
 
