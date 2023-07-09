@@ -107,12 +107,19 @@ std::tuple<std::string, std::string> parse_file_data(const std::string file_data
     return std::make_tuple(file_name, file_content);
 }
 
-ChatMessage create_chat_message(MessagePacket p) {
+ChatMessage create_chat_message(MessagePacket p, std::string& folder_path) {
+    std::string data;
+    if (p.chat_header.data_type == DataType::FILE)
+        data = process_file_header(p.data, folder_path);
+        // data is now path to the file
+    else
+        data = p.data;
+
     ChatMessage m {
         p.chat_header.sender,
         p.chat_header.timestamp,
         p.chat_header.data_type,
-        p.data
+        data
     };
     return m;
 }
@@ -127,34 +134,29 @@ std::string format_time(std::time_t timestamp)
     return std::string(buffer);
 }
 
-std::string process_file(const std::string& data_string, const std::string& folder_path)
+std::string process_file_header(const std::string& data, const std::string& folder_path)
 {
-    size_t fn_delim = data_string.find(':');
-    size_t fd_delim = data_string.find(':', fn_delim + 1);
+    size_t fn_delim = data.find(':');
+    size_t fd_delim = data.find(':', fn_delim + 1);
 
-    int fn_len = std::stoi(data_string.substr(0, fn_delim));
-    int fd_len = std::stoi(data_string.substr(fn_len + fn_delim + 1, fd_delim - (fn_len + fn_delim + 1)));
+    long long fn_len = std::stoll(data.substr(0, fn_delim));
+    long long fd_len = std::stoll(data.substr(fn_len + fn_delim + 1, fd_delim - (fn_len + fn_delim + 1)));
 
-    std::string file_name = data_string.substr(fn_delim + 1, fn_len);
-    std::string file_data = data_string.substr(fd_delim + 1, fd_len);
+    std::string file_name = data.substr(fn_delim + 1, fn_len);
+    std::string file_data = data.substr(fd_delim + 1, fd_len);
 
     std::string file_path = folder_path + "/" + file_name;
 
-    // Convert the base64-encoded binary data to binary data
-    std::stringstream ss(file_data);
-    ss >> std::noskipws;
-    std::vector<unsigned char> binary_data;
-    std::copy(std::istream_iterator<char>(ss), std::istream_iterator<char>(), std::back_inserter(binary_data));
-
-    // Write the binary data to the file
-    std::ofstream file(file_path, std::ios::binary);
-    if (file.is_open()) {
-        file.write(reinterpret_cast<const char*>(binary_data.data()), binary_data.size());
-        file.close();
-    } else {
-        std::cerr << "Error opening file: " << file_path << std::endl;
-        return "NULL";
-    }
+    std::ofstream file(file_path);
+    file << file_data;
+    file.close();
 
     return file_path;
 }
+
+void write_file(const std::string& data, const std::string& file_path) {
+    std::ofstream file(file_path, std::ios_base::app);
+    file << data;
+    file.close();
+    return;
+}  

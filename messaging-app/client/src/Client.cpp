@@ -150,9 +150,22 @@ void Client::send_chat_message(std::string buff, int chat_id, ChatType chat_type
         std::string header = std::to_string(filename.length()) + ":" + filename + std::to_string(content_length) + ":";
 
         // read file content and add to data
-        data.resize(header.length() + content_length);
-        memcpy(&data[0], header.c_str(), header.length());
-        fread(&data[header.length()], sizeof(char), content_length, fptr);
+        const int CHUNK_SIZE = 1024;
+        std::vector<char> buffer(CHUNK_SIZE);
+        data.reserve(header.length() + content_length);
+
+        data.append(header);
+
+        while (!feof(fptr)) {
+            size_t bytesRead = fread(buffer.data(), sizeof(char), CHUNK_SIZE, fptr);
+            if (ferror(fptr)) {
+                std::cerr << "Error: Can not read file" << std::endl;
+                fclose(fptr);
+                return;
+            }
+            data.append(buffer.data(), bytesRead);
+        }
+
         fclose(fptr);        
     } else {
         std::cerr << "Error: Invalid data type" << std::endl;
@@ -210,151 +223,169 @@ void Client::send_chat_message(std::string buff, int chat_id, ChatType chat_type
 
 void Client::receive_message() {
     MessagePacket packet;
+    std::string folder_path = "../files_rcv";
+
     int bytes_received = recv(_conn_fd, &packet, sizeof(packet), 0);
     
     if (bytes_received < 0) {
         std::cerr << "Error: receive failed!" << std::endl;
-    } else if (bytes_received == 0) {
+        return;
+    }
+    if (bytes_received == 0) {
         std::cerr << "Error: server closed connection!" << std::endl;
         stop();
-    } else {        
-        if (packet.type == MessageType::RESPONSE) {
-            //print all data of packet for debug
-            std::string response_type;
-            if (packet.response_header.response_type == ResponseType::SUCCESS) {
-                response_type = "SUCCESS";
-            } else if (packet.response_header.response_type == ResponseType::FAILURE) {
-                response_type = "FAILURE";
-            } else if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {
-                response_type = "LOGIN_SUCCESS";
-            } else if (packet.response_header.response_type == ResponseType::ERROR) {
-                response_type = "ERROR";
-            } else if (packet.response_header.response_type == ResponseType::CREATE_PRIVATE_CHAT_SUCCESS) {
-                response_type = "CREATE_PRIVATE_CHAT_SUCCESS";
-            } else if (packet.response_header.response_type == ResponseType::CREATE_GROUP_CHAT_SUCCESS) {
-                response_type = "CREATE_GROUP_CHAT_SUCCESS";
-            } else if (packet.response_header.response_type == ResponseType::GET_FRIEND_LIST_SUCCESS) {
-                response_type = "GET_FRIEND_LIST_SUCCESS";
-            } else if (packet.response_header.response_type == ResponseType::WAIT_FOR_ANONYMOUS_CHAT) {
-                response_type = "WAIT_FOR_ANONYMOUS_CHAT";
-            } else if (packet.response_header.response_type == ResponseType::JOIN_ANONYMOUS_CHAT_SUCCESS) {
-                response_type = "JOIN_ANONYMOUS_CHAT_SUCCESS";
-            } else if (packet.response_header.response_type == ResponseType::GET_CHAT_LIST_SUCCESS) {
-                response_type = "GET_CHAT_LIST_SUCCESS";
-            } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_SUCCESS) {
-                response_type = "ADD_TO_GROUP_CHAT_SUCCESS";
-            } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_FAILURE) {
-                response_type = "ADD_TO_GROUP_CHAT_FAILURE";
-            } else if (packet.response_header.response_type == ResponseType::LEAVE_GROUP_CHAT_SUCCESS) {
-                response_type = "LEAVE_GROUP_CHAT_SUCCESS";
-            } else if (packet.response_header.response_type == ResponseType::GET_GROUP_CHAT_MEMBERS_SUCCESS) {
-                response_type = "GET_GROUP_CHAT_MEMBERS_SUCCESS";
-            } else if (packet.response_header.response_type == ResponseType::GET_CHAT_MESSAGES_SUCCESS) {
-                response_type = "GET_CHAT_MESSAGES_SUCCESS";
-            } else {
-                response_type = "UNKOWN";
-            }
-            std::cout << "Received message: (type, respose_type, fin, seq, data_len, data) = " << 
-                    "(" << "RESPONSE" <<
-                    ", " << response_type << 
-                    ", " << packet.fin << 
-                    ", " << packet.seq << 
-                    ", " << packet.data_length << 
-                    ", " << packet.data << ")" << std::endl;
+        return;
+    } 
 
-            if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {
-                std::tie(_user_id, _display_name) = parse_user_info_data(packet.data);
-            }
-
-        } else if (packet.type == MessageType::CHAT) {
-            int cid = packet.chat_header.chat_id;
-            if (chat_map.find(cid) == chat_map.end()) {
-                chat_map[cid] = std::vector<ChatMessage>();
-            }
-            if (chat_map[cid].empty()) {
-                ChatMessage m = create_chat_message(packet);
-                chat_map[cid].push_back(m);
-            } else {
-                if (packet.chat_header.sender == chat_map[cid].back().sender 
-                    && packet.chat_header.timestamp == chat_map[cid].back().timestamp) {
-                        chat_map[cid].back().data += packet.data;
-                } else {
-                    ChatMessage m = create_chat_message(packet);
-                    chat_map[cid].push_back(m);
-                }
-            }
-            // Print if this is last packet
-            if (packet.fin == 1) {
-                ChatMessage latest_msg = chat_map[cid].back();
-                std::cout << "\n\033[32m(" << cid << 
-                            ", " << latest_msg.sender << 
-                            ", " << format_time(latest_msg.timestamp) <<
-                            "): \033[0m";
-                            
-                if (packet.chat_header.data_type == DataType::FILE) {
-                    std::string file_path = process_file(latest_msg.data, "../files_rcv");
-                    std::cout <<  "New file at \"" << file_path << "\"" << std::endl;
-                } else {
-                    std::cout << latest_msg.data << std::endl;
-                } 
-            }
-
-            // //print all data of packet for debug
-            // std::string chat_type, data_type;
-            // if (packet.chat_header.chat_type == ChatType::GROUP_CHAT) {
-            //     chat_type = "GROUP_CHAT";
-            // } else if (packet.chat_header.chat_type == ChatType::PRIVATE_CHAT) {
-            //     chat_type = "PRIVATE_CHAT";
-            // } else {
-            //     chat_type = "UNKNOWN";
-            // }
-            // if (packet.chat_header.data_type == DataType::TEXT) {
-            //     data_type = "TEXT";
-            // } else if (packet.chat_header.data_type == DataType::FILE) {
-            //     data_type = "FILE";
-            // } else {
-            //     data_type = "UNKNOWN";
-            // }
-            // std::cout << "Received message: (type, chat_type, data_type, sender, chat_id, timestamp, data) = " 
-            //         << "(" << "CHAT" <<
-            //         ", " << chat_type << 
-            //         ", " << data_type << 
-            //         ", " << packet.chat_header.sender << 
-            //         ", " << packet.chat_header.chat_id << 
-            //         ", " << packet.chat_header.timestamp << 
-            //         ", " << packet.fin <<
-            //         ", " << packet.seq <<
-            //         ", " << packet.data_length <<
-            //         ", " << packet.data << ")" << std::endl;
-
-        } else if (packet.type == MessageType::PUSH) {
-            // print all data of packet for debug
-            std::string push_type;
-            if (packet.push_header.push_type == PushType::FRIEND_REQUEST) {
-                push_type = "FRIEND_REQUEST";
-            } else if (packet.push_header.push_type == PushType::FRIEND_ACCEPT) {
-                push_type = "FRIEND_ACCEPT";
-            } else if (packet.push_header.push_type == PushType::FRIEND_REJECT) {
-                push_type = "FRIEND_REJECT";
-            } else if (packet.push_header.push_type == PushType::GROUP_CHAT_JOINED) {
-                push_type = "GROUP_CHAT_JOINED";
-            } else if (packet.push_header.push_type == PushType::GROUP_CHAT_LEFT) {
-                push_type = "GROUP_CHAT_LEFT";
-            } else if (packet.push_header.push_type == PushType::GROUP_CHAT_NEW_MEMBER) {
-                push_type = "GROUP_CHAT_NEW_MEMBER";
-            } else {
-                push_type = "UNKNOWN";
-            }
-            std::cout << "Received message: (type, push_type, sender, fin, seq, data_len, data) = " << "(" << "PUSH" <<
-                                                                                                    ", " << push_type << 
-                                                                                                    ", " << packet.push_header.sender <<
-                                                                                                    ", " << packet.fin << 
-                                                                                                    ", " << packet.seq << 
-                                                                                                    ", " << packet.data_length << 
-                                                                                                    ", " << packet.data << ")" << std::endl;
+    if (packet.type == MessageType::RESPONSE) {
+        //print all data of packet for debug
+        std::string response_type;
+        if (packet.response_header.response_type == ResponseType::SUCCESS) {
+            response_type = "SUCCESS";
+        } else if (packet.response_header.response_type == ResponseType::FAILURE) {
+            response_type = "FAILURE";
+        } else if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {
+            response_type = "LOGIN_SUCCESS";
+        } else if (packet.response_header.response_type == ResponseType::ERROR) {
+            response_type = "ERROR";
+        } else if (packet.response_header.response_type == ResponseType::CREATE_PRIVATE_CHAT_SUCCESS) {
+            response_type = "CREATE_PRIVATE_CHAT_SUCCESS";
+        } else if (packet.response_header.response_type == ResponseType::CREATE_GROUP_CHAT_SUCCESS) {
+            response_type = "CREATE_GROUP_CHAT_SUCCESS";
+        } else if (packet.response_header.response_type == ResponseType::GET_FRIEND_LIST_SUCCESS) {
+            response_type = "GET_FRIEND_LIST_SUCCESS";
+        } else if (packet.response_header.response_type == ResponseType::WAIT_FOR_ANONYMOUS_CHAT) {
+            response_type = "WAIT_FOR_ANONYMOUS_CHAT";
+        } else if (packet.response_header.response_type == ResponseType::JOIN_ANONYMOUS_CHAT_SUCCESS) {
+            response_type = "JOIN_ANONYMOUS_CHAT_SUCCESS";
+        } else if (packet.response_header.response_type == ResponseType::GET_CHAT_LIST_SUCCESS) {
+            response_type = "GET_CHAT_LIST_SUCCESS";
+        } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_SUCCESS) {
+            response_type = "ADD_TO_GROUP_CHAT_SUCCESS";
+        } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_FAILURE) {
+            response_type = "ADD_TO_GROUP_CHAT_FAILURE";
+        } else if (packet.response_header.response_type == ResponseType::LEAVE_GROUP_CHAT_SUCCESS) {
+            response_type = "LEAVE_GROUP_CHAT_SUCCESS";
+        } else if (packet.response_header.response_type == ResponseType::GET_GROUP_CHAT_MEMBERS_SUCCESS) {
+            response_type = "GET_GROUP_CHAT_MEMBERS_SUCCESS";
+        } else if (packet.response_header.response_type == ResponseType::GET_CHAT_MESSAGES_SUCCESS) {
+            response_type = "GET_CHAT_MESSAGES_SUCCESS";
         } else {
-            std::cout << "Invalid message type" << std::endl;
+            response_type = "UNKOWN";
         }
+        std::cout << "Received message: (type, respose_type, fin, seq, data_len, data) = " << 
+                "(" << "RESPONSE" <<
+                ", " << response_type << 
+                ", " << packet.fin << 
+                ", " << packet.seq << 
+                ", " << packet.data_length << 
+                ", " << packet.data << ")" << std::endl;
+
+        if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {
+            std::tie(_user_id, _display_name) = parse_user_info_data(packet.data);
+        }
+
+    } 
+    
+    else if (packet.type == MessageType::CHAT) {
+        int cid = packet.chat_header.chat_id;
+        DataType dtype = packet.chat_header.data_type;
+
+        if (chat_map.find(cid) == chat_map.end()) {
+            chat_map[cid] = std::vector<ChatMessage>();
+        }
+        if (chat_map[cid].empty()) {
+            ChatMessage m = create_chat_message(packet, folder_path);
+            chat_map[cid].push_back(m);
+        } 
+        else {
+            if (packet.chat_header.sender == chat_map[cid].back().sender 
+                && packet.chat_header.timestamp == chat_map[cid].back().timestamp) {
+                    if (dtype == DataType::TEXT) { chat_map[cid].back().data += packet.data; }    
+                    else {
+                        std::cout << "\033[34mWriting to: \033[0m" << chat_map[cid].back().data << std::endl;
+                        write_file(packet.data, chat_map[cid].back().data);
+                    }
+                        
+            } else {
+                ChatMessage m = create_chat_message(packet, folder_path);
+                chat_map[cid].push_back(m);
+            }
+        }
+        // Print if this is last packet
+        if (packet.fin == 1) {
+            ChatMessage latest_msg = chat_map[cid].back();
+            std::cout << "\n\033[32m(" << cid << 
+                        ", " << latest_msg.sender << 
+                        ", " << format_time(latest_msg.timestamp) <<
+                        "): \033[0m";
+                        
+            if (packet.chat_header.data_type == DataType::FILE) {
+                std::string file_path = latest_msg.data;
+                std::cout <<  "New file at \"" << file_path << "\"" << std::endl;
+            } else {
+                std::cout << latest_msg.data << std::endl;
+            } 
+        }
+
+        // //print all data of packet for debug
+        // std::string chat_type, data_type;
+        // if (packet.chat_header.chat_type == ChatType::GROUP_CHAT) {
+        //     chat_type = "GROUP_CHAT";
+        // } else if (packet.chat_header.chat_type == ChatType::PRIVATE_CHAT) {
+        //     chat_type = "PRIVATE_CHAT";
+        // } else {
+        //     chat_type = "UNKNOWN";
+        // }
+        // if (packet.chat_header.data_type == DataType::TEXT) {
+        //     data_type = "TEXT";
+        // } else if (packet.chat_header.data_type == DataType::FILE) {
+        //     data_type = "FILE";
+        // } else {
+        //     data_type = "UNKNOWN";
+        // }
+        // std::cout << "Received message: (type, chat_type, data_type, sender, chat_id, timestamp, data) = " 
+        //         << "(" << "CHAT" <<
+        //         ", " << chat_type << 
+        //         ", " << data_type << 
+        //         ", " << packet.chat_header.sender << 
+        //         ", " << packet.chat_header.chat_id << 
+        //         ", " << packet.chat_header.timestamp << 
+        //         ", " << packet.fin <<
+        //         ", " << packet.seq <<
+        //         ", " << packet.data_length <<
+        //         ", " << packet.data << ")" << std::endl;
+    } 
+
+    else if (packet.type == MessageType::PUSH) {
+        // print all data of packet for debug
+        std::string push_type;
+        if (packet.push_header.push_type == PushType::FRIEND_REQUEST) {
+            push_type = "FRIEND_REQUEST";
+        } else if (packet.push_header.push_type == PushType::FRIEND_ACCEPT) {
+            push_type = "FRIEND_ACCEPT";
+        } else if (packet.push_header.push_type == PushType::FRIEND_REJECT) {
+            push_type = "FRIEND_REJECT";
+        } else if (packet.push_header.push_type == PushType::GROUP_CHAT_JOINED) {
+            push_type = "GROUP_CHAT_JOINED";
+        } else if (packet.push_header.push_type == PushType::GROUP_CHAT_LEFT) {
+            push_type = "GROUP_CHAT_LEFT";
+        } else if (packet.push_header.push_type == PushType::GROUP_CHAT_NEW_MEMBER) {
+            push_type = "GROUP_CHAT_NEW_MEMBER";
+        } else {
+            push_type = "UNKNOWN";
+        }
+        std::cout << "Received message: (type, push_type, sender, fin, seq, data_len, data) = " << "(" << "PUSH" <<
+                                                                                                ", " << push_type << 
+                                                                                                ", " << packet.push_header.sender <<
+                                                                                                ", " << packet.fin << 
+                                                                                                ", " << packet.seq << 
+                                                                                                ", " << packet.data_length << 
+                                                                                                ", " << packet.data << ")" << std::endl;
+    } 
+    
+    else {
+        std::cout << "Invalid message type" << std::endl;
     }
 }
 
