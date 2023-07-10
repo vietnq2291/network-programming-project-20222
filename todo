@@ -14,7 +14,7 @@
 - ✅ Process a stream of packets for text 
 - ❓ Process a stream of packet for files (error while sending large file)
 - 🚧 Store message history for display after the first request from server when logging in
-- [ ] Process list of friends
+- ✅ Process list of friends
 
 ## (Client) Room management
 - ✅ Only a group of three or more people can create a room. 

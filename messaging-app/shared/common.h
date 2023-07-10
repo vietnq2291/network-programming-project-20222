@@ -124,5 +124,11 @@ struct ChatMessage_t{
 };
 typedef struct ChatMessage_t ChatMessage;
 
+struct Friend_t {
+    int id;
+    std::string disp_name;
+    int status;
+};
+typedef struct Friend_t Friend;
 
 #endif // COMMON_H

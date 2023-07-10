@@ -11,11 +11,14 @@
 #include "../include/Utils.h"
 #include "../../shared/common.h"
 
-Client::Client(int port, std::string ip) {
+Client::Client(int port, std::string ip, std::string folder_path) {
     _server_port = port;
     _server_ip = ip;
+    _folder_path = folder_path;
     _user_id = -1;
     _display_name = "";
+    _friend_list = std::vector<Friend>();
+    _buff = "";
 
     /* ----- setup client socket ----- */
     // create socket
@@ -150,22 +153,9 @@ void Client::send_chat_message(std::string buff, int chat_id, ChatType chat_type
         std::string header = std::to_string(filename.length()) + ":" + filename + std::to_string(content_length) + ":";
 
         // read file content and add to data
-        const int CHUNK_SIZE = 1024;
-        std::vector<char> buffer(CHUNK_SIZE);
-        data.reserve(header.length() + content_length);
-
-        data.append(header);
-
-        while (!feof(fptr)) {
-            size_t bytesRead = fread(buffer.data(), sizeof(char), CHUNK_SIZE, fptr);
-            if (ferror(fptr)) {
-                std::cerr << "Error: Can not read file" << std::endl;
-                fclose(fptr);
-                return;
-            }
-            data.append(buffer.data(), bytesRead);
-        }
-
+        data.resize(header.length() + content_length);
+        memcpy(&data[0], header.c_str(), header.length());
+        fread(&data[header.length()], sizeof(char), content_length, fptr);
         fclose(fptr);        
     } else {
         std::cerr << "Error: Invalid data type" << std::endl;
@@ -183,47 +173,47 @@ void Client::send_chat_message(std::string buff, int chat_id, ChatType chat_type
             break;
         }
 
-        // //print all data of packet
-        // std::string type, chat_type, data_type;
-        // if (packet.type == MessageType::REQUEST) {
-        //     type = "REQUEST";
-        // } else if (packet.type == MessageType::RESPONSE) {
-        //     type = "RESPONSE";
-        // } else if (packet.type == MessageType::CHAT) {
-        //     type = "CHAT";
-        // } else {
-        //     type = "UNKNOWN";
-        // }
-        // if (packet.chat_header.chat_type == ChatType::GROUP_CHAT) {
-        //     chat_type = "GROUP_CHAT";
-        // } else if (packet.chat_header.chat_type == ChatType::PRIVATE_CHAT) {
-        //     chat_type = "PRIVATE_CHAT";
-        // } else {
-        //     chat_type = "UNKNOWN";
-        // }
-        // if (packet.chat_header.data_type == DataType::TEXT) {
-        //     data_type = "TEXT";
-        // } else if (packet.chat_header.data_type == DataType::FILE) {
-        //     data_type = "FILE";
-        // } else {
-        //     data_type = "UNKNOWN";
-        // }
-        // std::cout << "Sent message: (type, chat_type, data_type, sender, chat_id, timestamp, data) = " << "(" << type <<
-        //                                                                                                 ", " << chat_type << 
-        //                                                                                                 ", " << data_type << 
-        //                                                                                                 ", " << packet.chat_header.sender << 
-        //                                                                                                 ", " << packet.chat_header.chat_id << 
-        //                                                                                                 ", " << packet.chat_header.timestamp << 
-        //                                                                                                 ", " << packet.data << ")" <<
-        //                                                                                                 " - " << packet.data_length <<
-        //                                                                                                 " - " << packet.fin <<
-        //                                                                                                 " - " << packet.seq << std::endl;
+        //print all data of packet
+        std::string type, chat_type, data_type;
+        if (packet.type == MessageType::REQUEST) {
+            type = "REQUEST";
+        } else if (packet.type == MessageType::RESPONSE) {
+            type = "RESPONSE";
+        } else if (packet.type == MessageType::CHAT) {
+            type = "CHAT";
+        } else {
+            type = "UNKNOWN";
+        }
+        if (packet.chat_header.chat_type == ChatType::GROUP_CHAT) {
+            chat_type = "GROUP_CHAT";
+        } else if (packet.chat_header.chat_type == ChatType::PRIVATE_CHAT) {
+            chat_type = "PRIVATE_CHAT";
+        } else {
+            chat_type = "UNKNOWN";
+        }
+        if (packet.chat_header.data_type == DataType::TEXT) {
+            data_type = "TEXT";
+        } else if (packet.chat_header.data_type == DataType::FILE) {
+            data_type = "FILE";
+        } else {
+            data_type = "UNKNOWN";
+        }
+        std::cout << "Sent message: (type, chat_type, data_type, sender, chat_id, timestamp, data) = " << "(" << type <<
+                                                                                                        ", " << chat_type << 
+                                                                                                        ", " << data_type << 
+                                                                                                        ", " << packet.chat_header.sender << 
+                                                                                                        ", " << packet.chat_header.chat_id << 
+                                                                                                        ", " << packet.chat_header.timestamp << 
+                                                                                                        ", " << packet.data << ")" <<
+                                                                                                        " - " << packet.data_length <<
+                                                                                                        " - " << packet.fin <<
+                                                                                                        " - " << packet.seq << std::endl;
     }
 }
 
 void Client::receive_message() {
     MessagePacket packet;
-    std::string folder_path = "../files_rcv";
+    std::string buff; 
 
     int bytes_received = recv(_conn_fd, &packet, sizeof(packet), 0);
     
@@ -237,6 +227,8 @@ void Client::receive_message() {
         return;
     } 
 
+    std::string data = packet.data;
+    
     if (packet.type == MessageType::RESPONSE) {
         //print all data of packet for debug
         std::string response_type;
@@ -254,6 +246,12 @@ void Client::receive_message() {
             response_type = "CREATE_GROUP_CHAT_SUCCESS";
         } else if (packet.response_header.response_type == ResponseType::GET_FRIEND_LIST_SUCCESS) {
             response_type = "GET_FRIEND_LIST_SUCCESS";
+            write_buff(data);
+            if (packet.fin == 1) {
+                _friend_list.clear();
+                process_friend_list(_buff);
+                clean_buff();
+            }
         } else if (packet.response_header.response_type == ResponseType::WAIT_FOR_ANONYMOUS_CHAT) {
             response_type = "WAIT_FOR_ANONYMOUS_CHAT";
         } else if (packet.response_header.response_type == ResponseType::JOIN_ANONYMOUS_CHAT_SUCCESS) {
@@ -284,38 +282,14 @@ void Client::receive_message() {
         if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {
             std::tie(_user_id, _display_name) = parse_user_info_data(packet.data);
         }
-
     } 
     
     else if (packet.type == MessageType::CHAT) {
-        int cid = packet.chat_header.chat_id;
-        DataType dtype = packet.chat_header.data_type;
-
-        if (chat_map.find(cid) == chat_map.end()) {
-            chat_map[cid] = std::vector<ChatMessage>();
-        }
-        if (chat_map[cid].empty()) {
-            ChatMessage m = create_chat_message(packet, folder_path);
-            chat_map[cid].push_back(m);
-        } 
-        else {
-            if (packet.chat_header.sender == chat_map[cid].back().sender 
-                && packet.chat_header.timestamp == chat_map[cid].back().timestamp) {
-                    if (dtype == DataType::TEXT) { chat_map[cid].back().data += packet.data; }    
-                    else {
-                        std::cout << "\033[34mWriting to: \033[0m" << chat_map[cid].back().data << std::endl;
-                        write_file(packet.data, chat_map[cid].back().data);
-                    }
-                        
-            } else {
-                ChatMessage m = create_chat_message(packet, folder_path);
-                chat_map[cid].push_back(m);
-            }
-        }
+        int chat_id = process_chat_packet(packet);
         // Print if this is last packet
         if (packet.fin == 1) {
-            ChatMessage latest_msg = chat_map[cid].back();
-            std::cout << "\n\033[32m(" << cid << 
+            ChatMessage latest_msg = chat_map[chat_id].back();
+            std::cout << "\n\033[32m(" << chat_id << 
                         ", " << latest_msg.sender << 
                         ", " << format_time(latest_msg.timestamp) <<
                         "): \033[0m";
@@ -328,33 +302,33 @@ void Client::receive_message() {
             } 
         }
 
-        // //print all data of packet for debug
-        // std::string chat_type, data_type;
-        // if (packet.chat_header.chat_type == ChatType::GROUP_CHAT) {
-        //     chat_type = "GROUP_CHAT";
-        // } else if (packet.chat_header.chat_type == ChatType::PRIVATE_CHAT) {
-        //     chat_type = "PRIVATE_CHAT";
-        // } else {
-        //     chat_type = "UNKNOWN";
-        // }
-        // if (packet.chat_header.data_type == DataType::TEXT) {
-        //     data_type = "TEXT";
-        // } else if (packet.chat_header.data_type == DataType::FILE) {
-        //     data_type = "FILE";
-        // } else {
-        //     data_type = "UNKNOWN";
-        // }
-        // std::cout << "Received message: (type, chat_type, data_type, sender, chat_id, timestamp, data) = " 
-        //         << "(" << "CHAT" <<
-        //         ", " << chat_type << 
-        //         ", " << data_type << 
-        //         ", " << packet.chat_header.sender << 
-        //         ", " << packet.chat_header.chat_id << 
-        //         ", " << packet.chat_header.timestamp << 
-        //         ", " << packet.fin <<
-        //         ", " << packet.seq <<
-        //         ", " << packet.data_length <<
-        //         ", " << packet.data << ")" << std::endl;
+        //print all data of packet for debug
+        std::string chat_type, data_type;
+        if (packet.chat_header.chat_type == ChatType::GROUP_CHAT) {
+            chat_type = "GROUP_CHAT";
+        } else if (packet.chat_header.chat_type == ChatType::PRIVATE_CHAT) {
+            chat_type = "PRIVATE_CHAT";
+        } else {
+            chat_type = "UNKNOWN";
+        }
+        if (packet.chat_header.data_type == DataType::TEXT) {
+            data_type = "TEXT";
+        } else if (packet.chat_header.data_type == DataType::FILE) {
+            data_type = "FILE";
+        } else {
+            data_type = "UNKNOWN";
+        }
+        std::cout << "Received message: (type, chat_type, data_type, sender, chat_id, timestamp, data) = " 
+                << "(" << "CHAT" <<
+                ", " << chat_type << 
+                ", " << data_type << 
+                ", " << packet.chat_header.sender << 
+                ", " << packet.chat_header.chat_id << 
+                ", " << packet.chat_header.timestamp << 
+                ", " << packet.fin <<
+                ", " << packet.seq <<
+                ", " << packet.data_length <<
+                ", " << packet.data << ")" << std::endl;
     } 
 
     else if (packet.type == MessageType::PUSH) {
@@ -543,4 +517,75 @@ void Client::send_request_message(std::string buff) {
     //                                                                                                 ", " << packet.data_length << 
     //                                                                                                 ", " << packet.data << ")" << std::endl;
     }
+}
+
+int Client::process_chat_packet(MessagePacket& p) {
+    int cid = p.chat_header.chat_id;
+    DataType dtype = p.chat_header.data_type;
+
+    if (chat_map.find(cid) == chat_map.end()) {
+        chat_map[cid] = std::vector<ChatMessage>();
+    }
+    if (chat_map[cid].empty()) {
+        ChatMessage m = create_chat_message(p, _folder_path);
+        chat_map[cid].push_back(m);
+    } 
+    else {
+        if (p.chat_header.sender == chat_map[cid].back().sender 
+            && p.chat_header.timestamp == chat_map[cid].back().timestamp) {
+                if (dtype == DataType::TEXT) { 
+                    chat_map[cid].back().data += p.data; 
+                } else {
+                    std::cout << "\033[34mWriting to: \033[0m" << chat_map[cid].back().data << std::endl;
+                    append_file(p.data, chat_map[cid].back().data);
+                }
+                    
+        } else {
+            ChatMessage m = create_chat_message(p, _folder_path);
+            chat_map[cid].push_back(m);
+        }
+    }
+    return cid;
+}
+
+void Client::process_friend_list(std::string& data) {
+    // parse the number of friends
+
+    size_t num_delim = data.find(':');
+    int num_friends_len = std::stoi(data.substr(0, num_delim));
+    int num_friends = std::stoi(data.substr(num_delim + 1, num_friends_len));
+    std::cout << "\033[38;5;208mNumber of friends: \033[0m" << num_friends << std::endl;
+
+    // parse each friend
+    size_t pos = num_delim + num_friends_len + 1;
+    for (int i = 0; i < num_friends; i++) {
+        // parse the friend ID
+        size_t id_delim = data.find(':', pos);
+        int id_len = std::stoi(data.substr(pos, id_delim - pos));
+        int id = std::stoi(data.substr(id_delim + 1, id_len));
+        pos = id_delim + id_len + 1;
+
+        // parse the friend display name
+        size_t name_delim = data.find(':', pos);
+        int name_len = std::stoi(data.substr(pos, name_delim - pos));
+        std::string name = data.substr(name_delim + 1, name_len);
+        pos = name_delim + name_len + 1;
+
+        // parese the friend status
+        int status = std::stoi(data.substr(pos, 1));
+        pos += 1;
+
+        // add the friend to friend list
+        Friend friend_obj = {id, name, status};
+        _friend_list.push_back(friend_obj);
+        std::cout << "  ID: " << id << ", dname: " << name << ", online: " << status << std::endl;
+    }
+}
+
+void Client::write_buff(std::string& data) {
+    _buff += data;
+}
+
+void Client::clean_buff() {
+    _buff = "";
 }
