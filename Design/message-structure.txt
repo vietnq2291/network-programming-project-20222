@@ -176,8 +176,8 @@ Requests:
             Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
             Message(MessageType::GET_CHAT_MESSAGES_SUCCESS, data)
                 data = <num_messages_length>:<num_messages><message_1><message_2>...
-                    where <message_i> = <msg_id_length>:<msg_id><chat_id_length>:<chat_id><chat_type><content_length>:<content><time_created_length>:<time_created><sender_id_length>:<sender_id>
-                        where <chat_type> = 'P' or 'G'
+                    where <message_i> = <msg_id_length>:<msg_id><chat_id_length>:<chat_id><data_type><content_length>:<content><time_created_length>:<time_created><sender_id_length>:<sender_id>
+                        where <data_type> = 'T' or 'F'
 
     Anonymous chat:
         R A C   # request to join an anonymous chat

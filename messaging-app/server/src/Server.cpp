@@ -1307,12 +1307,6 @@ void Server::handle_get_group_chat_members(Message& message, int conn_fd) {
     send_message(response_message, conn_fd);
 }
 
-/*
-SELECT `id`, `chat_id`, `type`, `content`, `time_created`, `sender_id` FROM `Message` WHERE `sender_id` = 2 and `chat_id` = 2
-ORDER BY `id` DESC
-LIMIT 3
-*/
-
 void Server::handle_get_chat_messages(Message& message, int conn_fd) {
     MessagePacket response_packet(MessageType::RESPONSE);
     Message response_message;
@@ -1329,8 +1323,7 @@ void Server::handle_get_chat_messages(Message& message, int conn_fd) {
         log(LogType::WARNING, response_packet.data, conn_fd);        
     } else {
         auto [chat_id_str, num_messages] = parse_get_chat_messages_request(message.get_data());
-        std::string query = "SELECT `id`, `chat_id`, `type`, `content`, `time_created`, `sender_id` FROM `Message` WHERE `sender_id` = " + std::to_string(user_id) 
-                            + " and `chat_id` = " + chat_id_str
+        std::string query = "SELECT `id`, `chat_id`, `type`, `content`, `time_created`, `sender_id` FROM `Message` WHERE `chat_id` = " + chat_id_str
                             + " ORDER BY `id` DESC LIMIT " + std::to_string(num_messages);
         _sql_query.query(query, response_packet);
 
@@ -1346,20 +1339,20 @@ void Server::handle_get_chat_messages(Message& message, int conn_fd) {
             int num_rows = mysql_num_rows(res);
 
             // send data of the form: <num_messages_length>:<num_messages><message_1><message_2>...
-            // where <message_i> = <msg_id_length>:<msg_id><chat_id_length>:<chat_id><chat_type><content_length>:<content><time_created_length>:<time_created><sender_id_length>:<sender_id>
-            // where <chat_type> = 'P' or 'G'
+            // where <message_i> = <msg_id_length>:<msg_id><chat_id_length>:<chat_id><data_type><content_length>:<content><time_created_length>:<time_created><sender_id_length>:<sender_id>
+            // where <data_type> = 'T' or 'F'
             std::string data = std::to_string(std::to_string(num_rows).length()) + ":" + std::to_string(num_rows);
             while ((row = mysql_fetch_row(res)) != NULL) {
                 std::string msg_id_str = row[0];
                 std::string chat_id_str = row[1];
-                std::string chat_type = row[2];
+                std::string data_type = row[2];
                 std::string content = row[3];
                 std::string time_created = row[4];
                 std::string sender_id_str = row[5];
 
                 data += std::to_string(msg_id_str.length()) + ":" + msg_id_str;
                 data += std::to_string(chat_id_str.length()) + ":" + chat_id_str;
-                data += (strcmp(chat_type.c_str(), "PRIVATE") == 0) ? "P" : "G";
+                data += (strcmp(data_type.c_str(), "TEXT") == 0) ? "T" : "F";
                 data += std::to_string(content.length()) + ":" + content;
                 data += std::to_string(time_created.length()) + ":" + time_created;
                 data += std::to_string(sender_id_str.length()) + ":" + sender_id_str;
