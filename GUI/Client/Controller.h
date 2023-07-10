@@ -2,14 +2,16 @@
 #define CONTROLLER_H
 #include "Views.h"
 #include "Client.h"
+#include "common.h"
 
 class controller: public QObject
 {
-public:
     Q_OBJECT
-    controller(views *_v, client *_clt);
+public:
+    controller();
 
 private slots:
+    void Authenticate(QString username, QString password);
     void pressSendButton();
     void pressSendEnter();
     void recvMsg();

@@ -5,6 +5,7 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    controller contr;
+    controller ctrol;
+
     return app.exec();
 }

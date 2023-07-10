@@ -12,6 +12,12 @@ public:
 
 signals:
     void loggedInView();
+    void recievedAuthView(QString user, QString pass);
+
+private slots:
+    void recvAuth(QString user, QString pass);
+    void switchToChat();
+    void switchToLogin();
 
 private:
     ChatWindow *cw;

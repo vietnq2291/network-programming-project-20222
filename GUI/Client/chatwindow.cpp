@@ -13,6 +13,10 @@ ChatWindow::ChatWindow()
     ui.sendButton->setIcon(QIcon(pix));
 }
 
+ChatWindow::~ChatWindow(){
+
+}
+
 void ChatWindow::pressConnect() {
 
     ui.convBox->append(tr("<em>Connecting...</em>"));

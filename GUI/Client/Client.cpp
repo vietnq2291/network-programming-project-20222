@@ -64,7 +64,8 @@ void client::start() {
             // one or both of the descriptors have data
             if (FD_ISSET(STDIN_FILENO, &_read_fds))
             {
-                std::getline(std::cin, buff);
+//                std::getline(std::cin, buff);
+
                 // buff is like <type> <data>
                 // if type = R, then call send_request_message()
                 // if type = C, then call send_chat_message()
@@ -173,6 +174,7 @@ void client::receive_message() {
                 response_type = "FAILURE";
             } else if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {
                 response_type = "LOGIN_SUCCESS";
+                emit authSuccess();
             } else if (packet.response_header.response_type == ResponseType::ERROR) {
                 response_type = "ERROR";
             } else if (packet.response_header.response_type == ResponseType::CREATE_PRIVATE_CHAT_SUCCESS) {

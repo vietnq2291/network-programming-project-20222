@@ -22,6 +22,7 @@ public:
 
 signals:
     void messageReceived();
+    void authSuccess();
 
 private:
     int _conn_fd;

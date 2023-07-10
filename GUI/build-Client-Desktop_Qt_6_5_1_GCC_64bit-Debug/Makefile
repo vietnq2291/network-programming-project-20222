@@ -3645,7 +3645,9 @@ loginwindow.o: ../Client/loginwindow.cpp ../Client/loginwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qdialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o loginwindow.o ../Client/loginwindow.cpp
 
-main.o: ../Client/main.cpp ../Client/chatwindow.h \
+main.o: ../Client/main.cpp ../Client/Controller.h \
+		../Client/Views.h \
+		../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtwidgetsglobal.h \

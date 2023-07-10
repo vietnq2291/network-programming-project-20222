@@ -16,7 +16,7 @@ ServerWindow::ServerWindow()
     setWindowTitle("Chat Server");
 
     server = new QTcpServer(this);
-    if (!server->listen(QHostAddress::Any, 50885)) {
+    if (!server->listen(QHostAddress::Any, 5050)) {
         state->setText(tr("Server cannot initiate. Reason: <br />") + server->errorString());
     } else {
         state->setText(tr("Server open on port <strong>") + QString::number(server->serverPort()) + tr("</strong>. User can connect and start chatting!"));

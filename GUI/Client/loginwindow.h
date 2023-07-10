@@ -21,6 +21,7 @@ public slots:
     void on_pushButton_Login_clicked();
 
 signals:
+    void receivedAuth(QString username, QString password);
     void loggedIn();
 
 private:
