@@ -21,10 +21,10 @@ std::string encode_signup_data(const std::string username, const std::string pas
 
 std::string encode_update_account_data(const std::string data) {
     // input: data = <type> <data>
-    // output is of the form: <type><data_len>:<data>, where type is either 'P' (password) or 'N' (display name)
+    // output is of the form: <type>:<data_len>:<data>, where type is either 'P' (password) or 'N' (display name)
 
     std::stringstream ss;
-    ss << data[0] << data.length() - 2 << ":" << data.substr(2);
+    ss << data[0] << ":" << data.length() - 2 << ":" << data.substr(2);
     return ss.str();
 }
 
@@ -34,17 +34,17 @@ std::tuple<int, std::string> parse_user_info_data(const std::string info_data) {
     size_t userid_delim = info_data.find(':');
     size_t name_delim = info_data.find(':', userid_delim + 1);
 
-    int username_len = std::stoi(info_data.substr(0, userid_delim));
-    int password_len = std::stoi(info_data.substr(username_len + userid_delim + 1, name_delim - (username_len + userid_delim + 1)));
+    int userid_len = std::stoi(info_data.substr(0, userid_delim));
+    int display_name_len = std::stoi(info_data.substr(userid_len + userid_delim + 1, name_delim - (userid_len + userid_delim + 1)));
 
-    std::string user_id = info_data.substr(userid_delim + 1, username_len);
-    std::string display_name = info_data.substr(name_delim + 1, password_len);
+    std::string user_id = info_data.substr(userid_delim + 1, userid_len);
+    std::string display_name = info_data.substr(name_delim + 1, display_name_len);
 
     return std::make_tuple(std::stoi(user_id), display_name);
 }
 
 std::string encode_create_group_chat(const std::string group_name, const std::vector<std::string> members) {
-    // output is of the form: <group_name_len>:<group_name><num_members>:<member1_len>:<member1>...<memberN_len>:<memberN>:
+    // output is of the form: <group_name_len>:<group_name><num_members>:<member1_len>:<member1>...<memberN_len>:<memberN>
 
     std::stringstream ss;
     ss << group_name.length() << ":" << group_name << members.size() << ":";
@@ -52,4 +52,58 @@ std::string encode_create_group_chat(const std::string group_name, const std::ve
         ss << member.length() << ":" << member;
     }
     return ss.str();
+}
+
+std::string encode_invite_group_chat(const std::string buff) {
+    // buff = <group_id> <number of other users> <user_id_1> <user_id_2> ... <user_id_n>
+    std::istringstream iss(buff);
+    std::string group_id;
+    int num_users;
+    iss >> group_id >> num_users;
+    std::vector<std::string> user_ids(num_users);
+    for (int i = 0; i < num_users; ++i) {
+        iss >> user_ids[i];
+    }
+
+    // output data = <group_id_len>:<group_id><num_users>:<user_id_1>:<user_id_2>:...:<user_id_n>
+    std::ostringstream oss;
+    oss << group_id.size() << ':' << group_id
+        << num_users;
+    for (const auto& user_id : user_ids) {
+        oss << ':' << user_id;
+    }
+    std::string data = oss.str();
+
+    return data;
+}
+
+std::string encode_get_latest_messages(const std::string buff) {
+    // buff = <chat_id> <number of messages>
+    std::istringstream iss(buff);
+    std::string chat_id;
+    int num_messages;
+    iss >> chat_id >> num_messages;
+
+    // output data = <chat_id_len>:<chat_id><num_messages>
+    std::ostringstream oss;
+    oss << chat_id.size() << ':' << chat_id
+        << num_messages;
+    std::string data = oss.str();
+
+    return data;
+}
+
+std::tuple<std::string, std::string> parse_file_data(const std::string file_data) {
+    // input is of the form: <file_name_length>:<file_name><file_content_length>:<file_content>
+
+    size_t name_delim = file_data.find(':');
+    size_t content_delim = file_data.find(':', name_delim + 1);
+
+    int file_name_len = std::stoi(file_data.substr(0, name_delim));
+    int file_content_len = std::stoi(file_data.substr(name_delim + 1, content_delim - (name_delim + 1)));
+
+    std::string file_name = file_data.substr(name_delim + 1, file_name_len);
+    std::string file_content = file_data.substr(content_delim + 1, file_content_len);
+
+    return std::make_tuple(file_name, file_content);
 }

@@ -46,23 +46,19 @@ static constexpr auto qt_meta_stringdata_CLASScontrollerENDCLASS = QtMocHelpers:
     "",
     "username",
     "password",
-    "pressSendButton",
-    "pressSendEnter",
     "recvMsg",
     "logInSucc"
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASScontrollerENDCLASS_t {
-    uint offsetsAndSizes[18];
+    uint offsetsAndSizes[14];
     char stringdata0[11];
     char stringdata1[13];
     char stringdata2[1];
     char stringdata3[9];
     char stringdata4[9];
-    char stringdata5[16];
-    char stringdata6[15];
-    char stringdata7[8];
-    char stringdata8[10];
+    char stringdata5[8];
+    char stringdata6[10];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASScontrollerENDCLASS_t::offsetsAndSizes) + ofs), len 
@@ -73,18 +69,14 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASScontrollerENDCLASS_t qt_meta_st
         QT_MOC_LITERAL(24, 0),  // ""
         QT_MOC_LITERAL(25, 8),  // "username"
         QT_MOC_LITERAL(34, 8),  // "password"
-        QT_MOC_LITERAL(43, 15),  // "pressSendButton"
-        QT_MOC_LITERAL(59, 14),  // "pressSendEnter"
-        QT_MOC_LITERAL(74, 7),  // "recvMsg"
-        QT_MOC_LITERAL(82, 9)   // "logInSucc"
+        QT_MOC_LITERAL(43, 7),  // "recvMsg"
+        QT_MOC_LITERAL(51, 9)   // "logInSucc"
     },
     "controller",
     "Authenticate",
     "",
     "username",
     "password",
-    "pressSendButton",
-    "pressSendEnter",
     "recvMsg",
     "logInSucc"
 };
@@ -98,7 +90,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASScontrollerENDCLASS[] = {
       11,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       3,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -106,16 +98,12 @@ Q_CONSTINIT static const uint qt_meta_data_CLASScontrollerENDCLASS[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    2,   44,    2, 0x08,    1 /* Private */,
-       5,    0,   49,    2, 0x08,    4 /* Private */,
-       6,    0,   50,    2, 0x08,    5 /* Private */,
-       7,    0,   51,    2, 0x08,    6 /* Private */,
-       8,    0,   52,    2, 0x08,    7 /* Private */,
+       1,    2,   32,    2, 0x08,    1 /* Private */,
+       5,    0,   37,    2, 0x08,    4 /* Private */,
+       6,    0,   38,    2, 0x08,    5 /* Private */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::QString, QMetaType::QString,    3,    4,
-    QMetaType::Void,
-    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
 
@@ -135,10 +123,6 @@ Q_CONSTINIT const QMetaObject controller::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
-        // method 'pressSendButton'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'pressSendEnter'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'recvMsg'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'logInSucc'
@@ -154,10 +138,8 @@ void controller::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         (void)_t;
         switch (_id) {
         case 0: _t->Authenticate((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[2]))); break;
-        case 1: _t->pressSendButton(); break;
-        case 2: _t->pressSendEnter(); break;
-        case 3: _t->recvMsg(); break;
-        case 4: _t->logInSucc(); break;
+        case 1: _t->recvMsg(); break;
+        case 2: _t->logInSucc(); break;
         default: ;
         }
     }
@@ -182,13 +164,13 @@ int controller::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 3)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 3;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 5)
+        if (_id < 3)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 5;
+        _id -= 3;
     }
     return _id;
 }

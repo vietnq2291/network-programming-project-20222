@@ -12,8 +12,6 @@ public:
 
 private slots:
     void Authenticate(QString username, QString password);
-    void pressSendButton();
-    void pressSendEnter();
     void recvMsg();
     void logInSucc();
 

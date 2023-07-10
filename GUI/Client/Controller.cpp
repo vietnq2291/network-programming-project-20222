@@ -20,14 +20,6 @@ void controller::Authenticate(QString username, QString password) {
     clt->receive_message();
 }
 
-void controller::pressSendButton(){
-
-}
-
-void controller::pressSendEnter(){
-
-}
-
 void controller::recvMsg() {
 
 }

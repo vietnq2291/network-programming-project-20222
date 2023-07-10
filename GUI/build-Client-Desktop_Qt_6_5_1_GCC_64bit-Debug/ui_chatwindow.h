@@ -16,6 +16,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QSpinBox>
@@ -34,7 +35,9 @@ public:
     QLabel *label_3;
     QTabWidget *tabWidget;
     QWidget *tab;
+    QListWidget *listWidget;
     QWidget *tab_2;
+    QListWidget *listWidget_2;
     QVBoxLayout *verticalLayout_2;
     QHBoxLayout *horizontalLayout;
     QLabel *label;
@@ -76,9 +79,15 @@ public:
         tabWidget->setObjectName("tabWidget");
         tab = new QWidget();
         tab->setObjectName("tab");
+        listWidget = new QListWidget(tab);
+        listWidget->setObjectName("listWidget");
+        listWidget->setGeometry(QRect(0, 0, 191, 421));
         tabWidget->addTab(tab, QString());
         tab_2 = new QWidget();
         tab_2->setObjectName("tab_2");
+        listWidget_2 = new QListWidget(tab_2);
+        listWidget_2->setObjectName("listWidget_2");
+        listWidget_2->setGeometry(QRect(0, 0, 191, 421));
         tabWidget->addTab(tab_2, QString());
 
         gridLayout->addWidget(tabWidget, 1, 0, 1, 1);
