@@ -134,38 +134,38 @@ std::tuple<std::string, std::string> process_file_header(const std::string& data
 }
 
 void write_file(const std::string& data, const std::string& file_path) {
-    std::ofstream file(file_path);
-    if (!file.is_open()) {
-        std::cerr << "Error: Could not open file for appending." << std::endl;
+    FILE* fp;
+    if ((fp = fopen(file_path.c_str(), "wb")) == NULL) {
+        std::cerr << "Error: Can not open file at " << file_path << std::endl;
         return;
     }
 
-    file << data;
-    if (file.fail() || file.bad()) {
-        std::cerr << "Error: Failed to append to file." << std::endl;
-        file.close();
+    size_t bytes_written = fwrite(data.c_str(), sizeof(char), data.size(), fp);
+    if (bytes_written != data.size()) {
+        std::cerr << "Error: Failed to write data to file." << std::endl;
+        fclose(fp);
         return;
     }
 
-    file.close();
-}  
+    fclose(fp);
+}
 
 void append_file(const std::string& data, const std::string& file_path) {
-    std::ofstream file(file_path, std::ios_base::app);
-    if (!file.is_open()) {
-        std::cerr << "Error: Could not open file for appending." << std::endl;
-        return;
-    }
+  FILE* fp;
+  if ((fp = fopen(file_path.c_str(), "ab")) == NULL) {
+    std::cerr << "Error: Can not open file at " << file_path << std::endl;
+    return;
+  }
 
-    file << data;
-    if (file.fail() || file.bad()) {
-        std::cerr << "Error: Failed to append to file." << std::endl;
-        file.close();
-        return;
-    }
+  size_t bytes_written = fwrite(data.c_str(), sizeof(char), data.size(), fp);
+  if (bytes_written != data.size()) {
+    std::cerr << "Error: Failed to append data to file." << std::endl;
+    fclose(fp);
+    return;
+  }
 
-    file.close();
-}  
+  fclose(fp);
+}
 
 ChatMessage create_chat_message(MessagePacket p, std::string& folder_path) {
     std::string data;
