@@ -477,7 +477,8 @@ void Client::send_request_message(std::string buff) {
             message_ptr = new Message(MessageType::REQUEST, RequestType::END_ANONYMOUS_CHAT, _user_id, chat_id);
         }
     } else if (buff[2] == 'M') {
-        // request to get some latest messages of chat: R M <chat_id> <number of messages>
+        // request to get some latest messages of chat: R M <chat_id> <number of messages> <offset>
+        // where offset is the number of messages that have been sent to client
         buff = buff.substr(4);
         std::string get_latest_messages_data = encode_get_latest_messages(buff);
         message_ptr = new Message(MessageType::REQUEST, RequestType::GET_CHAT_MESSAGES, _user_id, get_latest_messages_data);

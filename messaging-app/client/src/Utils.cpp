@@ -77,16 +77,14 @@ std::string encode_invite_group_chat(const std::string buff) {
 }
 
 std::string encode_get_latest_messages(const std::string buff) {
-    // buff = <chat_id> <number of messages>
+    // buff = <chat_id> <number of messages> <offset>
     std::istringstream iss(buff);
-    std::string chat_id;
-    int num_messages;
-    iss >> chat_id >> num_messages;
+    int chat_id, num_messages, offset;
+    iss >> chat_id >> num_messages >> offset;
 
-    // output data = <chat_id_len>:<chat_id><num_messages>
+    // output data = <chat_id>:<num_messages>:<offset>
     std::ostringstream oss;
-    oss << chat_id.size() << ':' << chat_id
-        << num_messages;
+    oss << chat_id << ':' << num_messages << ':' << offset;
     std::string data = oss.str();
 
     return data;
