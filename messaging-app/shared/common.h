@@ -131,4 +131,11 @@ struct Friend_t {
 };
 typedef struct Friend_t Friend;
 
+struct Chat_t {
+    ChatType ctype;
+    int cid;
+    std::string cname;
+};
+typedef struct Chat_t Chat;
+
 #endif // COMMON_H

@@ -258,6 +258,12 @@ void Client::receive_message() {
             response_type = "JOIN_ANONYMOUS_CHAT_SUCCESS";
         } else if (packet.response_header.response_type == ResponseType::GET_CHAT_LIST_SUCCESS) {
             response_type = "GET_CHAT_LIST_SUCCESS";
+            write_buff(data);
+            if (packet.fin == 1) {
+                _chat_list.clear();
+                process_chat_list(_buff);
+                clean_buff();
+            }
         } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_SUCCESS) {
             response_type = "ADD_TO_GROUP_CHAT_SUCCESS";
         } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_FAILURE) {
@@ -550,7 +556,6 @@ int Client::process_chat_packet(MessagePacket& p) {
 
 void Client::process_friend_list(std::string& data) {
     // parse the number of friends
-
     size_t num_delim = data.find(':');
     int num_friends_len = std::stoi(data.substr(0, num_delim));
     int num_friends = std::stoi(data.substr(num_delim + 1, num_friends_len));
@@ -571,7 +576,7 @@ void Client::process_friend_list(std::string& data) {
         std::string name = data.substr(name_delim + 1, name_len);
         pos = name_delim + name_len + 1;
 
-        // parese the friend status
+        // parse the friend status
         int status = std::stoi(data.substr(pos, 1));
         pos += 1;
 
@@ -579,6 +584,33 @@ void Client::process_friend_list(std::string& data) {
         Friend friend_obj = {id, name, status};
         _friend_list.push_back(friend_obj);
         std::cout << "  ID: " << id << ", dname: " << name << ", online: " << status << std::endl;
+    }
+}
+
+void Client::process_chat_list(std::string& data) {
+    size_t num_delim = data.find(':');
+    int num_chats = std::stoi(data.substr(0, num_delim));
+    std::cout << "\033[38;5;208mNumber of chats: \033[0m" << num_chats << std::endl;
+    
+    size_t pos = num_delim + 1;
+    for (int i = 0; i < num_chats; i++) {
+        std::string chat_type = data.substr(pos, 1);
+        pos += 1;
+
+        size_t id_delim = data.find(':', pos);
+        int id_len = std::stoi(data.substr(pos, id_delim - pos));
+        int id = std::stoi(data.substr(id_delim + 1, id_len));
+        pos = id_delim + id_len + 1;
+
+        size_t name_delim = data.find(':', pos);
+        int name_len = std::stoi(data.substr(pos, name_delim - pos));
+        std::string name = data.substr(name_delim + 1, name_len);
+        pos = name_delim + name_len + 1;
+
+        ChatType ctype = (chat_type == "P") ? ChatType::PRIVATE_CHAT : ChatType::GROUP_CHAT;
+        Chat chat_obj = {ctype, id, name};
+        _chat_list.push_back(chat_obj);
+        std::cout << "  ID: " << id << ", name: " << name << ", type: " << ((ctype == ChatType::PRIVATE_CHAT) ? "Private" : "Group") << std::endl;
     }
 }
 

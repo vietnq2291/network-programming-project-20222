@@ -3,6 +3,7 @@ Commands & Message structure
 ============================
 
 Requests: 
+
     Login:
         R L <username> <password>
             Message(MessageType::REQUEST, RequestType::LOGIN, _user_id, auth_data)
@@ -197,7 +198,6 @@ Requests:
             Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Anonymous chat ended")
             
             Message(MessageType::PUSH, PushType::ANONYMOUS_CHAT_ENDED, _user_id, "Anonymous chat ended")
-
 
 Chat:
     C P T <chat_id> <message>
