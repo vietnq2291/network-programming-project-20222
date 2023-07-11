@@ -26,6 +26,8 @@ void ChatWindow::loadFriend(std::string disName){
 void ChatWindow::pressSendButton() {
     QString sendPack = ui.messageBox->text();
     if (!sendPack.isEmpty()) {
+        QString Message = "Me:" + sendPack + "\n";
+        ui.convBox->append(Message);
         emit sendMessage(sendPack);
     }
 

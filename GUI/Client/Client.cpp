@@ -581,7 +581,7 @@ void client::clean_buff() {
 }
 
 void client::setChat(QString chat_name){
-
+    _chat_id = 1;
 };
 
 void client::sendMessage(QString packet) {
