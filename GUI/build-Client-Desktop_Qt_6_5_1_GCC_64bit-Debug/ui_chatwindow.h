@@ -27,7 +27,7 @@ QT_BEGIN_NAMESPACE
 class Ui_ChatWindow
 {
 public:
-    QtabWidget *tabWidget;
+    QTabWidget *tabWidget;
     QWidget *tab;
     QListWidget *listWidget;
     QWidget *tab_2;
@@ -56,7 +56,7 @@ public:
         tab = new QWidget();
         tab->setObjectName("tab");
         listWidget = new QListWidget(tab);
-        listWidget->setObjtabName("listWidget");
+        listWidget->setObjectName("listWidget");
         listWidget->setGeometry(QRect(0, 0, 221, 571));
         tabWidget->addTab(tab, QString());
         tab_2 = new QWidget();
@@ -112,7 +112,7 @@ public:
 
         retranslateUi(ChatWindow);
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(ChatWindow);
@@ -121,8 +121,11 @@ public:
     void retranslateUi(QWidget *ChatWindow)
     {
         ChatWindow->setWindowTitle(QCoreApplication::translate("ChatWindow", "Aloo!", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("ChatWindow", "Tab 1", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("ChatWindow", "Tab 2", nullptr));
+#if QT_CONFIG(accessibility)
+        tab->setAccessibleName(QString());
+#endif // QT_CONFIG(accessibility)
+        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("ChatWindow", "Friends", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("ChatWindow", "Groups", nullptr));
         label_3->setText(QCoreApplication::translate("ChatWindow", "Choose a person to chat", nullptr));
         label_4->setText(QCoreApplication::translate("ChatWindow", "Message:", nullptr));
         sendButton->setText(QCoreApplication::translate("ChatWindow", "Send", nullptr));

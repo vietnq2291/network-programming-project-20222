@@ -10,7 +10,7 @@ views::views()
     connect(lw, SIGNAL(receivedAuth(QString,QString)), this, SLOT(recvAuth(QString,QString)));
     connect(cw, SIGNAL(chooseChat(QString)), this, SLOT(setToChat(QString)));
     connect(cw, SIGNAL(sendMessage(QString)), this, SLOT(sendMessage(QString)));
-    connect(this, SIGNAL(recvMessage(QString)), cw, SLOT(recvMsg(QString)));
+    connect(this, SIGNAL(recvMessage(ChatMessage)), cw, SLOT(recvMsg(ChatMessage)));
 }
 
 views::~views()

@@ -25,8 +25,12 @@ public:
     void clean_buff();
 
 signals:
-    void messageReceived();
+    void messageReceived(ChatMessage Message);
     void authSuccess(std::vector<Friend> friend_list);
+
+private slots:
+    void setChat(QString chat_name);
+    void sendMessage(QString packet);
 
 private:
     int _conn_fd;
@@ -38,6 +42,7 @@ private:
     fd_set _read_fds;
 
     int _user_id; // user id of the current user or -1 if the user has not logged in
+    int _chat_id; // chat id of the current chat
     std::string _display_name; // username of the current user or "" if the user has not logged in
     std::map<int, std::vector<ChatMessage>> chat_map;
     std::string _folder_path;

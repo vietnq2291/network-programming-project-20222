@@ -38,8 +38,8 @@ void ChatWindow::pressSendEnter() {
 }
 
 void ChatWindow::recvMsg(ChatMessage message) {
-    QDateTime t(QTime::fromTime_t(message.timestamp));
-    QString Message = chat_name + "<" + t.toString("hh:mm") + ">:" + message.data.c_str() + "\n";
+
+    QString Message = chat_name + "<" + format_time(message.timestamp).c_str() + ">:" + message.data.c_str() + "\n";
 
     ui.convBox->append(Message);
 }
