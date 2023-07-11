@@ -381,6 +381,7 @@ void Server::process_request_message(Message& message, int conn_fd) {
             break;
         case RequestType::GET_CHAT_MESSAGES:
             handle_get_chat_messages(message, conn_fd);
+            break;
         case RequestType::ADD_FRIEND: 
         case RequestType::ACCEPT_FRIEND: 
         case RequestType::REJECT_FRIEND:
@@ -1323,8 +1324,9 @@ void Server::handle_get_chat_messages(Message& message, int conn_fd) {
         log(LogType::WARNING, response_packet.data, conn_fd);        
     } else {
         auto [chat_id_str, num_messages] = parse_get_chat_messages_request(message.get_data());
-        std::string query = "SELECT `id`, `chat_id`, `type`, `content`, `time_created`, `sender_id` FROM `Message` WHERE `chat_id` = " + chat_id_str
-                            + " ORDER BY `id` DESC LIMIT " + std::to_string(num_messages);
+        std::string query = "SELECT * FROM (SELECT `id`, `chat_id`, `type`, `content`, `time_created`, `sender_id` FROM `Message` WHERE `chat_id` = " + chat_id_str 
+                            + " ORDER BY `id` DESC LIMIT " + std::to_string(num_messages) + ") AS subquery "
+                            + "ORDER BY `id` ASC;";
         _sql_query.query(query, response_packet);
 
         if (_sql_query.is_select_successful() == false) {
