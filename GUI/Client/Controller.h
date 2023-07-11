@@ -13,7 +13,6 @@ public:
 private slots:
     void Authenticate(QString username, QString password);
     void recvMsg();
-    void logInSucc();
 
 private:
     views* v;

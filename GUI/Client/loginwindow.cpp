@@ -23,11 +23,5 @@ void LoginWindow::on_pushButton_Login_clicked()
     QString password = ui->lineEdit_Password->text();
 
     emit receivedAuth(username, password);
-
-//    if (username == "test" && password == "test") {
-//        emit loggedIn();
-//    } else {
-//        ui->statusbar->showMessage("Wrong username or password");
-//    }
 }
 

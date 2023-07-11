@@ -15,15 +15,17 @@ class ChatWindow : public QWidget
     public:
         ChatWindow();
         ~ChatWindow();
+        void loadFriend(std::string disName);
 
     private slots:
-        void pressConnect();
         void pressSendButton();
         void pressSendEnter();
         void recvMsg();
-        void Conn();
-        void closeConn();
-        void socketErr(QAbstractSocket::SocketError);
+
+        void on_listWidget_itemClicked(QListWidgetItem *item);
+
+    signals:
+        void sendMessage(QString message);
 
     private:
         Ui::ChatWindow ui;

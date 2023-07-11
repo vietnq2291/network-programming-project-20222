@@ -7,11 +7,12 @@ controller::controller()
     clt = new client(DEFAULT_PORT, DEFAULT_IP);
     clt->connect();
 
-    connect(v, SIGNAL(loggedInView()), this, SLOT(logInSucc()));
     connect(v, SIGNAL(recievedAuthView(QString,QString)), this, SLOT(Authenticate(QString,QString)));
 
-    connect(clt, SIGNAL(messageReceived()), this, SLOT(recvMsg()));
-    connect(clt, SIGNAL(authSuccess()), v, SLOT(switchToChat()));
+    connect(clt, SIGNAL(messageReceived(QString)), this, SLOT(recvMsg(QString)));
+    connect(clt, SIGNAL(authSuccess(std::vector<Friend>)), v, SLOT(initChat(std::vector<Friend>)));
+    connect(v, SIGNAL(setChatView(QString)), clt, SLOT(setChat(QString)));
+    connect(v, SIGNAL(sendMessageView(QString)), clt, SLOT(sendMessage(QString)));
 }
 
 void controller::Authenticate(QString username, QString password) {
@@ -24,6 +25,3 @@ void controller::recvMsg() {
 
 }
 
-void controller::logInSucc() {
-//    v->switchToChat();
-}

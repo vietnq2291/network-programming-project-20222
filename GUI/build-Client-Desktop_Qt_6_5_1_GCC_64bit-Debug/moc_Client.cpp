@@ -41,15 +41,19 @@ static constexpr auto qt_meta_stringdata_CLASSclientENDCLASS = QtMocHelpers::str
     "client",
     "messageReceived",
     "",
-    "authSuccess"
+    "authSuccess",
+    "std::vector<Friend>",
+    "friend_list"
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASSclientENDCLASS_t {
-    uint offsetsAndSizes[8];
+    uint offsetsAndSizes[12];
     char stringdata0[7];
     char stringdata1[16];
     char stringdata2[1];
     char stringdata3[12];
+    char stringdata4[20];
+    char stringdata5[12];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASSclientENDCLASS_t::offsetsAndSizes) + ofs), len 
@@ -58,12 +62,16 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSclientENDCLASS_t qt_meta_string
         QT_MOC_LITERAL(0, 6),  // "client"
         QT_MOC_LITERAL(7, 15),  // "messageReceived"
         QT_MOC_LITERAL(23, 0),  // ""
-        QT_MOC_LITERAL(24, 11)   // "authSuccess"
+        QT_MOC_LITERAL(24, 11),  // "authSuccess"
+        QT_MOC_LITERAL(36, 19),  // "std::vector<Friend>"
+        QT_MOC_LITERAL(56, 11)   // "friend_list"
     },
     "client",
     "messageReceived",
     "",
-    "authSuccess"
+    "authSuccess",
+    "std::vector<Friend>",
+    "friend_list"
 };
 #undef QT_MOC_LITERAL
 #endif // !QT_MOC_HAS_STRING_DATA
@@ -84,11 +92,11 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSclientENDCLASS[] = {
 
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
        1,    0,   26,    2, 0x06,    1 /* Public */,
-       3,    0,   27,    2, 0x06,    2 /* Public */,
+       3,    1,   27,    2, 0x06,    2 /* Public */,
 
  // signals: parameters
     QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 4,    5,
 
        0        // eod
 };
@@ -105,7 +113,8 @@ Q_CONSTINIT const QMetaObject client::staticMetaObject = { {
         // method 'messageReceived'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'authSuccess'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<std::vector<Friend>, std::false_type>
     >,
     nullptr
 } };
@@ -117,7 +126,7 @@ void client::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         (void)_t;
         switch (_id) {
         case 0: _t->messageReceived(); break;
-        case 1: _t->authSuccess(); break;
+        case 1: _t->authSuccess((*reinterpret_cast< std::add_pointer_t<std::vector<Friend>>>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -130,14 +139,13 @@ void client::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
             }
         }
         {
-            using _t = void (client::*)();
+            using _t = void (client::*)(std::vector<Friend> );
             if (_t _q_method = &client::authSuccess; *reinterpret_cast<_t *>(_a[1]) == _q_method) {
                 *result = 1;
                 return;
             }
         }
     }
-    (void)_a;
 }
 
 const QMetaObject *client::metaObject() const
@@ -177,8 +185,9 @@ void client::messageReceived()
 }
 
 // SIGNAL 1
-void client::authSuccess()
+void client::authSuccess(std::vector<Friend> _t1)
 {
-    QMetaObject::activate(this, &staticMetaObject, 1, nullptr);
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
+    QMetaObject::activate(this, &staticMetaObject, 1, _a);
 }
 QT_WARNING_POP

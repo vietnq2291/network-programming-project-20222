@@ -22,7 +22,6 @@ public slots:
 
 signals:
     void receivedAuth(QString username, QString password);
-    void loggedIn();
 
 private:
     Ui::LoginWindow *ui;

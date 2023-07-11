@@ -1,7 +1,6 @@
 #include "Utils.h"
-#include <string>
-#include <sstream>
-#include <vector>
+
+#include "common.h"
 
 std::string encode_auth_data(const std::string username, const std::string password) {
     // output is of the form: <username_len>:<username><password_len>:<password>
@@ -106,4 +105,84 @@ std::tuple<std::string, std::string> parse_file_data(const std::string file_data
     std::string file_content = file_data.substr(content_delim + 1, file_content_len);
 
     return std::make_tuple(file_name, file_content);
+}
+
+std::string format_time(std::time_t timestamp)
+{
+    std::tm* time_info = std::localtime(&timestamp);
+
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", time_info);
+
+    return std::string(buffer);
+}
+
+std::tuple<std::string, std::string> process_file_header(const std::string& data, const std::string& folder_path)
+{
+    size_t fn_delim = data.find(':');
+    size_t fd_delim = data.find(':', fn_delim + 1);
+
+    long long fn_len = std::stoll(data.substr(0, fn_delim));
+    long long fd_len = std::stoll(data.substr(fn_delim + fn_len + 1, fd_delim - (fn_delim + fn_len + 1)));
+
+    std::string file_name = data.substr(fn_delim + 1, fn_len);
+    std::string file_data = data.substr(fd_delim + 1, fd_len);
+
+    std::string file_path = folder_path + "/" + file_name;
+
+    return std::make_tuple(file_path, file_data);
+}
+
+void write_file(const std::string& data, const std::string& file_path) {
+    std::ofstream file(file_path);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open file for appending." << std::endl;
+        return;
+    }
+
+    file << data;
+    if (file.fail() || file.bad()) {
+        std::cerr << "Error: Failed to append to file." << std::endl;
+        file.close();
+        return;
+    }
+
+    file.close();
+}
+
+void append_file(const std::string& data, const std::string& file_path) {
+    std::ofstream file(file_path, std::ios_base::app);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open file for appending." << std::endl;
+        return;
+    }
+
+    file << data;
+    if (file.fail() || file.bad()) {
+        std::cerr << "Error: Failed to append to file." << std::endl;
+        file.close();
+        return;
+    }
+
+    file.close();
+}
+
+ChatMessage create_chat_message(MessagePacket p, std::string& folder_path) {
+    std::string data;
+
+    if (p.chat_header.data_type == DataType::FILE) {
+        auto [file_path, fdata] = process_file_header(p.data, folder_path);
+        write_file(fdata, file_path);
+        data = file_path;
+    } else {
+        data = p.data;
+    }
+
+    ChatMessage m {
+        p.chat_header.sender,
+        p.chat_header.timestamp,
+        p.chat_header.data_type,
+        data
+    };
+    return m;
 }

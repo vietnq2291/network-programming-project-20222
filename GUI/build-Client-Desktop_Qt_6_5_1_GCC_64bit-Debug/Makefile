@@ -1102,19 +1102,30 @@ moc_Controller.cpp: ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyleoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyle.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabbar.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qrubberband.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpinBox \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
 		../Client/common.h \
@@ -1506,19 +1517,30 @@ moc_Views.cpp: ../Client/Views.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyleoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyle.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabbar.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qrubberband.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpinBox \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
 		../Client/common.h \
@@ -1909,19 +1931,30 @@ moc_chatwindow.cpp: ../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyleoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyle.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabbar.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qrubberband.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpinBox \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
 		../Client/common.h \
@@ -2598,19 +2631,30 @@ Controller.o: ../Client/Controller.cpp ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyleoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyle.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabbar.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qrubberband.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpinBox \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
 		../Client/common.h \
@@ -3007,19 +3051,30 @@ Views.o: ../Client/Views.cpp ../Client/Views.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyleoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyle.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabbar.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qrubberband.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpinBox \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
 		../Client/common.h \
@@ -3408,19 +3463,30 @@ chatwindow.o: ../Client/chatwindow.cpp ../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyleoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyle.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabbar.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qrubberband.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpinBox \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
 		../Client/common.h \
@@ -4027,19 +4093,30 @@ main.o: ../Client/main.cpp ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyleoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractslider.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qstyle.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabbar.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qrubberband.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpinBox \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvalidator.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtabwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
 		../Client/common.h \

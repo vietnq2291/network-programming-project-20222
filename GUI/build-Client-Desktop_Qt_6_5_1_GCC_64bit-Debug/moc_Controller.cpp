@@ -46,19 +46,17 @@ static constexpr auto qt_meta_stringdata_CLASScontrollerENDCLASS = QtMocHelpers:
     "",
     "username",
     "password",
-    "recvMsg",
-    "logInSucc"
+    "recvMsg"
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASScontrollerENDCLASS_t {
-    uint offsetsAndSizes[14];
+    uint offsetsAndSizes[12];
     char stringdata0[11];
     char stringdata1[13];
     char stringdata2[1];
     char stringdata3[9];
     char stringdata4[9];
     char stringdata5[8];
-    char stringdata6[10];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASScontrollerENDCLASS_t::offsetsAndSizes) + ofs), len 
@@ -69,16 +67,14 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASScontrollerENDCLASS_t qt_meta_st
         QT_MOC_LITERAL(24, 0),  // ""
         QT_MOC_LITERAL(25, 8),  // "username"
         QT_MOC_LITERAL(34, 8),  // "password"
-        QT_MOC_LITERAL(43, 7),  // "recvMsg"
-        QT_MOC_LITERAL(51, 9)   // "logInSucc"
+        QT_MOC_LITERAL(43, 7)   // "recvMsg"
     },
     "controller",
     "Authenticate",
     "",
     "username",
     "password",
-    "recvMsg",
-    "logInSucc"
+    "recvMsg"
 };
 #undef QT_MOC_LITERAL
 #endif // !QT_MOC_HAS_STRING_DATA
@@ -90,7 +86,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASScontrollerENDCLASS[] = {
       11,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   14, // methods
+       2,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -98,13 +94,11 @@ Q_CONSTINIT static const uint qt_meta_data_CLASScontrollerENDCLASS[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    2,   32,    2, 0x08,    1 /* Private */,
-       5,    0,   37,    2, 0x08,    4 /* Private */,
-       6,    0,   38,    2, 0x08,    5 /* Private */,
+       1,    2,   26,    2, 0x08,    1 /* Private */,
+       5,    0,   31,    2, 0x08,    4 /* Private */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::QString, QMetaType::QString,    3,    4,
-    QMetaType::Void,
     QMetaType::Void,
 
        0        // eod
@@ -124,8 +118,6 @@ Q_CONSTINIT const QMetaObject controller::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
         // method 'recvMsg'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'logInSucc'
         QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
     nullptr
@@ -139,7 +131,6 @@ void controller::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         switch (_id) {
         case 0: _t->Authenticate((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[2]))); break;
         case 1: _t->recvMsg(); break;
-        case 2: _t->logInSucc(); break;
         default: ;
         }
     }
@@ -164,13 +155,13 @@ int controller::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 2)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 2;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 3)
+        if (_id < 2)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 3;
+        _id -= 2;
     }
     return _id;
 }
