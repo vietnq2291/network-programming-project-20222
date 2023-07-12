@@ -198,7 +198,7 @@ void Client::send_chat_message(std::string buff, int chat_id, ChatType chat_type
         } else {
             data_type = "UNKNOWN";
         }
-        std::cout << "Sent message: (type, chat_type, data_type, sender, chat_id, timestamp, data) = " << "(" << type <<
+        std::cout << "\033[34mSent message:\033[0m (type, chat_type, data_type, sender, chat_id, timestamp, data) = " << "(" << type <<
                                                                                                         ", " << chat_type << 
                                                                                                         ", " << data_type << 
                                                                                                         ", " << packet.chat_header.sender << 
@@ -274,6 +274,12 @@ void Client::receive_message() {
             response_type = "GET_GROUP_CHAT_MEMBERS_SUCCESS";
         } else if (packet.response_header.response_type == ResponseType::GET_CHAT_MESSAGES_SUCCESS) {
             response_type = "GET_CHAT_MESSAGES_SUCCESS";
+            write_buff(data);
+            if (packet.fin == 1) {
+                // _chat_map[].clear(); // TODO: might need to update later
+                process_chat_history(_buff);
+                clean_buff();
+            }
         } else {
             response_type = "UNKOWN";
         }
@@ -294,10 +300,10 @@ void Client::receive_message() {
         int chat_id = process_chat_packet(packet);
         // Print if this is last packet
         if (packet.fin == 1) {
-            ChatMessage latest_msg = chat_map[chat_id].back();
+            ChatMessage latest_msg = _chat_map[chat_id].back();
             std::cout << "\n\033[32m(" << chat_id << 
-                        ", " << latest_msg.sender << 
-                        ", " << format_time(latest_msg.timestamp) <<
+                        ", " << latest_msg.sender_id << 
+                        ", " << time2string(latest_msg.timestamp) <<
                         "): \033[0m";
                         
             if (packet.chat_header.data_type == DataType::FILE) {
@@ -529,26 +535,26 @@ int Client::process_chat_packet(MessagePacket& p) {
     int cid = p.chat_header.chat_id;
     DataType dtype = p.chat_header.data_type;
 
-    if (chat_map.find(cid) == chat_map.end()) {
-        chat_map[cid] = std::vector<ChatMessage>();
+    if (_chat_map.find(cid) == _chat_map.end()) {
+        _chat_map[cid] = std::vector<ChatMessage>();
     }
-    if (chat_map[cid].empty()) {
+    if (_chat_map[cid].empty()) {
         ChatMessage m = create_chat_message(p, _folder_path);
-        chat_map[cid].push_back(m);
+        _chat_map[cid].push_back(m);
     } 
     else {
-        if (p.chat_header.sender == chat_map[cid].back().sender 
-            && p.chat_header.timestamp == chat_map[cid].back().timestamp) {
+        if (p.chat_header.sender == _chat_map[cid].back().sender_id 
+            && p.chat_header.timestamp == _chat_map[cid].back().timestamp) {
                 if (dtype == DataType::TEXT) { 
-                    chat_map[cid].back().data += p.data; 
+                    _chat_map[cid].back().data += p.data; 
                 } else {
-                    std::cout << "\033[34mWriting to: \033[0m" << chat_map[cid].back().data << std::endl;
-                    append_file(p.data, chat_map[cid].back().data);
+                    std::cout << "\033[34mWriting to: \033[0m" << _chat_map[cid].back().data << std::endl;
+                    append_file(p.data, _chat_map[cid].back().data);
                 }
                     
         } else {
             ChatMessage m = create_chat_message(p, _folder_path);
-            chat_map[cid].push_back(m);
+            _chat_map[cid].push_back(m);
         }
     }
     return cid;
@@ -611,6 +617,64 @@ void Client::process_chat_list(std::string& data) {
         Chat chat_obj = {ctype, id, name};
         _chat_list.push_back(chat_obj);
         std::cout << "  ID: " << id << ", name: " << name << ", type: " << ((ctype == ChatType::PRIVATE_CHAT) ? "Private" : "Group") << std::endl;
+    }
+}
+
+void Client::process_chat_history(std::string& data) {
+    size_t num_delim = data.find(':');
+    int num_chats_len = std::stoi(data.substr(0, num_delim));
+    int num_chats = std::stoi(data.substr(num_delim + 1, num_chats_len));
+    std::cout << "\033[38;5;208mNumber of chats retrieved from history: \033[0m" << num_chats << std::endl;
+
+    size_t pos = num_delim + num_chats_len + 1;
+    for (int i = 0; i < num_chats; i++) {
+        // parse message id
+        size_t msg_id_delim = data.find(':', pos);
+        int id_len = std::stoi(data.substr(pos, msg_id_delim - pos));
+        int msg_id = std::stoi(data.substr(msg_id_delim + 1, id_len));
+        pos = msg_id_delim + id_len + 1;
+
+        // parse chat id
+        size_t cid_delim = data.find(':', pos);
+        int cid_len = std::stoi(data.substr(pos, cid_delim - pos));
+        int cid = std::stoi(data.substr(cid_delim + 1, cid_len));
+        pos = cid_delim + cid_len + 1;
+
+        // parse data type
+        std::string datatype = data.substr(pos, 1);
+        DataType dtype = (datatype == "T") ? DataType::TEXT : DataType::FILE;
+        pos += 1;
+
+        // parse content
+        size_t content_delim = data.find(':', pos);
+        int content_len = std::stoi(data.substr(pos, content_delim - pos));
+        std::string content = data.substr(content_delim + 1, content_len);
+        pos = content_delim + content_len + 1;
+
+        if (dtype == DataType::FILE) {
+            auto [fpath, fdata] = process_file_header(content, _folder_path);
+            write_file(fdata, fpath);
+            content = "New file at \"" + fpath + "\"";
+        }
+
+        // parse time
+        size_t time_delim = data.find(':', pos);
+        int time_len = std::stoi(data.substr(pos, time_delim - pos));
+        std::string time = data.substr(time_delim + 1, time_len);
+        pos = time_delim + time_len + 1;
+
+        // parse sender id
+        size_t sid_delim = data.find(':', pos);
+        int sid_len = std::stoi(data.substr(pos, sid_delim - pos));
+        int sender_id = std::stoi(data.substr(sid_delim + 1, sid_len));
+        pos = sid_delim + sid_len + 1;
+
+        std::cout << "\n\033[38;5;208m*\033[0m Msg ID    : " << msg_id << std::endl;
+        std::cout << "  Chat ID   : " << cid << std::endl;
+        std::cout << "  Sender ID : " << sender_id << std::endl;
+        std::cout << "  Data type : " << ((dtype == DataType::TEXT) ? "text" : "file") << std::endl;
+        std::cout << "  Content   : " << content << std::endl;
+        std::cout << "  Time      : " << time << std::endl;
     }
 }
 

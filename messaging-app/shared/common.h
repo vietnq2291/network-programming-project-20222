@@ -117,7 +117,7 @@ struct MessagePacket_t {
 typedef struct MessagePacket_t MessagePacket;
 
 struct ChatMessage_t{
-    int sender;
+    int sender_id;
     time_t timestamp;
     DataType data_type;
     std::string data;

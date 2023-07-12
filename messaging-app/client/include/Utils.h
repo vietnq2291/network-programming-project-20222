@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
+#include <iomanip>
 
 #include "../../shared/common.h"
 
@@ -21,7 +22,8 @@ std::string encode_invite_group_chat(const std::string buff);
 std::string encode_get_latest_messages(const std::string buff);
 
 ChatMessage create_chat_message(MessagePacket p, std::string& folder_path);
-std::string format_time(std::time_t timestamp);
+std::string time2string(std::time_t timestamp);
+std::time_t string2time(const std::string& timestamp_str);
 std::tuple<std::string, std::string> process_file_header(const std::string& data_string, const std::string& folder_path);
 void write_file(const std::string& data, const std::string& file_path);
 void append_file(const std::string& data, const std::string& file_path);

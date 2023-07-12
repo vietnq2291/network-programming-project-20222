@@ -107,7 +107,7 @@ std::tuple<std::string, std::string> parse_file_data(const std::string file_data
     return std::make_tuple(file_name, file_content);
 }
 
-std::string format_time(std::time_t timestamp)
+std::string time2string(std::time_t timestamp)
 {
     std::tm* time_info = std::localtime(&timestamp);
 
@@ -115,6 +115,14 @@ std::string format_time(std::time_t timestamp)
     std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", time_info);
 
     return std::string(buffer);
+}
+
+std::time_t string2time(const std::string& timestamp_str)
+{
+    std::tm time_info = {};
+    std::istringstream ss(timestamp_str);
+    ss >> std::get_time(&time_info, "%Y-%m-%d %H:%M:%S");
+    return std::mktime(&time_info);
 }
 
 std::tuple<std::string, std::string> process_file_header(const std::string& data, const std::string& folder_path)
@@ -146,7 +154,6 @@ void write_file(const std::string& data, const std::string& file_path) {
         fclose(fp);
         return;
     }
-
     fclose(fp);
 }
 
@@ -163,7 +170,6 @@ void append_file(const std::string& data, const std::string& file_path) {
     fclose(fp);
     return;
   }
-
   fclose(fp);
 }
 
