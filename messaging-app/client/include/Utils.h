@@ -27,6 +27,7 @@ std::time_t string2time(const std::string& timestamp_str);
 std::tuple<std::string, std::string> process_file_header(const std::string& data_string, const std::string& folder_path);
 void write_file(const std::string& data, const std::string& file_path);
 void append_file(const std::string& data, const std::string& file_path);
+void print_chat_message(ChatMessage& cm);
 
 std::tuple<int, std::string> parse_user_info_data(const std::string info_data);
 std::tuple<std::string, std::string> parse_file_data(const std::string file_data);

@@ -183,10 +183,25 @@ ChatMessage create_chat_message(MessagePacket p, std::string& folder_path) {
     }
 
     ChatMessage m {
+        p.chat_header.chat_id,
         p.chat_header.sender,
         p.chat_header.timestamp,
         p.chat_header.data_type,
         data
     };
     return m;
+}
+
+void print_chat_message(ChatMessage& cm) {
+    std::cout << "\n\033[32m(chatID: " << cm.chat_id <<
+                ", senderID: " << cm.sender_id << 
+                ", time: " << time2string(cm.timestamp) <<
+                "): \033[0m";
+                
+    if (cm.data_type == DataType::FILE) {
+        std::string file_path = cm.data;
+        std::cout <<  "New file at \"" << file_path << "\"" << std::endl;
+    } else {
+        std::cout << cm.data << std::endl;
+    } 
 }

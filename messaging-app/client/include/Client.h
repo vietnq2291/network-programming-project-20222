@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <map>
 #include <vector>
+#include <list>
 
 #include "../../shared/common.h"
 
@@ -21,6 +22,7 @@ public:
     int process_chat_packet(MessagePacket& packet);
     void process_friend_list(std::string& data);
     void process_chat_list(std::string& data);
+    std::tuple<int, std::string> process_chat_history_header(std::string& data);
     void process_chat_history(std::string& data);
     void write_buff(std::string& data);
     void clean_buff();
@@ -36,7 +38,7 @@ private:
     std::string _display_name; // username of the current user or "" if the user has not logged in
     std::string _folder_path;
 
-    std::map<int, std::vector<ChatMessage>> _chat_map;
+    std::map<int, std::list<ChatMessage>> _chat_map;
     std::vector<Friend> _friend_list;
     std::vector<Chat> _chat_list;
 };
