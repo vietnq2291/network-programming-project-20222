@@ -1323,10 +1323,10 @@ void Server::handle_get_chat_messages(Message& message, int conn_fd) {
 
         log(LogType::WARNING, response_packet.data, conn_fd);        
     } else {
-        auto [chat_id_str, num_messages] = parse_get_chat_messages_request(message.get_data());
-        std::string query = "SELECT * FROM (SELECT `id`, `chat_id`, `type`, `content`, `time_created`, `sender_id` FROM `Message` WHERE `chat_id` = " + chat_id_str 
-                            + " ORDER BY `id` DESC LIMIT " + std::to_string(num_messages) + ") AS subquery "
-                            + "ORDER BY `id` ASC;";
+        auto [chat_id, num_messages, off_set] = parse_get_chat_messages_request(message.get_data());
+        std::string query = "SELECT `id`, `chat_id`, `type`, `content`, `time_created`, `sender_id` FROM `Message` WHERE `chat_id` = " + std::to_string(chat_id)
+                            + " ORDER BY `id` DESC LIMIT " + std::to_string(num_messages)
+                            + " OFFSET " + std::to_string(off_set) + ";";
         _sql_query.query(query, response_packet);
 
         if (_sql_query.is_select_successful() == false) {

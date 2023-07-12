@@ -170,9 +170,9 @@ Requests:
                     where <user_i> = <user_id_length>:<user_id><display_name_length>:<display_name>
 
     Get messages from server database:
-        R M <chat_id> <number of messages>
+        R M <chat_id> <number of messages> <offset>
             Message(MessageType::REQUEST, RequestType::GET_CHAT_MESSAGES, _user_id, get_latest_messages_data)
-                get_latest_messages_data = <chat_id_len>:<chat_id><num_messages>
+                get_latest_messages_data = <chat_id>:<num_messages>:<offset>
             
             Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
             Message(MessageType::GET_CHAT_MESSAGES_SUCCESS, data)
