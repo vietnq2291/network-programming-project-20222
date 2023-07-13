@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 16, 2023 at 04:14 PM
+-- Generation Time: Jul 13, 2023 at 07:44 AM
 -- Server version: 8.0.33-0ubuntu0.22.04.2
 -- PHP Version: 8.2.7
 
@@ -20,7 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `messaging_db`
 --
-
 CREATE DATABASE IF NOT EXISTS `messaging_db`;
 USE `messaging_db`;
 
@@ -83,7 +82,7 @@ CREATE TABLE `Message` (
   `id` int NOT NULL,
   `chat_id` int NOT NULL,
   `type` char(20) NOT NULL,
-  `content` text NOT NULL,
+  `content` longblob NOT NULL,
   `time_created` timestamp NULL DEFAULT NULL,
   `sender_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
