@@ -77,16 +77,14 @@ std::string encode_invite_group_chat(const std::string buff) {
 }
 
 std::string encode_get_latest_messages(const std::string buff) {
-    // buff = <chat_id> <number of messages>
+    // buff = <chat_id> <number of messages> <offset>
     std::istringstream iss(buff);
-    std::string chat_id;
-    int num_messages;
-    iss >> chat_id >> num_messages;
+    int chat_id, num_messages, offset;
+    iss >> chat_id >> num_messages >> offset;
 
-    // output data = <chat_id_len>:<chat_id><num_messages>
+    // output data = <chat_id>:<num_messages>:<offset>
     std::ostringstream oss;
-    oss << chat_id.size() << ':' << chat_id
-        << num_messages;
+    oss << chat_id << ':' << num_messages << ':' << offset;
     std::string data = oss.str();
 
     return data;
@@ -107,7 +105,7 @@ std::tuple<std::string, std::string> parse_file_data(const std::string file_data
     return std::make_tuple(file_name, file_content);
 }
 
-std::string format_time(std::time_t timestamp)
+std::string time2string(std::time_t timestamp)
 {
     std::tm* time_info = std::localtime(&timestamp);
 
@@ -115,6 +113,14 @@ std::string format_time(std::time_t timestamp)
     std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", time_info);
 
     return std::string(buffer);
+}
+
+std::time_t string2time(const std::string& timestamp_str)
+{
+    std::tm time_info = {};
+    std::istringstream ss(timestamp_str);
+    ss >> std::get_time(&time_info, "%Y-%m-%d %H:%M:%S");
+    return std::mktime(&time_info);
 }
 
 std::tuple<std::string, std::string> process_file_header(const std::string& data, const std::string& folder_path)
@@ -134,37 +140,35 @@ std::tuple<std::string, std::string> process_file_header(const std::string& data
 }
 
 void write_file(const std::string& data, const std::string& file_path) {
-    std::ofstream file(file_path);
-    if (!file.is_open()) {
-        std::cerr << "Error: Could not open file for appending." << std::endl;
+    FILE* fp;
+    if ((fp = fopen(file_path.c_str(), "wb")) == NULL) {
+        std::cerr << "Error: Can not open file at " << file_path << std::endl;
         return;
     }
 
-    file << data;
-    if (file.fail() || file.bad()) {
-        std::cerr << "Error: Failed to append to file." << std::endl;
-        file.close();
+    size_t bytes_written = fwrite(data.c_str(), sizeof(char), data.size(), fp);
+    if (bytes_written != data.size()) {
+        std::cerr << "Error: Failed to write data to file." << std::endl;
+        fclose(fp);
         return;
     }
-
-    file.close();
+    fclose(fp);
 }
 
 void append_file(const std::string& data, const std::string& file_path) {
-    std::ofstream file(file_path, std::ios_base::app);
-    if (!file.is_open()) {
-        std::cerr << "Error: Could not open file for appending." << std::endl;
+    FILE* fp;
+    if ((fp = fopen(file_path.c_str(), "ab")) == NULL) {
+        std::cerr << "Error: Can not open file at " << file_path << std::endl;
         return;
     }
 
-    file << data;
-    if (file.fail() || file.bad()) {
-        std::cerr << "Error: Failed to append to file." << std::endl;
-        file.close();
+    size_t bytes_written = fwrite(data.c_str(), sizeof(char), data.size(), fp);
+    if (bytes_written != data.size()) {
+        std::cerr << "Error: Failed to append data to file." << std::endl;
+        fclose(fp);
         return;
     }
-
-    file.close();
+    fclose(fp);
 }
 
 ChatMessage create_chat_message(MessagePacket p, std::string& folder_path) {
@@ -179,10 +183,25 @@ ChatMessage create_chat_message(MessagePacket p, std::string& folder_path) {
     }
 
     ChatMessage m {
+        p.chat_header.chat_id,
         p.chat_header.sender,
         p.chat_header.timestamp,
         p.chat_header.data_type,
         data
     };
     return m;
+}
+
+void print_chat_message(ChatMessage& cm) {
+    std::cout << "\033[32m(chatID: " << cm.chat_id <<
+        ", senderID: " << cm.sender_id <<
+        ", time: " << time2string(cm.timestamp) <<
+        "): \033[0m";
+
+    if (cm.data_type == DataType::FILE) {
+        std::string file_path = cm.data;
+        std::cout <<  "New file at \"" << file_path << "\"" << std::endl;
+    } else {
+        std::cout << cm.data << std::endl;
+    }
 }

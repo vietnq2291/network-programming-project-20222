@@ -117,7 +117,8 @@ struct MessagePacket_t {
 typedef struct MessagePacket_t MessagePacket;
 
 struct ChatMessage_t{
-    int sender;
+    int chat_id;
+    int sender_id;
     time_t timestamp;
     DataType data_type;
     std::string data;
@@ -130,5 +131,12 @@ struct Friend_t {
     int status;
 };
 typedef struct Friend_t Friend;
+
+struct Chat_t {
+    ChatType ctype;
+    int cid;
+    std::string cname;
+};
+typedef struct Chat_t Chat;
 
 #endif // COMMON_H

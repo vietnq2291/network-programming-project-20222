@@ -52,10 +52,26 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../Server/main.cpp \
-		../Server/serverwindow.cpp moc_serverwindow.cpp
-OBJECTS       = main.o \
+SOURCES       = ../Server/AnonymousChatRoom.cpp \
+		../Server/Message.cpp \
+		../Server/SQLQuery.cpp \
+		../Server/Server.cpp \
+		../Server/User.cpp \
+		../Server/Utils.cpp \
+		../Server/main.cpp \
+		../Server/serverwindow.cpp moc_SQLQuery.cpp \
+		moc_Server.cpp \
+		moc_serverwindow.cpp
+OBJECTS       = AnonymousChatRoom.o \
+		Message.o \
+		SQLQuery.o \
+		Server.o \
+		User.o \
+		Utils.o \
+		main.o \
 		serverwindow.o \
+		moc_SQLQuery.o \
+		moc_Server.o \
 		moc_serverwindow.o
 DIST          = /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/common/unix.conf \
@@ -183,6 +199,7 @@ DIST          = /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/qt_config.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/spec_post.prf \
+		../Server/.qmake.stash \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/toolchain.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/default_pre.prf \
@@ -203,7 +220,20 @@ DIST          = /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/exceptions.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/yacc.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/lex.prf \
-		../Server/Server.pro ../Server/serverwindow.h ../Server/main.cpp \
+		../Server/Server.pro ../Server/AnonymousChatRoom.h \
+		../Server/Message.h \
+		../Server/SQLQuery.h \
+		../Server/Server.h \
+		../Server/User.h \
+		../Server/Utils.h \
+		../Server/common.h \
+		../Server/serverwindow.h ../Server/AnonymousChatRoom.cpp \
+		../Server/Message.cpp \
+		../Server/SQLQuery.cpp \
+		../Server/Server.cpp \
+		../Server/User.cpp \
+		../Server/Utils.cpp \
+		../Server/main.cpp \
 		../Server/serverwindow.cpp
 QMAKE_TARGET  = Server
 DESTDIR       = 
@@ -342,6 +372,7 @@ Makefile: ../Server/Server.pro /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/linux-g+
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/qt_config.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/toolchain.prf \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/default_pre.prf \
@@ -494,6 +525,7 @@ Makefile: ../Server/Server.pro /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/linux-g+
 /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/qt_config.prf:
 /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/linux-g++/qmake.conf:
 /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/exclusive_builds.prf:
 /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/toolchain.prf:
 /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/default_pre.prf:
@@ -534,8 +566,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Server/serverwindow.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../Server/main.cpp ../Server/serverwindow.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Server/AnonymousChatRoom.h ../Server/Message.h ../Server/SQLQuery.h ../Server/Server.h ../Server/User.h ../Server/Utils.h ../Server/common.h ../Server/serverwindow.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../Server/AnonymousChatRoom.cpp ../Server/Message.cpp ../Server/SQLQuery.cpp ../Server/Server.cpp ../Server/User.cpp ../Server/Utils.cpp ../Server/main.cpp ../Server/serverwindow.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -567,9 +599,24 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++1z -Wall -Wextra -fPIC -dM -E -o moc_predefs.h /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_serverwindow.cpp
+compiler_moc_header_make_all: moc_SQLQuery.cpp moc_Server.cpp moc_serverwindow.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_serverwindow.cpp
+	-$(DEL_FILE) moc_SQLQuery.cpp moc_Server.cpp moc_serverwindow.cpp
+moc_SQLQuery.cpp: ../Server/SQLQuery.h \
+		moc_predefs.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/moc
+	/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/moc $(DEFINES) --include /home/dungnguyen/Desktop/Network/network-programming-project-20222/GUI/build-Server-Desktop_Qt_6_5_1_GCC_64bit-Debug/moc_predefs.h -I/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/linux-g++ -I/home/dungnguyen/Desktop/Network/network-programming-project-20222/GUI/Server -I/home/dungnguyen/Qt/6.5.1/gcc_64/include -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore -I. -I/usr/include/c++/12 -I/usr/include/x86_64-linux-gnu/c++/12 -I/usr/include/c++/12/backward -I/usr/lib/gcc/x86_64-linux-gnu/12/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../Server/SQLQuery.h -o moc_SQLQuery.cpp
+
+moc_Server.cpp: ../Server/Server.h \
+		../Server/Message.h \
+		../Server/common.h \
+		../Server/SQLQuery.h \
+		../Server/User.h \
+		../Server/AnonymousChatRoom.h \
+		moc_predefs.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/moc
+	/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/moc $(DEFINES) --include /home/dungnguyen/Desktop/Network/network-programming-project-20222/GUI/build-Server-Desktop_Qt_6_5_1_GCC_64bit-Debug/moc_predefs.h -I/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/linux-g++ -I/home/dungnguyen/Desktop/Network/network-programming-project-20222/GUI/Server -I/home/dungnguyen/Qt/6.5.1/gcc_64/include -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore -I. -I/usr/include/c++/12 -I/usr/include/x86_64-linux-gnu/c++/12 -I/usr/include/c++/12/backward -I/usr/lib/gcc/x86_64-linux-gnu/12/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../Server/Server.h -o moc_Server.cpp
+
 moc_serverwindow.cpp: ../Server/serverwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QtWidgets \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QtWidgetsDepends \
@@ -1162,6 +1209,39 @@ compiler_lex_clean:
 compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean 
 
 ####### Compile
+
+AnonymousChatRoom.o: ../Server/AnonymousChatRoom.cpp ../Server/AnonymousChatRoom.h \
+		../Server/User.h \
+		../Server/common.h \
+		../Server/SQLQuery.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o AnonymousChatRoom.o ../Server/AnonymousChatRoom.cpp
+
+Message.o: ../Server/Message.cpp ../Server/Message.h \
+		../Server/common.h \
+		../Server/SQLQuery.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Message.o ../Server/Message.cpp
+
+SQLQuery.o: ../Server/SQLQuery.cpp ../Server/SQLQuery.h \
+		../Server/Utils.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SQLQuery.o ../Server/SQLQuery.cpp
+
+Server.o: ../Server/Server.cpp ../Server/Server.h \
+		../Server/Message.h \
+		../Server/common.h \
+		../Server/SQLQuery.h \
+		../Server/User.h \
+		../Server/AnonymousChatRoom.h \
+		../Server/Utils.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Server.o ../Server/Server.cpp
+
+User.o: ../Server/User.cpp ../Server/User.h \
+		../Server/common.h \
+		../Server/SQLQuery.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o User.o ../Server/User.cpp
+
+Utils.o: ../Server/Utils.cpp ../Server/Utils.h \
+		../Server/common.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Utils.o ../Server/Utils.cpp
 
 main.o: ../Server/main.cpp ../Server/serverwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QtWidgets \
@@ -2313,6 +2393,12 @@ serverwindow.o: ../Server/serverwindow.cpp ../Server/serverwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/qtnetworkversion.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/qudpsocket.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o serverwindow.o ../Server/serverwindow.cpp
+
+moc_SQLQuery.o: moc_SQLQuery.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_SQLQuery.o moc_SQLQuery.cpp
+
+moc_Server.o: moc_Server.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_Server.o moc_Server.cpp
 
 moc_serverwindow.o: moc_serverwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_serverwindow.o moc_serverwindow.cpp

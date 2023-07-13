@@ -8,10 +8,23 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    AnonymousChatRoom.cpp \
+    Message.cpp \
+    SQLQuery.cpp \
+    Server.cpp \
+    User.cpp \
+    Utils.cpp \
     main.cpp \
     serverwindow.cpp
 
 HEADERS += \
+    AnonymousChatRoom.h \
+    Message.h \
+    SQLQuery.h \
+    Server.h \
+    User.h \
+    Utils.h \
+    common.h \
     serverwindow.h
 
 # Default rules for deployment.

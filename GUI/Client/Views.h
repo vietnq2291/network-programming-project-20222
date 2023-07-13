@@ -16,11 +16,11 @@ signals:
     void recievedAuthView(QString user, QString pass);
     void setChatView(QString chat_name);
     void sendMessageView(QString packet);
-    void recvMessage(QString message);
+    void recvMessage(ChatMessage message);
 
 private slots:
     void recvAuth(QString user, QString pass);
-    void recvMsg(QString message);
+    void recvMsg(ChatMessage message);
     void setToChat(QString chat_name);
     void sendMessage(QString packet);
 

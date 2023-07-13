@@ -11,6 +11,9 @@ ChatWindow::ChatWindow()
     this->setWindowIcon(QIcon(pix));
     ui.sendButton->setIcon(QIcon(pix));
     ui.messageBox->setReadOnly(true);
+
+    connect(ui.sendButton, SIGNAL(clicked(bool)), this, SLOT(pressSendButton()));
+    connect(ui.messageBox, SIGNAL(returnPressed()), this, SLOT(pressSendEnter()));
 }
 
 ChatWindow::~ChatWindow(){
@@ -26,7 +29,7 @@ void ChatWindow::loadFriend(std::string disName){
 void ChatWindow::pressSendButton() {
     QString sendPack = ui.messageBox->text();
     if (!sendPack.isEmpty()) {
-        QString Message = "Me:" + sendPack + "\n";
+        QString Message = "Me:" + sendPack;
         ui.convBox->append(Message);
         emit sendMessage(sendPack);
     }
@@ -41,7 +44,7 @@ void ChatWindow::pressSendEnter() {
 
 void ChatWindow::recvMsg(ChatMessage message) {
 
-    QString Message = chat_name + "<" + format_time(message.timestamp).c_str() + ">:" + message.data.c_str() + "\n";
+    QString Message = chat_name + "<" + time2string(message.timestamp).c_str() + ">:" + message.data.c_str();
 
     ui.convBox->append(Message);
 }
@@ -52,7 +55,6 @@ void ChatWindow::on_listWidget_itemClicked(QListWidgetItem *chat)
     ui.messageBox->setReadOnly(false);
     chat_name = chat->text();
     ui.label_3->setText(chat_name);
-
     emit chooseChat(chat->text());
 }
 

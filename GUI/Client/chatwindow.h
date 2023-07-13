@@ -2,7 +2,7 @@
 #define CLIENTWINDOW_H
 
 #include <QWidget>
-#include <QtNetwork>
+
 #include "ui_chatwindow.h"
 #include "Client.h"
 #include "Utils.h"
@@ -31,6 +31,7 @@ class ChatWindow : public QWidget
 
     private:
         Ui::ChatWindow ui;
+        QTcpSocket input_socket;
         QString chat_name;
 
 };
