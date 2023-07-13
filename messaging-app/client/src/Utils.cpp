@@ -193,7 +193,7 @@ ChatMessage create_chat_message(MessagePacket p, std::string& folder_path) {
 }
 
 void print_chat_message(ChatMessage& cm) {
-    std::cout << "\n\033[32m(chatID: " << cm.chat_id <<
+    std::cout << "\033[32m(chatID: " << cm.chat_id <<
                 ", senderID: " << cm.sender_id << 
                 ", time: " << time2string(cm.timestamp) <<
                 "): \033[0m";
