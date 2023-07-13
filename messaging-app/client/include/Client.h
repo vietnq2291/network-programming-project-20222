@@ -27,6 +27,7 @@ public:
     void write_buff(std::string& data);
     void clear_buff();
     void clear_storage();
+    void insert_message(int chat_id, ChatMessage& cm);
 
 private:
     int _conn_fd;

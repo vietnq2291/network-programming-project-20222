@@ -703,26 +703,14 @@ void Client::process_chat_history(std::string& data) {
         int sender_id = std::stoi(data.substr(sid_delim + 1, sid_len));
         pos = sid_delim + sid_len + 1;
 
-        // std::cout << "\n\033[38;5;208m*\033[0m Msg ID    : " << msg_id << std::endl;
-        // std::cout << "  Chat ID   : " << cid << std::endl;
-        // std::cout << "  Sender ID : " << sender_id << std::endl;
-        // std::cout << "  Data type : " << ((dtype == DataType::TEXT) ? "text" : "file") << std::endl;
-        // std::cout << "  Content   : " << content << std::endl;
-        // std::cout << "  Time      : " << time << std::endl;
-
-        if (_chat_map.find(cid) == _chat_map.end()) {
-            _chat_map[cid] = std::list<ChatMessage>();
-        }
-        if (string2time(time) < _chat_map[cid].front().timestamp || _chat_map[cid].empty()) {
-            ChatMessage cm {
+        ChatMessage cm {
             cid,
             sender_id,
             string2time(time),
             dtype,
             content
-            };
-            _chat_map[cid].push_front(cm);
-        }
+        };
+        insert_message(cid, cm);
     }
     if (cid == -1) return;
     for (ChatMessage cm : _chat_map[cid]) {
@@ -743,3 +731,27 @@ void Client::clear_storage() {
     _chat_list.clear();
     _friend_list.clear();
 }
+
+void Client::insert_message(int chat_id, ChatMessage& cm) {
+    if (_chat_map.find(chat_id) == _chat_map.end()) {
+        _chat_map[chat_id] = std::list<ChatMessage>();
+        _chat_map[chat_id].push_front(cm);
+        return;
+    }
+
+    if (cm.timestamp < _chat_map[chat_id].front().timestamp) {
+        _chat_map[chat_id].push_front(cm);
+        return;
+    }
+
+    for (auto it = _chat_map[chat_id].begin(); it != _chat_map[chat_id].end(); it++) {
+        if (cm.timestamp < it->timestamp) {
+            _chat_map[chat_id].insert(it, cm);
+            return;
+        } else if (cm.timestamp == it->timestamp) 
+            return;
+    }
+    _chat_map[chat_id].push_back(cm);
+}
+
+
