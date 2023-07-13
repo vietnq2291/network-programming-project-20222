@@ -20,6 +20,7 @@ public:
     bool is_delete_successful();
     void disconnect();
     void free_result();
+    MYSQL *get_connection() const { return _conn; }
 
 
 private:

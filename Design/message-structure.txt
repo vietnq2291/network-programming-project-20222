@@ -3,6 +3,7 @@ Commands & Message structure
 ============================
 
 Requests: 
+
     Login:
         R L <username> <password>
             Message(MessageType::REQUEST, RequestType::LOGIN, _user_id, auth_data)
@@ -169,15 +170,15 @@ Requests:
                     where <user_i> = <user_id_length>:<user_id><display_name_length>:<display_name>
 
     Get messages from server database:
-        R M <chat_id> <number of messages>
+        R M <chat_id> <number of messages> <offset>
             Message(MessageType::REQUEST, RequestType::GET_CHAT_MESSAGES, _user_id, get_latest_messages_data)
-                get_latest_messages_data = <chat_id_len>:<chat_id><num_messages>
+                get_latest_messages_data = <chat_id>:<num_messages>:<offset>
             
             Message(MessageType::RESPONSE, ResponseType::ERROR, "Internal server error")
             Message(MessageType::GET_CHAT_MESSAGES_SUCCESS, data)
                 data = <num_messages_length>:<num_messages><message_1><message_2>...
-                    where <message_i> = <msg_id_length>:<msg_id><chat_id_length>:<chat_id><chat_type><content_length>:<content><time_created_length>:<time_created><sender_id_length>:<sender_id>
-                        where <chat_type> = 'P' or 'G'
+                    where <message_i> = <msg_id_length>:<msg_id><chat_id_length>:<chat_id><data_type><content_length>:<content><time_created_length>:<time_created><sender_id_length>:<sender_id>
+                        where <data_type> = 'T' or 'F'
 
     Anonymous chat:
         R A C   # request to join an anonymous chat
@@ -198,7 +199,6 @@ Requests:
             
             Message(MessageType::PUSH, PushType::ANONYMOUS_CHAT_ENDED, _user_id, "Anonymous chat ended")
 
-
 Chat:
     C P T <chat_id> <message>
         Message(MessageType::CHAT, ChatType::PRIVATE_CHAT, DataType::TEXT, _user_id, chat_id, time(NULL), data)
@@ -212,20 +212,21 @@ Chat:
     C G F <chat_id> <file_path>    
         Message(MessageType::CHAT, ChatType::GROUP_CHAT, DataType::FILE, _user_id, chat_id, time(NULL), filedata)
   
-    where filedata = <file_name_length>:<file_name><file_content_length>:<file_content>
-    
-    # save message to database:
-        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Chat ID not found")
-        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Failed to save message to database")  
-        Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Message saved to database")
-        Message(MessageType::RESPONSE, ResponseType::ERROR, "Failed to query database")
+        where filedata = <file_name_length>:<file_name><file_content_length>:<file_content>
+        
+        # save message to database:
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Chat ID not found")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Failed to save message to database")  
+            Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Message saved to database")
+            Message(MessageType::RESPONSE, ResponseType::ERROR, "Failed to query database")
 
-    # forward message to receiver:
-        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find receiver of chat")
-        Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not send message to receiver")
-        Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Message sent")
+        # forward message to receiver:
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not find receiver of chat")
+            Message(MessageType::RESPONSE, ResponseType::FAILURE, "Can not send message to receiver")
+            Message(MessageType::RESPONSE, ResponseType::SUCCESS, "Message sent")
 
-    # ------------------- #
+        # ------------------- #
+        
     C A T <chat_id> <message>
         Message(MessageType::CHAT, ChatType::ANONYMOUS_CHAT, DataType::TEXT, _user_id, chat_id, time(NULL), data)
     

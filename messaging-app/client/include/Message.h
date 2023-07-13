@@ -11,6 +11,7 @@ public:
     Message(MessageType message_type, ChatType chat_type, DataType data_type, int sender, int chat_id,  time_t timestamp, std::string data);
     Message(MessageType message_type, RequestType request_type, int sender, std::string data);
     Message(MessageType message_type, RequestType request_type, int sender);
+    
 
     // Get the next MessagePacket struct in the list
     bool get_next_packet(MessagePacket& packet);
