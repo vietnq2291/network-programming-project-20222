@@ -10,9 +10,6 @@ class controller: public QObject
 public:
     controller();
 
-private slots:
-    void Authenticate(QString username, QString password);
-
 private:
     views* v;
     client* clt;

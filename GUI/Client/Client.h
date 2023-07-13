@@ -2,6 +2,8 @@
 #define CLIENT_H
 
 #include <QObject>
+#include <QtNetwork>
+#include <QTcpSocket>
 #include <iostream>
 #include <arpa/inet.h>
 
@@ -13,11 +15,11 @@ class client: public QObject
 public:
     client(int port, std::string ip);
 
-    void connect();
+    void connectToServer();
     void start();
     void send_chat_message(std::string buff, int chat_id, ChatType chat_type, DataType data_type);
     void send_request_message(std::string buff);
-    void receive_message();
+
     void stop();
     int process_chat_packet(MessagePacket& packet);
     void process_friend_list(std::string& data);
@@ -31,10 +33,16 @@ signals:
 private slots:
     void setChat(QString chat_name);
     void sendMessage(QString packet);
+    void receive_message();
+    void Authenticate(QString username, QString password);
+    void connectSuccess();
+    void loiSocket(QAbstractSocket::SocketError err);
 
 private:
+
     int _conn_fd;
     int _server_port;
+    QTcpSocket* qsocket;
     std::string _server_ip;
     struct sockaddr_in _server_addr;
     std::string _buff;
@@ -48,5 +56,8 @@ private:
     std::string _folder_path;
     std::vector<Friend> _friend_list;
 };
+
+QDataStream &operator<<(QDataStream &out, const MessagePacket &dataStruct);
+//QDataStream &operator>>(QDataStream &in, MessagePacket &dataStruct);
 
 #endif // CLIENT_H

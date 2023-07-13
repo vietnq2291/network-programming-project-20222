@@ -7,9 +7,9 @@
 *****************************************************************************/
 
 #include "../Client/chatwindow.h"
+#include <QtGui/qtextcursor.h>
 #include <QtNetwork/QSslPreSharedKeyAuthenticator>
 #include <QtNetwork/QSslError>
-#include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
 #if __has_include(<QtCore/qtmochelpers.h>)

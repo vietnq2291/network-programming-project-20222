@@ -9,102 +9,194 @@
 #include "Utils.h"
 #include "common.h"
 
+QDataStream &operator<<(QDataStream &out, const MessagePacket &dataStruct)
+{
+    out << static_cast<int>(dataStruct.type);
+    switch (dataStruct.type) {
+        case MessageType::CHAT:
+            out << static_cast<int>(dataStruct.chat_header.chat_type);
+            out << static_cast<int>(dataStruct.chat_header.data_type);
+            out << dataStruct.chat_header.sender;
+            out << dataStruct.chat_header.chat_id;
+            out << static_cast<qint64>(dataStruct.chat_header.timestamp);
+            break;
+
+        case MessageType::REQUEST:
+            out << static_cast<int>(dataStruct.request_header.request_type);
+            out << dataStruct.request_header.sender;
+            break;
+
+        case MessageType::RESPONSE:
+            out << static_cast<int>(dataStruct.response_header.response_type);
+            break;
+
+        case MessageType::PUSH:
+            out << static_cast<int>(dataStruct.push_header.push_type);
+            out << dataStruct.push_header.sender;
+            break;
+        }
+
+    out << dataStruct.fin;
+    out << dataStruct.seq;
+    out << dataStruct.data_length;
+    out.writeRawData(dataStruct.data, DATA_SIZE);
+    return out;
+}
+
+//QDataStream &operator>>(QDataStream &in, MessagePacket &dataStruct)
+//{
+////    dataStruct = structName();
+////    in >> dataStruct.varint;
+////    in.readRawData(dataStruct.varchar, 10) return in;
+//}
+
 client::client(int port, std::string ip) {
     _server_port = port;
     _server_ip = ip;
     _user_id = -1;
     _display_name = "";
+    qsocket = new QTcpSocket(this);
 
     /* ----- setup client socket ----- */
     // create socket
-    if ((_conn_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        std::cerr << "Can not create socket" << std::endl;
-        exit(1);
-    }
+//    if ((_conn_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+//        std::cerr << "Can not create socket" << std::endl;
+//        exit(1);
+//    }
+
+
 
     // set server address
-    bzero((char *)&_server_addr, sizeof(_server_addr));
-    _server_addr.sin_family = AF_INET;
-    _server_addr.sin_port = htons(_server_port);
-    _server_addr.sin_addr.s_addr = inet_addr(_server_ip.c_str());
+//    bzero((char *)&_server_addr, sizeof(_server_addr));
+//    _server_addr.sin_family = AF_INET;
+//    _server_addr.sin_port = htons(_server_port);
+//    _server_addr.sin_addr.s_addr = inet_addr(_server_ip.c_str());
+
+    connect(qsocket, SIGNAL(connected()), this, SLOT(connectSuccess()));
+    connect(qsocket, SIGNAL(errorOccurred(QAbstractSocket::SocketError)), this, SLOT(loiSocket(QAbstractSocket::SocketError)));
 
     std::cout << "Client started" << std::endl;
 }
 
-void client::connect() {
-
-    if (::connect(_conn_fd, (struct sockaddr *)&_server_addr, sizeof(struct sockaddr)) < 0) {
-        std::cerr << "Can not connect to server at " << _server_ip << ":" << _server_port << std::endl;
-        exit(1);
-    }
-
-    std::cout << "Connected to server at " << _server_ip << ":" << _server_port << std::endl;
-}
-
-void client::start() {
-    std::string buff;
-
-    while (true) {
-        // clear the set ahead of time
-        FD_ZERO(&_read_fds);
-
-        // add our descriptors to the set
-        FD_SET(_conn_fd, &_read_fds);
-        FD_SET(STDIN_FILENO, &_read_fds);
-
-        // find the largest descriptor
-        int maxfd = std::max(_conn_fd, STDIN_FILENO);
-
-        // wait until either socket has data ready to be recv()
-        int rv = select(maxfd + 1, &_read_fds, NULL, NULL, NULL);
-
-        if (rv == -1) {
-            std::cerr << "Error: select()" << std::endl;
-        } else {
-            // one or both of the descriptors have data
-            if (FD_ISSET(STDIN_FILENO, &_read_fds))
-            {
-                std::getline(std::cin, buff);
-
-                // buff is like <type> <data>
-                // if type = R, then call send_request_message()
-                // if type = C, then call send_chat_message()
-
-                // check first character of buff to determine message type
-                if (buff[0] == 'R') {
-                    send_request_message(buff);
-                } else if (buff[0] == 'C') {
-                    // buff = C <chat_type> <chat_id> <message>
-                    // where <chat_type> = G (group chat) or P (private chat)
-
-                    ChatType chat_type;
-                    if (buff[2] == 'G') {
-                        chat_type = ChatType::GROUP_CHAT;
-                    } else if (buff[2] == 'P') {
-                        chat_type = ChatType::PRIVATE_CHAT;
-                    } else {
-                        std::cout << "Invalid chat type" << std::endl;
-                    }
-                    int chat_id = std::stoi(buff.substr(4, buff.find(' ', 4) - 4));
-                    buff = buff.substr(buff.find(' ', 4) + 1);
-                    send_chat_message(buff, chat_id, chat_type, DataType::TEXT);
-                } else {
-                    std::cout << "Invalid message type" << std::endl;
-                }
-            }
-
-            if (FD_ISSET(_conn_fd, &_read_fds))
-            {
-                receive_message();
-            }
-        }
+void client::loiSocket(QAbstractSocket::SocketError err) {
+    switch(err) { // Hien thi thong bao khac nhau tuy theo loi gap phai
+        case QAbstractSocket::HostNotFoundError:
+            std::cerr << (tr("<em>LỖI : Không thể kết nối tới máy chủ ! Vui lòng kiểm tra lại địa chỉ IP và cổng truy cập.</em>")).toStdString();
+            break;
+        case QAbstractSocket::ConnectionRefusedError:
+            std::cerr << (tr("<em>LỖI : Máy chủ từ chối truy cập ! Vui lòng kiểm tra chắc chắn là máy chủ đã được khởi động. Lưu ý đồng thời lỗi địa chỉ IP và cổng truy cập.</em>")).toStdString();
+            break;
+        case QAbstractSocket::RemoteHostClosedError:
+            std::cerr << (tr("<em>LỖI : Máy chủ đã ngắt kết nối !</em>")).toStdString();
+            break;
+        default:
+            std::cerr << (tr("<em>LỖI : ") + qsocket->errorString() + tr("</em>")).toStdString();
     }
 }
+
+void client::connectToServer() {
+//    qsocket->abort();
+//    qsocket->connectToHost(_server_ip.c_str(), qint16(_server_port));
+
+    qsocket->abort();
+    qsocket->connectToHost("127.0.0.1", 5050);
+
+//    if (::connect(_conn_fd, (struct sockaddr *)&_server_addr, sizeof(struct sockaddr)) < 0) {
+//        std::cerr << "Can not connect to server at " << _server_ip << ":" << _server_port << std::endl;
+//        exit(1);
+//    }
+
+//    if (qsocket->setSocketDescriptor(_conn_fd) == true) {
+//        std::cerr << "set socket descriptor successfull with socket descriptor as: " << qsocket->isWritable() << std::endl;
+//    } else {
+//        std::cerr << "cannot set socket descriptor" << std::endl;
+//    }
+
+//    connect(qsocket, SIGNAL(readyRead()), this, SLOT(receive_message()));
+//    connect(qsocket, SIGNAL(connected()), this, SLOT(connectSuccess()));
+
+//    std::cout << "Connected to server by fd at " << _server_ip << ":" << _server_port << std::endl;
+//    std::cout << "Connected to server by qt at " << qsocket->localAddress().toString().toStdString() << ":" << qsocket->localPort() << std::endl;
+}
+
+void client::connectSuccess() {
+    std::cout << "Connected to server by qt at " << qsocket->localAddress().toString().toStdString() << ":" << qsocket->localPort() << std::endl;
+}
+
+//void client::start() {
+//    std::string buff;
+
+//    while (true) {
+//        // clear the set ahead of time
+//        FD_ZERO(&_read_fds);
+
+//        // add our descriptors to the set
+//        FD_SET(_conn_fd, &_read_fds);
+//        FD_SET(STDIN_FILENO, &_read_fds);
+
+//        // find the largest descriptor
+//        int maxfd = std::max(_conn_fd, STDIN_FILENO);
+
+//        // wait until either socket has data ready to be recv()
+//        int rv = select(maxfd + 1, &_read_fds, NULL, NULL, NULL);
+
+//        if (rv == -1) {
+//            std::cerr << "Error: select()" << std::endl;
+//        } else {
+//            // one or both of the descriptors have data
+//            if (FD_ISSET(STDIN_FILENO, &_read_fds))
+//            {
+//                std::getline(std::cin, buff);
+
+//                // buff is like <type> <data>
+//                // if type = R, then call send_request_message()
+//                // if type = C, then call send_chat_message()
+
+//                // check first character of buff to determine message type
+//                if (buff[0] == 'R') {
+//                    send_request_message(buff);
+//                } else if (buff[0] == 'C') {
+//                    // buff = C <chat_type> <chat_id> <message>
+//                    // where <chat_type> = G (group chat) or P (private chat)
+
+//                    ChatType chat_type;
+//                    if (buff[2] == 'G') {
+//                        chat_type = ChatType::GROUP_CHAT;
+//                    } else if (buff[2] == 'P') {
+//                        chat_type = ChatType::PRIVATE_CHAT;
+//                    } else {
+//                        std::cout << "Invalid chat type" << std::endl;
+//                    }
+//                    int chat_id = std::stoi(buff.substr(4, buff.find(' ', 4) - 4));
+//                    buff = buff.substr(buff.find(' ', 4) + 1);
+//                    send_chat_message(buff, chat_id, chat_type, DataType::TEXT);
+//                } else {
+//                    std::cout << "Invalid message type" << std::endl;
+//                }
+//            }
+
+//            if (FD_ISSET(_conn_fd, &_read_fds))
+//            {
+//                receive_message();
+//            }
+//        }
+//    }
+//}
 
 void client::stop() {
     std::cout << "Client stopped" << std::endl;
     close(_conn_fd);
     exit(0);
+}
+
+void client::Authenticate(QString username, QString password) {
+//    std::string buff = "R L " + username.toStdString() + " " + password.toStdString();
+    std::string buff = encode_auth_data(username.toStdString(), password.toStdString());
+    std::cerr << buff << std::endl;
+    sendMessage(buff.c_str());
+//    receive_message();
+
+//    connect(qsocket, SIGNAL(readyRead()), this, SLOT(receive_message()));
 }
 
 void client::send_chat_message(std::string buff, int chat_id, ChatType chat_type, DataType data_type) {
@@ -201,6 +293,14 @@ void client::receive_message() {
 
     int bytes_received = recv(_conn_fd, &packet, sizeof(packet), 0);
 
+//    QDataStream in(qsocket);
+//    QString messageReceivedFrom;
+//    in>>messageReceivedFrom;
+
+//    if (messageReceivedFrom.isEmpty()) {
+//        std::cerr << "Error in failed!" << std::endl;
+//    }
+
     if (bytes_received < 0) {
         std::cerr << "Error: receive failed!" << std::endl;
         return;
@@ -278,8 +378,8 @@ void client::receive_message() {
         if (packet.fin == 1) {
             ChatMessage latest_msg = chat_map[chat_id].back();
             std::cout << "\n\033[32m(" << chat_id <<
-                ", " << latest_msg.sender <<
-                ", " << format_time(latest_msg.timestamp) <<
+                ", " << latest_msg.sender_id <<
+                ", " << time2string(latest_msg.timestamp) <<
                 "): \033[0m";
 
             if (packet.chat_header.data_type == DataType::FILE) {
@@ -521,7 +621,7 @@ int client::process_chat_packet(MessagePacket& p) {
         chat_map[cid].push_back(m);
     }
     else {
-        if (p.chat_header.sender == chat_map[cid].back().sender
+        if (p.chat_header.sender == chat_map[cid].back().sender_id
             && p.chat_header.timestamp == chat_map[cid].back().timestamp) {
             if (dtype == DataType::TEXT) {
                 chat_map[cid].back().data += p.data;
@@ -581,9 +681,60 @@ void client::clean_buff() {
 }
 
 void client::setChat(QString chat_name){
+    this->_chat_id = 1;
 
-};
+}
 
 void client::sendMessage(QString packet) {
-    send_chat_message(packet.toStdString(), this->_chat_id, ChatType::PRIVATE_CHAT, DataType::TEXT);
+//    send_chat_message(packet.toStdString(), this->_chat_id, ChatType::PRIVATE_CHAT, DataType::TEXT);
+    QByteArray sendPacket;
+    QDataStream out(&sendPacket, QIODevice::WriteOnly);
+
+    Message message(MessageType::REQUEST, RequestType::LOGIN, _user_id, packet.toStdString());
+
+    MessagePacket mpacket;
+
+    while (message.get_next_packet(mpacket)) {
+        std::cerr << "copying pack" << std::endl;
+        out << &mpacket;
+    }
+
+
+
+//    print all data of packet
+             std::string type, request_type;
+             if (mpacket.type == MessageType::REQUEST) {
+                 type = "REQUEST";
+             } else if (mpacket.type == MessageType::RESPONSE) {
+                 type = "RESPONSE";
+             } else if (mpacket.type == MessageType::CHAT) {
+                 type = "CHAT";
+             } else {
+                 type = "UNKNOWN";
+             }
+             if (mpacket.request_header.request_type == RequestType::LOGIN) {
+                 request_type = "LOGIN";
+             } else if (mpacket.request_header.request_type == RequestType::SIGNUP) {
+                 request_type = "SIGNUP";
+             } else if (mpacket.request_header.request_type == RequestType::LOGOUT) {
+                 request_type = "LOGOUT";
+             } else if (mpacket.request_header.request_type == RequestType::UPDATE_ACCOUNT) {
+                 request_type = "UPDATE_ACCOUNT";
+             } else {
+                 request_type = "UNKNOWN";
+             }
+
+             std::cout << "Sent message: (type, request_type, sender, fin, seq, data_len, data) = " << "(" << type <<
+                                                                                                         ", " << request_type <<
+                                                                                                         ", " << mpacket.request_header.sender <<
+                                                                                                         ", " << mpacket.fin <<
+                                                                                                         ", " << mpacket.seq <<
+                                                                                                         ", " << mpacket.data_length <<
+                                                                                                         ", " << mpacket.data << ")" << std::endl;
+
+
+    if (qsocket->write(sendPacket) < 0) {
+            std::cerr << "pack in stream but not sent" << std::endl;
+    }
+
 }

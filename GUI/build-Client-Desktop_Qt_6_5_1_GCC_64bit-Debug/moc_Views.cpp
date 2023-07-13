@@ -7,9 +7,9 @@
 *****************************************************************************/
 
 #include "../Client/Views.h"
+#include <QtGui/qtextcursor.h>
 #include <QtNetwork/QSslPreSharedKeyAuthenticator>
 #include <QtNetwork/QSslError>
-#include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
 #if __has_include(<QtCore/qtmochelpers.h>)
@@ -52,6 +52,7 @@ static constexpr auto qt_meta_stringdata_CLASSviewsENDCLASS = QtMocHelpers::stri
     "sendMessageView",
     "packet",
     "recvMessage",
+    "ChatMessage",
     "message",
     "recvAuth",
     "recvMsg",
@@ -64,7 +65,7 @@ static constexpr auto qt_meta_stringdata_CLASSviewsENDCLASS = QtMocHelpers::stri
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASSviewsENDCLASS_t {
-    uint offsetsAndSizes[40];
+    uint offsetsAndSizes[42];
     char stringdata0[6];
     char stringdata1[13];
     char stringdata2[1];
@@ -76,15 +77,16 @@ struct qt_meta_stringdata_CLASSviewsENDCLASS_t {
     char stringdata8[16];
     char stringdata9[7];
     char stringdata10[12];
-    char stringdata11[8];
-    char stringdata12[9];
-    char stringdata13[8];
-    char stringdata14[10];
-    char stringdata15[12];
-    char stringdata16[13];
-    char stringdata17[14];
-    char stringdata18[9];
-    char stringdata19[20];
+    char stringdata11[12];
+    char stringdata12[8];
+    char stringdata13[9];
+    char stringdata14[8];
+    char stringdata15[10];
+    char stringdata16[12];
+    char stringdata17[13];
+    char stringdata18[14];
+    char stringdata19[9];
+    char stringdata20[20];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASSviewsENDCLASS_t::offsetsAndSizes) + ofs), len 
@@ -101,15 +103,16 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSviewsENDCLASS_t qt_meta_stringd
         QT_MOC_LITERAL(69, 15),  // "sendMessageView"
         QT_MOC_LITERAL(85, 6),  // "packet"
         QT_MOC_LITERAL(92, 11),  // "recvMessage"
-        QT_MOC_LITERAL(104, 7),  // "message"
-        QT_MOC_LITERAL(112, 8),  // "recvAuth"
-        QT_MOC_LITERAL(121, 7),  // "recvMsg"
-        QT_MOC_LITERAL(129, 9),  // "setToChat"
-        QT_MOC_LITERAL(139, 11),  // "sendMessage"
-        QT_MOC_LITERAL(151, 12),  // "switchToChat"
-        QT_MOC_LITERAL(164, 13),  // "switchToLogin"
-        QT_MOC_LITERAL(178, 8),  // "initChat"
-        QT_MOC_LITERAL(187, 19)   // "std::vector<Friend>"
+        QT_MOC_LITERAL(104, 11),  // "ChatMessage"
+        QT_MOC_LITERAL(116, 7),  // "message"
+        QT_MOC_LITERAL(124, 8),  // "recvAuth"
+        QT_MOC_LITERAL(133, 7),  // "recvMsg"
+        QT_MOC_LITERAL(141, 9),  // "setToChat"
+        QT_MOC_LITERAL(151, 11),  // "sendMessage"
+        QT_MOC_LITERAL(163, 12),  // "switchToChat"
+        QT_MOC_LITERAL(176, 13),  // "switchToLogin"
+        QT_MOC_LITERAL(190, 8),  // "initChat"
+        QT_MOC_LITERAL(199, 19)   // "std::vector<Friend>"
     },
     "views",
     "loggedInView",
@@ -122,6 +125,7 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSviewsENDCLASS_t qt_meta_stringd
     "sendMessageView",
     "packet",
     "recvMessage",
+    "ChatMessage",
     "message",
     "recvAuth",
     "recvMsg",
@@ -157,29 +161,29 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSviewsENDCLASS[] = {
       10,    1,   98,    2, 0x06,    9 /* Public */,
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-      12,    2,  101,    2, 0x08,   11 /* Private */,
-      13,    1,  106,    2, 0x08,   14 /* Private */,
-      14,    1,  109,    2, 0x08,   16 /* Private */,
-      15,    1,  112,    2, 0x08,   18 /* Private */,
-      16,    0,  115,    2, 0x08,   20 /* Private */,
-      17,    0,  116,    2, 0x08,   21 /* Private */,
-      18,    1,  117,    2, 0x08,   22 /* Private */,
+      13,    2,  101,    2, 0x08,   11 /* Private */,
+      14,    1,  106,    2, 0x08,   14 /* Private */,
+      15,    1,  109,    2, 0x08,   16 /* Private */,
+      16,    1,  112,    2, 0x08,   18 /* Private */,
+      17,    0,  115,    2, 0x08,   20 /* Private */,
+      18,    0,  116,    2, 0x08,   21 /* Private */,
+      19,    1,  117,    2, 0x08,   22 /* Private */,
 
  // signals: parameters
     QMetaType::Void,
     QMetaType::Void, QMetaType::QString, QMetaType::QString,    4,    5,
     QMetaType::Void, QMetaType::QString,    7,
     QMetaType::Void, QMetaType::QString,    9,
-    QMetaType::Void, QMetaType::QString,   11,
+    QMetaType::Void, 0x80000000 | 11,   12,
 
  // slots: parameters
     QMetaType::Void, QMetaType::QString, QMetaType::QString,    4,    5,
-    QMetaType::Void, QMetaType::QString,   11,
+    QMetaType::Void, 0x80000000 | 11,   12,
     QMetaType::Void, QMetaType::QString,    7,
     QMetaType::Void, QMetaType::QString,    9,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 19,    2,
+    QMetaType::Void, 0x80000000 | 20,    2,
 
        0        // eod
 };
@@ -207,14 +211,14 @@ Q_CONSTINIT const QMetaObject views::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
         // method 'recvMessage'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<QString, std::false_type>,
+        QtPrivate::TypeAndForceComplete<ChatMessage, std::false_type>,
         // method 'recvAuth'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
         // method 'recvMsg'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<QString, std::false_type>,
+        QtPrivate::TypeAndForceComplete<ChatMessage, std::false_type>,
         // method 'setToChat'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
@@ -242,9 +246,9 @@ void views::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void 
         case 1: _t->recievedAuthView((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[2]))); break;
         case 2: _t->setChatView((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
         case 3: _t->sendMessageView((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
-        case 4: _t->recvMessage((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 4: _t->recvMessage((*reinterpret_cast< std::add_pointer_t<ChatMessage>>(_a[1]))); break;
         case 5: _t->recvAuth((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[2]))); break;
-        case 6: _t->recvMsg((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 6: _t->recvMsg((*reinterpret_cast< std::add_pointer_t<ChatMessage>>(_a[1]))); break;
         case 7: _t->setToChat((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
         case 8: _t->sendMessage((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
         case 9: _t->switchToChat(); break;
@@ -283,7 +287,7 @@ void views::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void 
             }
         }
         {
-            using _t = void (views::*)(QString );
+            using _t = void (views::*)(ChatMessage );
             if (_t _q_method = &views::recvMessage; *reinterpret_cast<_t *>(_a[1]) == _q_method) {
                 *result = 4;
                 return;
@@ -350,7 +354,7 @@ void views::sendMessageView(QString _t1)
 }
 
 // SIGNAL 4
-void views::recvMessage(QString _t1)
+void views::recvMessage(ChatMessage _t1)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
     QMetaObject::activate(this, &staticMetaObject, 4, _a);

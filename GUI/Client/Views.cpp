@@ -51,6 +51,6 @@ void views::sendMessage(QString packet) {
     emit sendMessageView(packet);
 }
 
-void views::recvMsg(QString message) {
+void views::recvMsg(ChatMessage message) {
     emit recvMessage(message);
 }
