@@ -483,6 +483,9 @@ void Server::handle_logout(Message& message, int conn_fd) {
         int user_id = it->second->get_id();
         std::string username = it->second->get_username();
 
+        // remove client fd from anonymous chat wait list
+        _anonymous_chat_room.remove_client_from_waiting_list(conn_fd);
+
         // remove user from online user list
         _online_user_list.erase(username);
         _online_user_list.erase(user_id);
