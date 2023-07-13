@@ -280,7 +280,7 @@ void Client::receive_message() {
             }
         } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_SUCCESS) {
             response_type = "ADD_TO_GROUP_CHAT_SUCCESS";
-            std::cout << "\033[34mFrom server:\033[0m Adding to group chat successfulyy" << std::endl;
+            std::cout << "\033[34mFrom server:\033[0m Adding member to group chat successfuly" << std::endl;
         } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_FAILURE) {
             response_type = "ADD_TO_GROUP_CHAT_FAILURE";
             std::cout << "\033[34mFrom server:\033[0m Cannot add to group chat" << std::endl;
@@ -289,8 +289,11 @@ void Client::receive_message() {
             std::cout << "\033[34mFrom server:\033[0m Leaving group successfully" << std::endl;
         } else if (packet.response_header.response_type == ResponseType::GET_GROUP_CHAT_MEMBERS_SUCCESS) {
             response_type = "GET_GROUP_CHAT_MEMBERS_SUCCESS";
-            // TODO
-            std::cout << "\033[34mFrom server:\033[0m Getting group chat members successfully" << std::endl;
+            write_buff(data);
+            if (packet.fin == 1) {
+                process_group_members_list(_buff);
+                clear_buff();
+            }
         } else if (packet.response_header.response_type == ResponseType::GET_CHAT_MESSAGES_SUCCESS) {
             response_type = "GET_CHAT_HISTORY_SUCCESS";
             // std::cout << "Received message: (type, respose_type, fin, seq, data_len, data) = " << 
@@ -381,12 +384,15 @@ void Client::receive_message() {
         } else if (packet.push_header.push_type == PushType::GROUP_CHAT_JOINED) {
             push_type = "GROUP_CHAT_JOINED";
             std::cout << "\033[34mFrom server:\033[0m Joining group chat successfully" << std::endl;
+            auto [user_id, display_name] = parse_user_info_data(packet.data);
+            std::cout << "  \033[38;5;208mGroup name: \033[0m" << display_name << std::endl;
+            std::cout << "  \033[38;5;208mGroup ID  : \033[0m" << user_id << std::endl;
         } else if (packet.push_header.push_type == PushType::GROUP_CHAT_LEFT) {
             push_type = "GROUP_CHAT_LEFT";
             std::cout << "\033[34mFrom server:\033[0m Leaving group chat successfully" << std::endl;
         } else if (packet.push_header.push_type == PushType::GROUP_CHAT_NEW_MEMBER) {
             push_type = "GROUP_CHAT_NEW_MEMBER";
-            std::cout << "\033[34mFrom server:\033[0m Adding new group chat member successfully" << std::endl;
+            std::cout << "\033[34mFrom server:\033[0m New member: " << packet.data << std::endl;
         } else {
             push_type = "UNKNOWN";
         }
@@ -653,6 +659,32 @@ void Client::process_chat_list(std::string& data) {
     }
 }
 
+void Client::process_group_members_list(std::string& data) {
+    // parse the number of members
+    size_t num_delim = data.find(':');
+    int num_members_len = std::stoi(data.substr(0, num_delim));
+    int num_members = std::stoi(data.substr(num_delim + 1, num_members_len));
+    std::cout << "\033[34mNumber of group members: \033[0m" << num_members << std::endl;
+
+    // parse each friend
+    size_t pos = num_delim + num_members_len + 1;
+    for (int i = 0; i < num_members; i++) {
+        // parse the friend ID
+        size_t id_delim = data.find(':', pos);
+        int id_len = std::stoi(data.substr(pos, id_delim - pos));
+        int id = std::stoi(data.substr(id_delim + 1, id_len));
+        pos = id_delim + id_len + 1;
+
+        // parse the friend display name
+        size_t name_delim = data.find(':', pos);
+        int name_len = std::stoi(data.substr(pos, name_delim - pos));
+        std::string name = data.substr(name_delim + 1, name_len);
+        pos = name_delim + name_len + 1;
+
+        std::cout << "  ID: " << id << ", dname: " << name << std::endl;
+    }
+}
+
 void Client::process_chat_history(std::string& data) {
     size_t num_delim = data.find(':');
     int num_chats_len = std::stoi(data.substr(0, num_delim));
@@ -751,6 +783,7 @@ void Client::insert_message(int chat_id, ChatMessage& cm) {
         } else if (cm.timestamp == it->timestamp) 
             return;
     }
+    
     _chat_map[chat_id].push_back(cm);
 }
 

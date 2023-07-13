@@ -22,6 +22,7 @@ public:
     int process_chat_packet(MessagePacket& packet);
     void process_friend_list(std::string& data);
     void process_chat_list(std::string& data);
+    void process_group_members_list(std::string& data);
     std::tuple<int, std::string> process_chat_history_header(std::string& data);
     void process_chat_history(std::string& data);
     void write_buff(std::string& data);
