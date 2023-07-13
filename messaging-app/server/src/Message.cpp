@@ -128,15 +128,22 @@ bool Message::save(SQLQuery sql_query, MessagePacket& response_packet) {
             else if (_template_packet.chat_header.data_type == DataType::FILE)
                 data_type = "FILE";
 
+            MYSQL_STMT *stmt = mysql_stmt_init(sql_query.get_connection());
             query  = "INSERT INTO `Message` (`chat_id`, `type`, `content`, `time_created`, `sender_id`) VALUES ("
                     + std::to_string(_template_packet.chat_header.chat_id) + ", '"
-                    + data_type + "', '"
-                    + _data + "', FROM_UNIXTIME("
+                    + data_type + "', ?, FROM_UNIXTIME("
                     + std::to_string(_template_packet.chat_header.timestamp) + "), "
                     + std::to_string(_template_packet.chat_header.sender) + ");";
+            mysql_stmt_prepare(stmt, query.c_str(), query.length());
+            MYSQL_BIND params[1];
+            memset(params, 0, sizeof(params));
+            params[0].buffer_type = MYSQL_TYPE_LONG_BLOB;
+            params[0].buffer = (void *)_data.c_str();
+            params[0].buffer_length = _data.length();
+            mysql_stmt_bind_param(stmt, params);
+            mysql_stmt_execute(stmt);
 
-            sql_query.query(query, response_packet);
-            if (sql_query.is_insert_successful() == true) {
+            if (mysql_stmt_affected_rows(stmt) == 1) {
                 response_packet.response_header.response_type = ResponseType::SUCCESS;
                 strcpy(response_packet.data, "Message saved to database");
                 response_packet.data_length = strlen(response_packet.data);
@@ -147,6 +154,8 @@ bool Message::save(SQLQuery sql_query, MessagePacket& response_packet) {
                 response_packet.data_length = strlen(response_packet.data);
                 return false;
             }
+            mysql_stmt_close(stmt);
+            return true;
         }
     } else {
         return false;

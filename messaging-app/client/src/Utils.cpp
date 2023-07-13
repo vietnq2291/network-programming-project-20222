@@ -1,7 +1,6 @@
 #include "../include/Utils.h"
-#include <string>
-#include <sstream>
-#include <vector>
+
+#include "../../shared/common.h"
 
 std::string encode_auth_data(const std::string username, const std::string password) {
     // output is of the form: <username_len>:<username><password_len>:<password>
@@ -78,16 +77,14 @@ std::string encode_invite_group_chat(const std::string buff) {
 }
 
 std::string encode_get_latest_messages(const std::string buff) {
-    // buff = <chat_id> <number of messages>
+    // buff = <chat_id> <number of messages> <offset>
     std::istringstream iss(buff);
-    std::string chat_id;
-    int num_messages;
-    iss >> chat_id >> num_messages;
+    int chat_id, num_messages, offset;
+    iss >> chat_id >> num_messages >> offset;
 
-    // output data = <chat_id_len>:<chat_id><num_messages>
+    // output data = <chat_id>:<num_messages>:<offset>
     std::ostringstream oss;
-    oss << chat_id.size() << ':' << chat_id
-        << num_messages;
+    oss << chat_id << ':' << num_messages << ':' << offset;
     std::string data = oss.str();
 
     return data;
@@ -106,4 +103,105 @@ std::tuple<std::string, std::string> parse_file_data(const std::string file_data
     std::string file_content = file_data.substr(content_delim + 1, file_content_len);
 
     return std::make_tuple(file_name, file_content);
+}
+
+std::string time2string(std::time_t timestamp)
+{
+    std::tm* time_info = std::localtime(&timestamp);
+
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", time_info);
+
+    return std::string(buffer);
+}
+
+std::time_t string2time(const std::string& timestamp_str)
+{
+    std::tm time_info = {};
+    std::istringstream ss(timestamp_str);
+    ss >> std::get_time(&time_info, "%Y-%m-%d %H:%M:%S");
+    return std::mktime(&time_info);
+}
+
+std::tuple<std::string, std::string> process_file_header(const std::string& data, const std::string& folder_path)
+{
+    size_t fn_delim = data.find(':');
+    size_t fd_delim = data.find(':', fn_delim + 1);
+
+    long long fn_len = std::stoll(data.substr(0, fn_delim));
+    long long fd_len = std::stoll(data.substr(fn_delim + fn_len + 1, fd_delim - (fn_delim + fn_len + 1)));
+
+    std::string file_name = data.substr(fn_delim + 1, fn_len);
+    std::string file_data = data.substr(fd_delim + 1, fd_len);
+
+    std::string file_path = folder_path + "/" + file_name;
+
+    return std::make_tuple(file_path, file_data);
+}
+
+void write_file(const std::string& data, const std::string& file_path) {
+    FILE* fp;
+    if ((fp = fopen(file_path.c_str(), "wb")) == NULL) {
+        std::cerr << "Error: Can not open file at " << file_path << std::endl;
+        return;
+    }
+
+    size_t bytes_written = fwrite(data.c_str(), sizeof(char), data.size(), fp);
+    if (bytes_written != data.size()) {
+        std::cerr << "Error: Failed to write data to file." << std::endl;
+        fclose(fp);
+        return;
+    }
+    fclose(fp);
+}
+
+void append_file(const std::string& data, const std::string& file_path) {
+  FILE* fp;
+  if ((fp = fopen(file_path.c_str(), "ab")) == NULL) {
+    std::cerr << "Error: Can not open file at " << file_path << std::endl;
+    return;
+  }
+
+  size_t bytes_written = fwrite(data.c_str(), sizeof(char), data.size(), fp);
+  if (bytes_written != data.size()) {
+    std::cerr << "Error: Failed to append data to file." << std::endl;
+    fclose(fp);
+    return;
+  }
+  fclose(fp);
+}
+
+ChatMessage create_chat_message(MessagePacket& p, std::string& folder_path) {
+    std::string data;
+    
+    if (p.chat_header.data_type == DataType::FILE) {
+        auto [file_path, fdata] = process_file_header(p.data, folder_path);
+        write_file(fdata, file_path);
+        data = file_path;
+    } else {
+        data = p.data;
+    }
+
+    ChatMessage msg {
+        p.chat_header.chat_id,
+        p.chat_header.sender,
+        p.chat_header.timestamp,
+        p.chat_header.data_type,
+        data
+    };
+    return msg;
+}
+
+void print_chat_message(ChatMessage& cm) {
+    std::cout << "\033[32m(chatID: " << cm.chat_id <<
+                ", senderID: " << cm.sender_id << 
+                ", time: " << time2string(cm.timestamp) <<
+                "): \033[0m";
+                
+    if (cm.data_type == DataType::FILE) {
+        std::string file_path = cm.data;
+        std::cout <<  "New file at \"" << file_path << "\"" << std::endl;
+    } else {
+        std::cout << cm.data << std::endl;
+    } 
 }
