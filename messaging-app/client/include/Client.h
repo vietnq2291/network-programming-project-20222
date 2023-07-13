@@ -25,7 +25,8 @@ public:
     std::tuple<int, std::string> process_chat_history_header(std::string& data);
     void process_chat_history(std::string& data);
     void write_buff(std::string& data);
-    void clean_buff();
+    void clear_buff();
+    void clear_storage();
 
 private:
     int _conn_fd;

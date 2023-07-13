@@ -171,7 +171,7 @@ void append_file(const std::string& data, const std::string& file_path) {
   fclose(fp);
 }
 
-ChatMessage create_chat_message(MessagePacket p, std::string& folder_path) {
+ChatMessage create_chat_message(MessagePacket& p, std::string& folder_path) {
     std::string data;
     
     if (p.chat_header.data_type == DataType::FILE) {
@@ -182,14 +182,14 @@ ChatMessage create_chat_message(MessagePacket p, std::string& folder_path) {
         data = p.data;
     }
 
-    ChatMessage m {
+    ChatMessage msg {
         p.chat_header.chat_id,
         p.chat_header.sender,
         p.chat_header.timestamp,
         p.chat_header.data_type,
         data
     };
-    return m;
+    return msg;
 }
 
 void print_chat_message(ChatMessage& cm) {

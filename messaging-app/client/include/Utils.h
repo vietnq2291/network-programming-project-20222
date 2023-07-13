@@ -21,7 +21,7 @@ std::string encode_create_group_chat(const std::string group_name, const std::ve
 std::string encode_invite_group_chat(const std::string buff);
 std::string encode_get_latest_messages(const std::string buff);
 
-ChatMessage create_chat_message(MessagePacket p, std::string& folder_path);
+ChatMessage create_chat_message(MessagePacket& p, std::string& folder_path);
 std::string time2string(std::time_t timestamp);
 std::time_t string2time(const std::string& timestamp_str);
 std::tuple<std::string, std::string> process_file_header(const std::string& data_string, const std::string& folder_path);
