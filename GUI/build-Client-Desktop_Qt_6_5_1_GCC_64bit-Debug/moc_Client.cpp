@@ -46,7 +46,7 @@ static constexpr auto qt_meta_stringdata_CLASSclientENDCLASS = QtMocHelpers::str
     "ChatMessage",
     "Message",
     "authSuccess",
-    "std::vector<Friend>",
+    "std::vector<Chat>",
     "friend_list",
     "LogOutSuccess",
     "Authenticate",
@@ -73,7 +73,7 @@ struct qt_meta_stringdata_CLASSclientENDCLASS_t {
     char stringdata3[12];
     char stringdata4[8];
     char stringdata5[12];
-    char stringdata6[20];
+    char stringdata6[18];
     char stringdata7[12];
     char stringdata8[14];
     char stringdata9[13];
@@ -101,23 +101,23 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSclientENDCLASS_t qt_meta_string
         QT_MOC_LITERAL(24, 11),  // "ChatMessage"
         QT_MOC_LITERAL(36, 7),  // "Message"
         QT_MOC_LITERAL(44, 11),  // "authSuccess"
-        QT_MOC_LITERAL(56, 19),  // "std::vector<Friend>"
-        QT_MOC_LITERAL(76, 11),  // "friend_list"
-        QT_MOC_LITERAL(88, 13),  // "LogOutSuccess"
-        QT_MOC_LITERAL(102, 12),  // "Authenticate"
-        QT_MOC_LITERAL(115, 8),  // "username"
-        QT_MOC_LITERAL(124, 8),  // "password"
-        QT_MOC_LITERAL(133, 6),  // "SignUp"
-        QT_MOC_LITERAL(140, 7),  // "setChat"
-        QT_MOC_LITERAL(148, 9),  // "chat_name"
-        QT_MOC_LITERAL(158, 11),  // "sendMessage"
-        QT_MOC_LITERAL(170, 6),  // "packet"
-        QT_MOC_LITERAL(177, 15),  // "receive_message"
-        QT_MOC_LITERAL(193, 6),  // "LogOut"
-        QT_MOC_LITERAL(200, 14),  // "connectSuccess"
-        QT_MOC_LITERAL(215, 9),  // "loiSocket"
-        QT_MOC_LITERAL(225, 28),  // "QAbstractSocket::SocketError"
-        QT_MOC_LITERAL(254, 3)   // "err"
+        QT_MOC_LITERAL(56, 17),  // "std::vector<Chat>"
+        QT_MOC_LITERAL(74, 11),  // "friend_list"
+        QT_MOC_LITERAL(86, 13),  // "LogOutSuccess"
+        QT_MOC_LITERAL(100, 12),  // "Authenticate"
+        QT_MOC_LITERAL(113, 8),  // "username"
+        QT_MOC_LITERAL(122, 8),  // "password"
+        QT_MOC_LITERAL(131, 6),  // "SignUp"
+        QT_MOC_LITERAL(138, 7),  // "setChat"
+        QT_MOC_LITERAL(146, 9),  // "chat_name"
+        QT_MOC_LITERAL(156, 11),  // "sendMessage"
+        QT_MOC_LITERAL(168, 6),  // "packet"
+        QT_MOC_LITERAL(175, 15),  // "receive_message"
+        QT_MOC_LITERAL(191, 6),  // "LogOut"
+        QT_MOC_LITERAL(198, 14),  // "connectSuccess"
+        QT_MOC_LITERAL(213, 9),  // "loiSocket"
+        QT_MOC_LITERAL(223, 28),  // "QAbstractSocket::SocketError"
+        QT_MOC_LITERAL(252, 3)   // "err"
     },
     "client",
     "messageReceived",
@@ -125,7 +125,7 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSclientENDCLASS_t qt_meta_string
     "ChatMessage",
     "Message",
     "authSuccess",
-    "std::vector<Friend>",
+    "std::vector<Chat>",
     "friend_list",
     "LogOutSuccess",
     "Authenticate",
@@ -207,7 +207,7 @@ Q_CONSTINIT const QMetaObject client::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<ChatMessage, std::false_type>,
         // method 'authSuccess'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<std::vector<Friend>, std::false_type>,
+        QtPrivate::TypeAndForceComplete<std::vector<Chat>, std::false_type>,
         // method 'LogOutSuccess'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'Authenticate'
@@ -244,7 +244,7 @@ void client::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
         (void)_t;
         switch (_id) {
         case 0: _t->messageReceived((*reinterpret_cast< std::add_pointer_t<ChatMessage>>(_a[1]))); break;
-        case 1: _t->authSuccess((*reinterpret_cast< std::add_pointer_t<std::vector<Friend>>>(_a[1]))); break;
+        case 1: _t->authSuccess((*reinterpret_cast< std::add_pointer_t<std::vector<Chat>>>(_a[1]))); break;
         case 2: _t->LogOutSuccess(); break;
         case 3: _t->Authenticate((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[2]))); break;
         case 4: _t->SignUp((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[2]))); break;
@@ -277,7 +277,7 @@ void client::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
             }
         }
         {
-            using _t = void (client::*)(std::vector<Friend> );
+            using _t = void (client::*)(std::vector<Chat> );
             if (_t _q_method = &client::authSuccess; *reinterpret_cast<_t *>(_a[1]) == _q_method) {
                 *result = 1;
                 return;
@@ -331,7 +331,7 @@ void client::messageReceived(ChatMessage _t1)
 }
 
 // SIGNAL 1
-void client::authSuccess(std::vector<Friend> _t1)
+void client::authSuccess(std::vector<Chat> _t1)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
     QMetaObject::activate(this, &staticMetaObject, 1, _a);

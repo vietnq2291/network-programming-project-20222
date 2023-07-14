@@ -63,6 +63,8 @@ void *client::receive_message_p(void *arg) {
 
         int bytes_received = recv(_conn_fd, &packet, sizeof(packet), 0);
 
+        std::cerr << "recv called" << std::endl;
+
         if (bytes_received < 0) {
             std::cerr << "\033[31mError:\033[0m Receive failed!" << std::endl;
             return nullptr;
@@ -544,7 +546,7 @@ void client::receive_message() {
         } else if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {                 //Login SUCESSFULLY
             response_type = "LOGIN_SUCCESS";
             std::tie(_user_id, _display_name) = parse_user_info_data(packet.data);
-            send_request_message("R F L");
+            send_request_message("R C L");
             receive_message();
         } else if (packet.response_header.response_type == ResponseType::ERROR) {
             response_type = "ERROR";
@@ -559,7 +561,7 @@ void client::receive_message() {
                 _friend_list.clear();
                 process_friend_list(_buff);
                 clear_buff();
-                emit authSuccess(_friend_list);
+//                emit authSuccess(_friend_list);
             }
         } else if (packet.response_header.response_type == ResponseType::WAIT_FOR_ANONYMOUS_CHAT) {
             response_type = "WAIT_FOR_ANONYMOUS_CHAT";
@@ -567,6 +569,13 @@ void client::receive_message() {
             response_type = "JOIN_ANONYMOUS_CHAT_SUCCESS";
         } else if (packet.response_header.response_type == ResponseType::GET_CHAT_LIST_SUCCESS) {
             response_type = "GET_CHAT_LIST_SUCCESS";
+            write_buff(data);
+            if (packet.fin == 1) {
+                _chat_list.clear();
+                process_chat_list(_buff);
+                clear_buff();
+                emit authSuccess(_chat_list);
+            }
         } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_SUCCESS) {
             response_type = "ADD_TO_GROUP_CHAT_SUCCESS";
         } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_FAILURE) {
@@ -1055,7 +1064,13 @@ void client::insert_message(int chat_id, ChatMessage& cm) {
 }
 
 void client::setChat(QString chat_name){
-    this->_chat_id = 6;
+    int size = _chat_list.size();
+
+    for (int i = 0; i < size; i++) {
+        if (chat_name.toStdString() == _chat_list[i].cname) {
+            _chat_id = _chat_list[i].cid;
+        }
+    }
 
 }
 

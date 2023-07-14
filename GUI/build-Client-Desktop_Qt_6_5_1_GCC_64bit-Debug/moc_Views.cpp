@@ -67,11 +67,12 @@ static constexpr auto qt_meta_stringdata_CLASSviewsENDCLASS = QtMocHelpers::stri
     "switchToChat",
     "switchToLogin",
     "initChat",
-    "std::vector<Friend>"
+    "std::vector<Chat>",
+    "chatList"
 );
 #else  // !QT_MOC_HAS_STRING_DATA
 struct qt_meta_stringdata_CLASSviewsENDCLASS_t {
-    uint offsetsAndSizes[54];
+    uint offsetsAndSizes[56];
     char stringdata0[6];
     char stringdata1[13];
     char stringdata2[1];
@@ -98,7 +99,8 @@ struct qt_meta_stringdata_CLASSviewsENDCLASS_t {
     char stringdata23[13];
     char stringdata24[14];
     char stringdata25[9];
-    char stringdata26[20];
+    char stringdata26[18];
+    char stringdata27[9];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_CLASSviewsENDCLASS_t::offsetsAndSizes) + ofs), len 
@@ -130,7 +132,8 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSviewsENDCLASS_t qt_meta_stringd
         QT_MOC_LITERAL(229, 12),  // "switchToChat"
         QT_MOC_LITERAL(242, 13),  // "switchToLogin"
         QT_MOC_LITERAL(256, 8),  // "initChat"
-        QT_MOC_LITERAL(265, 19)   // "std::vector<Friend>"
+        QT_MOC_LITERAL(265, 17),  // "std::vector<Chat>"
+        QT_MOC_LITERAL(283, 8)   // "chatList"
     },
     "views",
     "loggedInView",
@@ -158,7 +161,8 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSviewsENDCLASS_t qt_meta_stringd
     "switchToChat",
     "switchToLogin",
     "initChat",
-    "std::vector<Friend>"
+    "std::vector<Chat>",
+    "chatList"
 };
 #undef QT_MOC_LITERAL
 #endif // !QT_MOC_HAS_STRING_DATA
@@ -215,7 +219,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSviewsENDCLASS[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 26,    2,
+    QMetaType::Void, 0x80000000 | 26,   27,
 
        0        // eod
 };
@@ -275,7 +279,7 @@ Q_CONSTINIT const QMetaObject views::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'initChat'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<std::vector<Friend>, std::false_type>
+        QtPrivate::TypeAndForceComplete<std::vector<Chat>, std::false_type>
     >,
     nullptr
 } };
@@ -301,7 +305,7 @@ void views::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void 
         case 12: _t->LogOut(); break;
         case 13: _t->switchToChat(); break;
         case 14: _t->switchToLogin(); break;
-        case 15: _t->initChat((*reinterpret_cast< std::add_pointer_t<std::vector<Friend>>>(_a[1]))); break;
+        case 15: _t->initChat((*reinterpret_cast< std::add_pointer_t<std::vector<Chat>>>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {

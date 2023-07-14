@@ -25,14 +25,14 @@ void views::switchToChat(){
     cw->show();
 }
 
-void views::initChat(std::vector<Friend> friendList) {
+void views::initChat(std::vector<Chat> chatList) {
     lw->hide();
     cw->show();
 
-    int size = friendList.size();
+    int size = chatList.size();
 
     for (int i = 0; i < size; i++) {
-        cw->loadFriend(friendList[i].disp_name);
+        cw->loadFriend(chatList[i].cname);
     }
 }
 

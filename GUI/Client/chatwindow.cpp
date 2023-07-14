@@ -52,7 +52,7 @@ void ChatWindow::pressSendEnter() {
 
 void ChatWindow::recvMsg(ChatMessage message) {
 
-    QString Message = "<em>" + chat_name + "</em>" + "<" + time2string(message.timestamp).c_str() + ">: " + message.data.c_str();
+    QString Message = chat_name + "<" + time2string(message.timestamp).c_str() + ">: " + message.data.c_str();
 
     ui.convBox->append(Message);
 }
@@ -72,5 +72,6 @@ void ChatWindow::on_LogOutButton_clicked()
 {
 //    clearAll();
     emit LogOut();
+
 }
 

@@ -44,7 +44,7 @@ public:
 
 signals:
     void messageReceived(ChatMessage Message);
-    void authSuccess(std::vector<Friend> friend_list);
+    void authSuccess(std::vector<Chat> friend_list);
     void LogOutSuccess();
 
 private slots:

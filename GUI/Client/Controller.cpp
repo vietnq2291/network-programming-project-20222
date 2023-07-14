@@ -13,7 +13,7 @@ controller::controller()
     connect(v, SIGNAL(recievedSignUpView(QString,QString)), clt, SLOT(SignUp(QString,QString)));
 
     connect(clt, SIGNAL(messageReceived(ChatMessage)), v, SLOT(recvMsg(ChatMessage)));
-    connect(clt, SIGNAL(authSuccess(std::vector<Friend>)), v, SLOT(initChat(std::vector<Friend>)));
+    connect(clt, SIGNAL(authSuccess(std::vector<Chat>)), v, SLOT(initChat(std::vector<Chat>)));
     connect(clt, SIGNAL(LogOutSuccess()), v, SLOT(switchToLogin()));
     connect(v, SIGNAL(setChatView(QString)), clt, SLOT(setChat(QString)));
     connect(v, SIGNAL(sendMessageView(QString)), clt, SLOT(sendMessage(QString)));

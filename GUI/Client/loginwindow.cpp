@@ -36,6 +36,7 @@ void LoginWindow::on_pushButton_clicked()
         QString password = ui->lineEdit_Password->text();
 
         emit receiveSignUp(username, password);
+        ui->pushButton_Login->setVisible(true);
     }
 }
 

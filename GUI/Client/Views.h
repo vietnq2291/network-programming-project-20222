@@ -30,7 +30,7 @@ private slots:
 
     void switchToChat();
     void switchToLogin();
-    void initChat(std::vector<Friend>);
+    void initChat(std::vector<Chat> chatList);
 
 private:
     ChatWindow *cw;
