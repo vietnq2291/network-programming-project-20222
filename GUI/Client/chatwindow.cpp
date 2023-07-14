@@ -20,6 +20,14 @@ ChatWindow::~ChatWindow(){
 
 }
 
+void ChatWindow::clearAll() {
+    while(ui.listWidget->currentItem() != NULL) {
+        ui.listWidget->removeItemWidget(ui.listWidget->currentItem());
+    }
+//    ui.listWidget->reset();
+    ui.convBox->clear();
+}
+
 void ChatWindow::loadFriend(std::string disName){
 
     ui.listWidget->addItem(disName.c_str());
@@ -29,7 +37,7 @@ void ChatWindow::loadFriend(std::string disName){
 void ChatWindow::pressSendButton() {
     QString sendPack = ui.messageBox->text();
     if (!sendPack.isEmpty()) {
-        QString Message = "Me:" + sendPack;
+        QString Message = tr("<b>Me:</b> ") + sendPack;
         ui.convBox->append(Message);
         emit sendMessage(sendPack);
     }
@@ -44,7 +52,7 @@ void ChatWindow::pressSendEnter() {
 
 void ChatWindow::recvMsg(ChatMessage message) {
 
-    QString Message = chat_name + "<" + time2string(message.timestamp).c_str() + ">:" + message.data.c_str();
+    QString Message = "<em>" + chat_name + "</em>" + "<" + time2string(message.timestamp).c_str() + ">: " + message.data.c_str();
 
     ui.convBox->append(Message);
 }
@@ -55,6 +63,14 @@ void ChatWindow::on_listWidget_itemClicked(QListWidgetItem *chat)
     ui.messageBox->setReadOnly(false);
     chat_name = chat->text();
     ui.label_3->setText(chat_name);
+    ui.convBox->clear();
     emit chooseChat(chat->text());
+}
+
+
+void ChatWindow::on_LogOutButton_clicked()
+{
+//    clearAll();
+    emit LogOut();
 }
 

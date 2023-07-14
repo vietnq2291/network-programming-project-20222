@@ -32,7 +32,7 @@ public:
     QListWidget *listWidget;
     QWidget *tab_2;
     QListWidget *listWidget_2;
-    QWidget *widget;
+    QWidget *layoutWidget;
     QVBoxLayout *verticalLayout_3;
     QLabel *label_3;
     QVBoxLayout *verticalLayout_2;
@@ -41,6 +41,7 @@ public:
     QLabel *label_4;
     QLineEdit *messageBox;
     QPushButton *sendButton;
+    QPushButton *LogOutButton;
 
     void setupUi(QWidget *ChatWindow)
     {
@@ -65,20 +66,20 @@ public:
         listWidget_2->setObjectName("listWidget_2");
         listWidget_2->setGeometry(QRect(0, 0, 221, 571));
         tabWidget->addTab(tab_2, QString());
-        widget = new QWidget(ChatWindow);
-        widget->setObjectName("widget");
-        widget->setGeometry(QRect(240, 10, 891, 631));
-        verticalLayout_3 = new QVBoxLayout(widget);
+        layoutWidget = new QWidget(ChatWindow);
+        layoutWidget->setObjectName("layoutWidget");
+        layoutWidget->setGeometry(QRect(240, 10, 891, 631));
+        verticalLayout_3 = new QVBoxLayout(layoutWidget);
         verticalLayout_3->setObjectName("verticalLayout_3");
         verticalLayout_3->setContentsMargins(0, 0, 0, 0);
-        label_3 = new QLabel(widget);
+        label_3 = new QLabel(layoutWidget);
         label_3->setObjectName("label_3");
 
         verticalLayout_3->addWidget(label_3);
 
         verticalLayout_2 = new QVBoxLayout();
         verticalLayout_2->setObjectName("verticalLayout_2");
-        convBox = new QTextEdit(widget);
+        convBox = new QTextEdit(layoutWidget);
         convBox->setObjectName("convBox");
         convBox->setMaximumSize(QSize(16777215, 16777215));
         convBox->setReadOnly(true);
@@ -87,17 +88,17 @@ public:
 
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setObjectName("horizontalLayout_2");
-        label_4 = new QLabel(widget);
+        label_4 = new QLabel(layoutWidget);
         label_4->setObjectName("label_4");
 
         horizontalLayout_2->addWidget(label_4);
 
-        messageBox = new QLineEdit(widget);
+        messageBox = new QLineEdit(layoutWidget);
         messageBox->setObjectName("messageBox");
 
         horizontalLayout_2->addWidget(messageBox);
 
-        sendButton = new QPushButton(widget);
+        sendButton = new QPushButton(layoutWidget);
         sendButton->setObjectName("sendButton");
         sendButton->setIcon(icon);
 
@@ -109,6 +110,9 @@ public:
 
         verticalLayout_3->addLayout(verticalLayout_2);
 
+        LogOutButton = new QPushButton(ChatWindow);
+        LogOutButton->setObjectName("LogOutButton");
+        LogOutButton->setGeometry(QRect(10, 610, 221, 31));
 
         retranslateUi(ChatWindow);
 
@@ -129,6 +133,7 @@ public:
         label_3->setText(QCoreApplication::translate("ChatWindow", "Choose a person to chat", nullptr));
         label_4->setText(QCoreApplication::translate("ChatWindow", "Message:", nullptr));
         sendButton->setText(QCoreApplication::translate("ChatWindow", "Send", nullptr));
+        LogOutButton->setText(QCoreApplication::translate("ChatWindow", "Log Out", nullptr));
     } // retranslateUi
 
 };

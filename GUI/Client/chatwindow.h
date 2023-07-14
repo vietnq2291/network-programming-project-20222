@@ -17,6 +17,7 @@ class ChatWindow : public QWidget
         ChatWindow();
         ~ChatWindow();
         void loadFriend(std::string disName);
+        void clearAll();
 
     private slots:
         void pressSendButton();
@@ -25,9 +26,12 @@ class ChatWindow : public QWidget
 
         void on_listWidget_itemClicked(QListWidgetItem *chat);
 
+        void on_LogOutButton_clicked();
+
     signals:
         void chooseChat(QString chat_name);
         void sendMessage(QString message);
+        void LogOut();
 
     private:
         Ui::ChatWindow ui;
