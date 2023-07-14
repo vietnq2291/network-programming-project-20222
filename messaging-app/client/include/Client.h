@@ -35,6 +35,7 @@ private:
     int _server_port;
     std::string _server_ip;
     struct sockaddr_in _server_addr;
+    
     std::string _buff;
     int _user_id; // user id of the current user or -1 if the user has not logged in
     std::string _display_name; // username of the current user or "" if the user has not logged in
