@@ -63,7 +63,7 @@
     </widget>
    </widget>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>240</x>
@@ -123,6 +123,19 @@
      </layout>
     </item>
    </layout>
+  </widget>
+  <widget class="QPushButton" name="LogOutButton">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>610</y>
+     <width>221</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Log Out</string>
+   </property>
   </widget>
  </widget>
  <resources/>

@@ -8,8 +8,10 @@ views::views()
     this->switchToLogin();
 
     connect(lw, SIGNAL(receivedAuth(QString,QString)), this, SLOT(recvAuth(QString,QString)));
+    connect(lw, SIGNAL(receiveSignUp(QString,QString)), this, SLOT(recvSignUp(QString,QString)));
     connect(cw, SIGNAL(chooseChat(QString)), this, SLOT(setToChat(QString)));
     connect(cw, SIGNAL(sendMessage(QString)), this, SLOT(sendMessage(QString)));
+    connect(cw, SIGNAL(LogOut()), this, SLOT(LogOut()));
     connect(this, SIGNAL(recvMessage(ChatMessage)), cw, SLOT(recvMsg(ChatMessage)));
 }
 
@@ -36,11 +38,16 @@ void views::initChat(std::vector<Friend> friendList) {
 
 void views::switchToLogin(){
     lw->show();
+//    cw->clearAll();
     cw->hide();
 }
 
 void views::recvAuth(QString user, QString pass) {
     emit recievedAuthView(user, pass);
+}
+
+void views::recvSignUp(QString username, QString password) {
+    emit recievedSignUpView(username, password);
 }
 
 void views::setToChat(QString chat_name) {
@@ -53,4 +60,8 @@ void views::sendMessage(QString packet) {
 
 void views::recvMsg(ChatMessage message) {
     emit recvMessage(message);
+}
+
+void views::LogOut() {
+    emit LogOutView();
 }

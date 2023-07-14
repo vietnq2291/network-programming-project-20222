@@ -25,3 +25,17 @@ void LoginWindow::on_pushButton_Login_clicked()
     emit receivedAuth(username, password);
 }
 
+
+void LoginWindow::on_pushButton_clicked()
+{
+    if (!ui->pushButton_Login->isHidden()) {
+        ui->pushButton_Login->setVisible(false);
+        ui->groupBox->setTitle("Sign Up");
+    } else {
+        QString username = ui->lineEdit_UserName->text();
+        QString password = ui->lineEdit_Password->text();
+
+        emit receiveSignUp(username, password);
+    }
+}
+

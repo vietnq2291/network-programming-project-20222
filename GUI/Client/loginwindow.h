@@ -17,11 +17,13 @@ public:
     explicit LoginWindow(QWidget *parent = nullptr);
     ~LoginWindow();
 
-public slots:
-    void on_pushButton_Login_clicked();
-
 signals:
     void receivedAuth(QString username, QString password);
+    void receiveSignUp(QString username, QString password);
+
+private slots:
+    void on_pushButton_clicked();
+    void on_pushButton_Login_clicked();
 
 private:
     Ui::LoginWindow *ui;

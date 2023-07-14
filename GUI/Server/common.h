@@ -1,6 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <time.h>
+
 const int DEFAULT_PORT = 5050;
 const char DEFAULT_IP[] = "127.0.0.1";
 

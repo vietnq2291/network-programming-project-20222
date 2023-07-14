@@ -10,6 +10,7 @@ class SQLQuery: public QObject
     Q_OBJECT
 public:
     SQLQuery();
+
     bool connect(std::string host, std::string user, std::string password, std::string database, std::string is_multi_statements);
     void query(std::string query, MessagePacket& response_packet);
     MYSQL_RES *get_result();

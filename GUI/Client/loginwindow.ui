@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Login</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QGroupBox" name="groupBox">
@@ -24,22 +24,9 @@
      </rect>
     </property>
     <property name="title">
-     <string>SignIn</string>
+     <string>Sign In</string>
     </property>
-    <widget class="QPushButton" name="pushButton_Login">
-     <property name="geometry">
-      <rect>
-       <x>22</x>
-       <y>150</y>
-       <width>251</width>
-       <height>29</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Log In</string>
-     </property>
-    </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -83,6 +70,32 @@
       </item>
      </layout>
     </widget>
+    <widget class="QWidget" name="">
+     <property name="geometry">
+      <rect>
+       <x>22</x>
+       <y>150</y>
+       <width>251</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QPushButton" name="pushButton_Login">
+        <property name="text">
+         <string>Log In</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Register</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -91,7 +104,7 @@
      <x>0</x>
      <y>0</y>
      <width>398</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
