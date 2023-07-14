@@ -140,7 +140,6 @@ void Client::send_chat_message(std::string buff, int chat_id, ChatType chat_type
     }
 }
 
-
 void *Client::send_message(void *arg) {
     std::string buff;
 
