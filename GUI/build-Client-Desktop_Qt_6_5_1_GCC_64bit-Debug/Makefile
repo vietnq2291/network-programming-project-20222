@@ -58,12 +58,14 @@ SOURCES       = ../Client/Client.cpp \
 		../Client/Utils.cpp \
 		../Client/Views.cpp \
 		../Client/chatwindow.cpp \
+		../Client/groupwindow.cpp \
 		../Client/loginwindow.cpp \
 		../Client/main.cpp qrc_chatIcon.cpp \
 		moc_Client.cpp \
 		moc_Controller.cpp \
 		moc_Views.cpp \
 		moc_chatwindow.cpp \
+		moc_groupwindow.cpp \
 		moc_loginwindow.cpp
 OBJECTS       = Client.o \
 		Controller.o \
@@ -71,6 +73,7 @@ OBJECTS       = Client.o \
 		Utils.o \
 		Views.o \
 		chatwindow.o \
+		groupwindow.o \
 		loginwindow.o \
 		main.o \
 		qrc_chatIcon.o \
@@ -78,6 +81,7 @@ OBJECTS       = Client.o \
 		moc_Controller.o \
 		moc_Views.o \
 		moc_chatwindow.o \
+		moc_groupwindow.o \
 		moc_loginwindow.o
 DIST          = ../../../OneDrive/Hình \
 		../Client/ảnh/Ảnh \
@@ -238,12 +242,14 @@ DIST          = ../../../OneDrive/Hình \
 		../Client/Views.h \
 		../Client/chatwindow.h \
 		../Client/common.h \
+		../Client/groupwindow.h \
 		../Client/loginwindow.h ../Client/Client.cpp \
 		../Client/Controller.cpp \
 		../Client/Message.cpp \
 		../Client/Utils.cpp \
 		../Client/Views.cpp \
 		../Client/chatwindow.cpp \
+		../Client/groupwindow.cpp \
 		../Client/loginwindow.cpp \
 		../Client/main.cpp
 QMAKE_TARGET  = Client
@@ -254,7 +260,7 @@ TARGET        = Client
 first: all
 ####### Build rules
 
-Client: ui_chatwindow.h ui_loginwindow.h $(OBJECTS)  
+Client: ui_chatwindow.h ui_groupwindow.h ui_loginwindow.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET)  $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: ../Client/Client.pro /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/linux-g++/qmake.conf /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/spec_pre.prf \
@@ -580,9 +586,9 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../Client/chatIcon.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Client/Client.h ../Client/Controller.h ../Client/Message.h ../Client/Utils.h ../Client/Views.h ../Client/chatwindow.h ../Client/common.h ../Client/loginwindow.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../Client/Client.cpp ../Client/Controller.cpp ../Client/Message.cpp ../Client/Utils.cpp ../Client/Views.cpp ../Client/chatwindow.cpp ../Client/loginwindow.cpp ../Client/main.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Client/chatwindow.ui ../Client/loginwindow.ui $(DISTDIR)/
+	$(COPY_FILE) --parents ../Client/Client.h ../Client/Controller.h ../Client/Message.h ../Client/Utils.h ../Client/Views.h ../Client/chatwindow.h ../Client/common.h ../Client/groupwindow.h ../Client/loginwindow.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../Client/Client.cpp ../Client/Controller.cpp ../Client/Message.cpp ../Client/Utils.cpp ../Client/Views.cpp ../Client/chatwindow.cpp ../Client/groupwindow.cpp ../Client/loginwindow.cpp ../Client/main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Client/chatwindow.ui ../Client/groupwindow.ui ../Client/loginwindow.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -620,9 +626,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++1z -Wall -Wextra -fPIC -dM -E -o moc_predefs.h /home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_Client.cpp moc_Controller.cpp moc_Views.cpp moc_chatwindow.cpp moc_loginwindow.cpp
+compiler_moc_header_make_all: moc_Client.cpp moc_Controller.cpp moc_Views.cpp moc_chatwindow.cpp moc_groupwindow.cpp moc_loginwindow.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_Client.cpp moc_Controller.cpp moc_Views.cpp moc_chatwindow.cpp moc_loginwindow.cpp
+	-$(DEL_FILE) moc_Client.cpp moc_Controller.cpp moc_Views.cpp moc_chatwindow.cpp moc_groupwindow.cpp moc_loginwindow.cpp
 moc_Client.cpp: ../Client/Client.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QObject \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobject.h \
@@ -715,6 +721,8 @@ moc_Client.cpp: ../Client/Client.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qscopeguard.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobject_impl.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbindingstorage.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QEventLoop \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qeventloop.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetwork \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetworkDepends \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QtCore \
@@ -726,7 +734,6 @@ moc_Client.cpp: ../Client/Client.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/q23functional.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qabstractanimation.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qabstracteventdispatcher.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qeventloop.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qabstractitemmodel.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qhash.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qvariant.h \
@@ -1103,6 +1110,18 @@ moc_Controller.cpp: ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSizeF \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QTransform \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnativeinterface.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QInputDialog \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qinputdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMessageBox \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qmessagebox.h \
 		ui_chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QVariant \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QIcon \
@@ -1135,15 +1154,8 @@ moc_Controller.cpp: ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qgridlayout.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLabel \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlabel.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpicture.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLineEdit \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
@@ -1165,11 +1177,13 @@ moc_Controller.cpp: ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QEventLoop \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetwork \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetworkDepends \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QtCore \
@@ -1350,6 +1364,7 @@ moc_Controller.cpp: ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/qudpsocket.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QTcpSocket \
 		../Client/common.h \
+		../Client/groupwindow.h \
 		../Client/Utils.h \
 		../Client/loginwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMainWindow \
@@ -1516,6 +1531,18 @@ moc_Views.cpp: ../Client/Views.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSizeF \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QTransform \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnativeinterface.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QInputDialog \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qinputdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMessageBox \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qmessagebox.h \
 		ui_chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QVariant \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QIcon \
@@ -1548,15 +1575,8 @@ moc_Views.cpp: ../Client/Views.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qgridlayout.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLabel \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlabel.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpicture.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLineEdit \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
@@ -1578,11 +1598,13 @@ moc_Views.cpp: ../Client/Views.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QEventLoop \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetwork \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetworkDepends \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QtCore \
@@ -1763,6 +1785,7 @@ moc_Views.cpp: ../Client/Views.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/qudpsocket.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QTcpSocket \
 		../Client/common.h \
+		../Client/groupwindow.h \
 		../Client/Utils.h \
 		../Client/loginwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMainWindow \
@@ -1928,6 +1951,18 @@ moc_chatwindow.cpp: ../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSizeF \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QTransform \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnativeinterface.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QInputDialog \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qinputdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMessageBox \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qmessagebox.h \
 		ui_chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QVariant \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QIcon \
@@ -1960,15 +1995,8 @@ moc_chatwindow.cpp: ../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qgridlayout.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLabel \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlabel.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpicture.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLineEdit \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
@@ -1990,11 +2018,13 @@ moc_chatwindow.cpp: ../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QEventLoop \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetwork \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetworkDepends \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QtCore \
@@ -2175,10 +2205,175 @@ moc_chatwindow.cpp: ../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/qudpsocket.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QTcpSocket \
 		../Client/common.h \
+		../Client/groupwindow.h \
 		../Client/Utils.h \
 		moc_predefs.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/moc
 	/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/moc $(DEFINES) --include /home/dungnguyen/Desktop/Network/network-programming-project-20222/GUI/build-Client-Desktop_Qt_6_5_1_GCC_64bit-Debug/moc_predefs.h -I/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/linux-g++ -I/home/dungnguyen/Desktop/Network/network-programming-project-20222/GUI/Client -I/home/dungnguyen/Qt/6.5.1/gcc_64/include -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore -I. -I/usr/include/c++/12 -I/usr/include/x86_64-linux-gnu/c++/12 -I/usr/include/c++/12/backward -I/usr/lib/gcc/x86_64-linux-gnu/12/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../Client/chatwindow.h -o moc_chatwindow.cpp
+
+moc_groupwindow.cpp: ../Client/groupwindow.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QWidget \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtguiglobal.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qglobal.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtversionchecks.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qconfig.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtcore-config.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtconfigmacros.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtcoreexports.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtpreprocessorsupport.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtnoop.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qassert.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtypes.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtclasshelpermacros.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtversion.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qsysinfo.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qlogging.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qflags.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcompare_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qatomic.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qconstructormacros.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qdarwinhelpers.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qexceptionhandling.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qforeach.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtdeprecationmarkers.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qttypetraits.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qfunctionpointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmalloc.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qminmax.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnumeric.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qoverload.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qswap.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtenvironmentvariables.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtresource.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qttranslation.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qversiontagging.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtgui-config.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtguiexports.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtwidgets-config.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtwidgetsexports.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qwindowdefs.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnamespace.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtmetamacros.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobject.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstring.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qchar.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbytearray.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qrefcount.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qarraydata.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qpair.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qarraydatapointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qarraydataops.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcontainertools_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qxptype_traits.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbytearrayalgorithms.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbytearrayview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringfwd.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/q20type_traits.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringliteral.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qanystringview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qutf8stringview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringtokenizer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qlist.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qiterator.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringlist.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qalgorithms.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcoreevent.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmetatype.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcompare.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qdatastream.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qiodevicebase.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qfloat16.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmath.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qiterable.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmetacontainer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcontainerinfo.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtaggedpointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qscopeguard.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobject_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbindingstorage.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmargins.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qaction.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qkeysequence.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qicon.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qsize.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpixmap.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpaintdevice.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qrect.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qpoint.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qcolor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qrgb.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qrgba64.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qsharedpointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qshareddata.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qimage.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpixelformat.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtransform.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpolygon.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qregion.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qline.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qvariant.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qdebug.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtextstream.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringconverter_base.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmap.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qshareddata_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qset.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qhash.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/q20memory.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpalette.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qbrush.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qfont.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qfontmetrics.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qfontinfo.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qsizepolicy.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qcursor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qbitmap.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qevent.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qiodevice.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qpointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qurl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qeventpoint.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvector2d.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvectornd.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpointingdevice.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qinputdevice.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qscreen.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QList \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QObject \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QRect \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSize \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSizeF \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QTransform \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnativeinterface.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMessageBox \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qmessagebox.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qdialog.h \
+		moc_predefs.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/moc
+	/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/moc $(DEFINES) --include /home/dungnguyen/Desktop/Network/network-programming-project-20222/GUI/build-Client-Desktop_Qt_6_5_1_GCC_64bit-Debug/moc_predefs.h -I/home/dungnguyen/Qt/6.5.1/gcc_64/mkspecs/linux-g++ -I/home/dungnguyen/Desktop/Network/network-programming-project-20222/GUI/Client -I/home/dungnguyen/Qt/6.5.1/gcc_64/include -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork -I/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore -I. -I/usr/include/c++/12 -I/usr/include/x86_64-linux-gnu/c++/12 -I/usr/include/c++/12/backward -I/usr/lib/gcc/x86_64-linux-gnu/12/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../Client/groupwindow.h -o moc_groupwindow.cpp
 
 moc_loginwindow.cpp: ../Client/loginwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QWidget \
@@ -2349,12 +2544,16 @@ compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_chatwindow.h ui_loginwindow.h
+compiler_uic_make_all: ui_chatwindow.h ui_groupwindow.h ui_loginwindow.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_chatwindow.h ui_loginwindow.h
+	-$(DEL_FILE) ui_chatwindow.h ui_groupwindow.h ui_loginwindow.h
 ui_chatwindow.h: ../Client/chatwindow.ui \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/uic
 	/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/uic ../Client/chatwindow.ui -o ui_chatwindow.h
+
+ui_groupwindow.h: ../Client/groupwindow.ui \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/uic
+	/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/uic ../Client/groupwindow.ui -o ui_groupwindow.h
 
 ui_loginwindow.h: ../Client/loginwindow.ui \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/libexec/uic
@@ -2462,6 +2661,8 @@ Client.o: ../Client/Client.cpp ../Client/Client.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qscopeguard.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobject_impl.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbindingstorage.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QEventLoop \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qeventloop.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetwork \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetworkDepends \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QtCore \
@@ -2473,7 +2674,6 @@ Client.o: ../Client/Client.cpp ../Client/Client.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/q23functional.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qabstractanimation.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qabstracteventdispatcher.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qeventloop.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qabstractitemmodel.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qhash.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qvariant.h \
@@ -2850,6 +3050,18 @@ Controller.o: ../Client/Controller.cpp ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSizeF \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QTransform \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnativeinterface.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QInputDialog \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qinputdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMessageBox \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qmessagebox.h \
 		ui_chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QVariant \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QIcon \
@@ -2882,15 +3094,8 @@ Controller.o: ../Client/Controller.cpp ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qgridlayout.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLabel \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlabel.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpicture.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLineEdit \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
@@ -2912,11 +3117,13 @@ Controller.o: ../Client/Controller.cpp ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QEventLoop \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetwork \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetworkDepends \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QtCore \
@@ -3097,6 +3304,7 @@ Controller.o: ../Client/Controller.cpp ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/qudpsocket.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QTcpSocket \
 		../Client/common.h \
+		../Client/groupwindow.h \
 		../Client/Utils.h \
 		../Client/loginwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMainWindow \
@@ -3269,6 +3477,18 @@ Views.o: ../Client/Views.cpp ../Client/Views.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSizeF \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QTransform \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnativeinterface.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QInputDialog \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qinputdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMessageBox \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qmessagebox.h \
 		ui_chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QVariant \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QIcon \
@@ -3301,15 +3521,8 @@ Views.o: ../Client/Views.cpp ../Client/Views.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qgridlayout.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLabel \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlabel.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpicture.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLineEdit \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
@@ -3331,11 +3544,13 @@ Views.o: ../Client/Views.cpp ../Client/Views.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QEventLoop \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetwork \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetworkDepends \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QtCore \
@@ -3516,6 +3731,7 @@ Views.o: ../Client/Views.cpp ../Client/Views.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/qudpsocket.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QTcpSocket \
 		../Client/common.h \
+		../Client/groupwindow.h \
 		../Client/Utils.h \
 		../Client/loginwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMainWindow \
@@ -3679,6 +3895,18 @@ chatwindow.o: ../Client/chatwindow.cpp ../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSizeF \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QTransform \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnativeinterface.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QInputDialog \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qinputdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMessageBox \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qmessagebox.h \
 		ui_chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QVariant \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QIcon \
@@ -3711,15 +3939,8 @@ chatwindow.o: ../Client/chatwindow.cpp ../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qgridlayout.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLabel \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlabel.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpicture.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLineEdit \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
@@ -3741,11 +3962,13 @@ chatwindow.o: ../Client/chatwindow.cpp ../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QEventLoop \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetwork \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetworkDepends \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QtCore \
@@ -3926,14 +4149,177 @@ chatwindow.o: ../Client/chatwindow.cpp ../Client/chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/qudpsocket.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QTcpSocket \
 		../Client/common.h \
+		../Client/groupwindow.h \
 		../Client/Utils.h \
 		ui_clientwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QGridLayout \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpinBox \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qspinbox.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QPixmap
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o chatwindow.o ../Client/chatwindow.cpp
+
+groupwindow.o: ../Client/groupwindow.cpp ../Client/groupwindow.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QWidget \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qwidget.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtguiglobal.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qglobal.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtversionchecks.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qconfig.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtcore-config.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtconfigmacros.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtcoreexports.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtpreprocessorsupport.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtnoop.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qassert.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtypes.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtclasshelpermacros.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtversion.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qsysinfo.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qlogging.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qflags.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcompare_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qatomic.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qconstructormacros.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qdarwinhelpers.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qexceptionhandling.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qforeach.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtdeprecationmarkers.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qttypetraits.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qfunctionpointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmalloc.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qminmax.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnumeric.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qoverload.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qswap.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtenvironmentvariables.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtresource.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qttranslation.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qversiontagging.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtgui-config.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtguiexports.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtwidgets-config.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtwidgetsexports.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qwindowdefs.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnamespace.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtmetamacros.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobject.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstring.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qchar.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbytearray.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qrefcount.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qarraydata.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qpair.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qarraydatapointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qarraydataops.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcontainertools_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qxptype_traits.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbytearrayalgorithms.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbytearrayview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringfwd.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/q20type_traits.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringliteral.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qanystringview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qutf8stringview.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringtokenizer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qlist.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qiterator.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringlist.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qalgorithms.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcoreevent.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmetatype.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcompare.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qdatastream.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qiodevicebase.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qfloat16.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmath.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qiterable.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmetacontainer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcontainerinfo.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtaggedpointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qscopeguard.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qobject_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qbindingstorage.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmargins.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qaction.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qkeysequence.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qicon.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qsize.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpixmap.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpaintdevice.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qrect.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qpoint.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qcolor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qrgb.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qrgba64.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qsharedpointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qshareddata.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qimage.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpixelformat.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtransform.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpolygon.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qregion.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qline.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qvariant.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qdebug.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qtextstream.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qstringconverter_base.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qmap.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qshareddata_impl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qset.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qhash.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/q20memory.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpalette.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qbrush.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qfont.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qfontmetrics.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qfontinfo.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qsizepolicy.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qcursor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qbitmap.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qevent.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qiodevice.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qpointer.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qurl.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qeventpoint.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvector2d.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qvectornd.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpointingdevice.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qinputdevice.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qscreen.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QList \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QObject \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QRect \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSize \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSizeF \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QTransform \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnativeinterface.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMessageBox \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qmessagebox.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qdialog.h \
+		ui_groupwindow.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o groupwindow.o ../Client/groupwindow.cpp
 
 loginwindow.o: ../Client/loginwindow.cpp ../Client/loginwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QWidget \
@@ -4311,6 +4697,18 @@ main.o: ../Client/main.cpp ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QSizeF \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QTransform \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/qnativeinterface.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QInputDialog \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qinputdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qdialog.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMessageBox \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qmessagebox.h \
 		ui_chatwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QVariant \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/QIcon \
@@ -4343,15 +4741,8 @@ main.o: ../Client/main.cpp ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qgridlayout.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLabel \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlabel.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qframe.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpicture.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextdocument.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QLineEdit \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlineedit.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextcursor.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextformat.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qpen.h \
-		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtGui/qtextoption.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QListWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistwidget.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qlistview.h \
@@ -4373,11 +4764,13 @@ main.o: ../Client/main.cpp ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QPushButton \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qpushbutton.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QSpacerItem \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTabWidget \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QTextEdit \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/qtextedit.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QVBoxLayout \
 		../Client/Client.h \
+		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QEventLoop \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetwork \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QtNetworkDepends \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtCore/QtCore \
@@ -4558,6 +4951,7 @@ main.o: ../Client/main.cpp ../Client/Controller.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/qudpsocket.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtNetwork/QTcpSocket \
 		../Client/common.h \
+		../Client/groupwindow.h \
 		../Client/Utils.h \
 		../Client/loginwindow.h \
 		/home/dungnguyen/Qt/6.5.1/gcc_64/include/QtWidgets/QMainWindow \
@@ -4578,6 +4972,9 @@ moc_Views.o: moc_Views.cpp
 
 moc_chatwindow.o: moc_chatwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_chatwindow.o moc_chatwindow.cpp
+
+moc_groupwindow.o: moc_groupwindow.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_groupwindow.o moc_groupwindow.cpp
 
 moc_loginwindow.o: moc_loginwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_loginwindow.o moc_loginwindow.cpp

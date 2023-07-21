@@ -5,17 +5,21 @@
 #include "common.h"
 #include "pthread.h"
 
+
+
 class controller: public QObject
 {
     Q_OBJECT
 public:
     controller();
 
-
+private slots:
+//    void initThread(std::vector<Chat>,std::vector<Friend>);
+    void initThread();
 private:
     views* v;
     client* clt;
-
+    pthread_t threads;
 };
 
 void *receive_thread_message(void *arg);

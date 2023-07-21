@@ -5,6 +5,7 @@ const int DEFAULT_PORT = 5050;
 const char DEFAULT_IP[] = "127.0.0.1";
 const char DEFAULT_FOLDER[] = "/home/dungnguyen/Desktop/sender";
 
+const int DEFAULT_CHAT_HISTORY = 10;
 const int DEFAULT_BACKLOG = 10;
 const int DATA_SIZE = 50;
 

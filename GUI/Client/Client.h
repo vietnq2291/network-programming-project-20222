@@ -14,6 +14,8 @@
 
 #include "common.h"
 
+Q_DECLARE_METATYPE(std::vector<Chat>)
+
 class client: public QObject
 {
     Q_OBJECT
@@ -31,6 +33,8 @@ public:
 
 
     void stop();
+    QString idToName(int id);
+    int nameToID(QString name);
     int process_chat_packet(MessagePacket& packet);
     void process_friend_list(std::string& data);
     void process_chat_list(std::string& data);
@@ -44,21 +48,32 @@ public:
 
 signals:
     void messageReceived(ChatMessage Message);
-    void authSuccess(std::vector<Chat> friend_list);
+    void authSuccess(const std::vector<Chat>& chat_list, const std::vector<Friend>& friend_list);
+    void authSuccess1st();
+    void resetUI();
+    void recvFriendRequest(std::string dispname, int id);
+    void chatHistory(ChatMessage message, QString sender);
+    void anonymousJoined();
     void LogOutSuccess();
 
 private slots:
     void Authenticate(QString username, QString password);
-    void SignUp(QString username, QString password);
+    void SignUp(QString username, QString password, QString dispname);
     void setChat(QString chat_name);
     void sendMessage(QString packet);
+    void addGroup(QString gname, std::vector<QString> userList);
     void receive_message();
+    void addFriend(QString name);
+    void accFriend(int id);
+    void denyFriend(int id);
+    void anonymousChatInit();
     void LogOut();
     void connectSuccess();
     void loiSocket(QAbstractSocket::SocketError err);
 
 private:
 
+    bool firstLog = true;
     int _conn_fd;
     int _server_port;
     QTcpSocket* qsocket;

@@ -17,6 +17,7 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QVBoxLayout>
@@ -29,53 +30,81 @@ class Ui_ChatWindow
 public:
     QTabWidget *tabWidget;
     QWidget *tab;
-    QListWidget *listWidget;
+    QListWidget *listChat;
+    QPushButton *AddGroupButton;
     QWidget *tab_2;
-    QListWidget *listWidget_2;
+    QListWidget *listFriend;
+    QPushButton *AddFriendButton;
+    QPushButton *LogOutButton;
     QWidget *layoutWidget;
-    QVBoxLayout *verticalLayout_3;
+    QVBoxLayout *verticalLayout;
+    QHBoxLayout *horizontalLayout;
     QLabel *label_3;
+    QSpacerItem *horizontalSpacer;
+    QPushButton *pushButton;
     QVBoxLayout *verticalLayout_2;
     QTextEdit *convBox;
     QHBoxLayout *horizontalLayout_2;
     QLabel *label_4;
     QLineEdit *messageBox;
     QPushButton *sendButton;
-    QPushButton *LogOutButton;
 
     void setupUi(QWidget *ChatWindow)
     {
         if (ChatWindow->objectName().isEmpty())
             ChatWindow->setObjectName("ChatWindow");
-        ChatWindow->resize(1146, 652);
+        ChatWindow->resize(1143, 653);
         QIcon icon;
         icon.addFile(QString::fromUtf8("chat.png"), QSize(), QIcon::Normal, QIcon::Off);
         ChatWindow->setWindowIcon(icon);
         tabWidget = new QTabWidget(ChatWindow);
         tabWidget->setObjectName("tabWidget");
-        tabWidget->setGeometry(QRect(10, 6, 221, 601));
+        tabWidget->setGeometry(QRect(10, 46, 221, 591));
         tab = new QWidget();
         tab->setObjectName("tab");
-        listWidget = new QListWidget(tab);
-        listWidget->setObjectName("listWidget");
-        listWidget->setGeometry(QRect(0, 0, 221, 571));
+        listChat = new QListWidget(tab);
+        listChat->setObjectName("listChat");
+        listChat->setGeometry(QRect(0, 0, 221, 521));
+        AddGroupButton = new QPushButton(tab);
+        AddGroupButton->setObjectName("AddGroupButton");
+        AddGroupButton->setGeometry(QRect(30, 530, 161, 25));
         tabWidget->addTab(tab, QString());
         tab_2 = new QWidget();
         tab_2->setObjectName("tab_2");
-        listWidget_2 = new QListWidget(tab_2);
-        listWidget_2->setObjectName("listWidget_2");
-        listWidget_2->setGeometry(QRect(0, 0, 221, 571));
+        listFriend = new QListWidget(tab_2);
+        listFriend->setObjectName("listFriend");
+        listFriend->setGeometry(QRect(0, 0, 221, 521));
+        AddFriendButton = new QPushButton(tab_2);
+        AddFriendButton->setObjectName("AddFriendButton");
+        AddFriendButton->setGeometry(QRect(30, 530, 161, 25));
         tabWidget->addTab(tab_2, QString());
+        LogOutButton = new QPushButton(ChatWindow);
+        LogOutButton->setObjectName("LogOutButton");
+        LogOutButton->setGeometry(QRect(10, 10, 221, 31));
         layoutWidget = new QWidget(ChatWindow);
         layoutWidget->setObjectName("layoutWidget");
-        layoutWidget->setGeometry(QRect(240, 10, 891, 631));
-        verticalLayout_3 = new QVBoxLayout(layoutWidget);
-        verticalLayout_3->setObjectName("verticalLayout_3");
-        verticalLayout_3->setContentsMargins(0, 0, 0, 0);
+        layoutWidget->setGeometry(QRect(241, 10, 881, 631));
+        verticalLayout = new QVBoxLayout(layoutWidget);
+        verticalLayout->setObjectName("verticalLayout");
+        verticalLayout->setContentsMargins(0, 0, 0, 0);
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setObjectName("horizontalLayout");
         label_3 = new QLabel(layoutWidget);
         label_3->setObjectName("label_3");
 
-        verticalLayout_3->addWidget(label_3);
+        horizontalLayout->addWidget(label_3);
+
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout->addItem(horizontalSpacer);
+
+        pushButton = new QPushButton(layoutWidget);
+        pushButton->setObjectName("pushButton");
+
+        horizontalLayout->addWidget(pushButton);
+
+
+        verticalLayout->addLayout(horizontalLayout);
 
         verticalLayout_2 = new QVBoxLayout();
         verticalLayout_2->setObjectName("verticalLayout_2");
@@ -108,11 +137,8 @@ public:
         verticalLayout_2->addLayout(horizontalLayout_2);
 
 
-        verticalLayout_3->addLayout(verticalLayout_2);
+        verticalLayout->addLayout(verticalLayout_2);
 
-        LogOutButton = new QPushButton(ChatWindow);
-        LogOutButton->setObjectName("LogOutButton");
-        LogOutButton->setGeometry(QRect(10, 610, 221, 31));
 
         retranslateUi(ChatWindow);
 
@@ -128,12 +154,15 @@ public:
 #if QT_CONFIG(accessibility)
         tab->setAccessibleName(QString());
 #endif // QT_CONFIG(accessibility)
-        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("ChatWindow", "Friends", nullptr));
-        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("ChatWindow", "Groups", nullptr));
+        AddGroupButton->setText(QCoreApplication::translate("ChatWindow", "Add Group", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("ChatWindow", "Chats", nullptr));
+        AddFriendButton->setText(QCoreApplication::translate("ChatWindow", "Add Friend", nullptr));
+        tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("ChatWindow", "Friends", nullptr));
+        LogOutButton->setText(QCoreApplication::translate("ChatWindow", "Log Out", nullptr));
         label_3->setText(QCoreApplication::translate("ChatWindow", "Choose a person to chat", nullptr));
+        pushButton->setText(QCoreApplication::translate("ChatWindow", "Go Anonymous...", nullptr));
         label_4->setText(QCoreApplication::translate("ChatWindow", "Message:", nullptr));
         sendButton->setText(QCoreApplication::translate("ChatWindow", "Send", nullptr));
-        LogOutButton->setText(QCoreApplication::translate("ChatWindow", "Log Out", nullptr));
     } // retranslateUi
 
 };

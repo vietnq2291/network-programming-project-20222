@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1146</width>
-    <height>652</height>
+    <width>1143</width>
+    <height>653</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,9 +21,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>6</y>
+     <y>46</y>
      <width>221</width>
-     <height>601</height>
+     <height>591</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -34,51 +34,114 @@
      <string/>
     </property>
     <attribute name="title">
-     <string>Friends</string>
+     <string>Chats</string>
     </attribute>
-    <widget class="QListWidget" name="listWidget">
+    <widget class="QListWidget" name="listChat">
      <property name="geometry">
       <rect>
        <x>0</x>
        <y>0</y>
        <width>221</width>
-       <height>571</height>
+       <height>521</height>
       </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="AddGroupButton">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>530</y>
+       <width>161</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Add Group</string>
      </property>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
-     <string>Groups</string>
+     <string>Friends</string>
     </attribute>
-    <widget class="QListWidget" name="listWidget_2">
+    <widget class="QListWidget" name="listFriend">
      <property name="geometry">
       <rect>
        <x>0</x>
        <y>0</y>
        <width>221</width>
-       <height>571</height>
+       <height>521</height>
       </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="AddFriendButton">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>530</y>
+       <width>161</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Add Friend</string>
      </property>
     </widget>
    </widget>
   </widget>
+  <widget class="QPushButton" name="LogOutButton">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>221</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Log Out</string>
+   </property>
+  </widget>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>241</x>
      <y>10</y>
-     <width>891</width>
+     <width>881</width>
      <height>631</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Choose a person to chat</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Choose a person to chat</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Go Anonymous...</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -123,19 +186,6 @@
      </layout>
     </item>
    </layout>
-  </widget>
-  <widget class="QPushButton" name="LogOutButton">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>610</y>
-     <width>221</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Log Out</string>
-   </property>
   </widget>
  </widget>
  <resources/>

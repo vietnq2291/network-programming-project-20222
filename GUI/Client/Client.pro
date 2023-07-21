@@ -17,6 +17,7 @@ SOURCES += \
     Utils.cpp \
     Views.cpp \
     chatwindow.cpp \
+    groupwindow.cpp \
     loginwindow.cpp \
     main.cpp
 
@@ -28,6 +29,7 @@ HEADERS += \
     Views.h \
     chatwindow.h \
     common.h \
+    groupwindow.h \
     loginwindow.h
 
 # Default rules for deployment.
@@ -37,6 +39,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 FORMS += \
     chatwindow.ui \
+    groupwindow.ui \
     loginwindow.ui
 
 DISTFILES += \

@@ -852,6 +852,9 @@ void Server::handle_get_friend_list(Message& message, int conn_fd) {
     log(LogType::INFO, "Send get friend list request to server", conn_fd);
 
     int user_id = message.get_request_sender();
+
+    std::cerr << "user id:" << user_id << std::endl;
+
     auto it = _online_user_list.find(user_id);
     if (it == _online_user_list.end()) {
         response_packet.response_header.response_type = ResponseType::FAILURE;

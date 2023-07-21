@@ -61,9 +61,11 @@ void *client::receive_message_p(void *arg) {
         MessagePacket packet;
         std::string buff;
 
+        std::cerr << "recv_p waiting" << std::endl;
+
         int bytes_received = recv(_conn_fd, &packet, sizeof(packet), 0);
 
-        std::cerr << "recv called" << std::endl;
+        std::cerr << "recv_p called" << std::endl;
 
         if (bytes_received < 0) {
             std::cerr << "\033[31mError:\033[0m Receive failed!" << std::endl;
@@ -89,6 +91,8 @@ void *client::receive_message_p(void *arg) {
             } else if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {
                 auto [user_id, display_name] = parse_user_info_data(packet.data);
                 response_type = "LOGIN_SUCCESS";
+                send_request_message("R F L");
+                send_request_message("R C L");
                 std::cout << "\033[34mFrom server:\033[0m Login successfully" << std::endl;
                 std::cout << "  \033[38;5;208mDisplay name: \033[0m" << display_name << std::endl;
                 std::cout << "  \033[38;5;208mID          : \033[0m" << user_id << std::endl;
@@ -103,6 +107,9 @@ void *client::receive_message_p(void *arg) {
                 response_type = "CREATE_GROUP_CHAT_SUCCESS";
                 std::cout << "\033[34mFrom server:\033[0m Creating group chat successfully" << std::endl;
                 std::cout << "  \033[38;5;208mChat ID: \033[0m" << packet.data << std::endl;
+                emit resetUI();
+                send_request_message("R F L");
+                send_request_message("R C L");
             } else if (packet.response_header.response_type == ResponseType::GET_FRIEND_LIST_SUCCESS) {
                 response_type = "GET_FRIEND_LIST_SUCCESS";
                 write_buff(data);
@@ -114,10 +121,13 @@ void *client::receive_message_p(void *arg) {
             } else if (packet.response_header.response_type == ResponseType::WAIT_FOR_ANONYMOUS_CHAT) {
                 response_type = "WAIT_FOR_ANONYMOUS_CHAT";
                 std::cout << "\033[34mFrom server:\033[0m Waiting for anonymous chat" << std::endl;
-            } else if (packet.response_header.response_type == ResponseType::JOIN_ANONYMOUS_CHAT_SUCCESS) {
+            } else if (packet.response_header.response_type == ResponseType::JOIN_ANONYMOUS_CHAT_SUCCESS) { //JOIN ANONYMOUS CHAT
                 response_type = "JOIN_ANONYMOUS_CHAT_SUCCESS";
                 std::cout << "\033[34mFrom server:\033[0m Joining anonymous chat" << std::endl;
                 std::cout << "  \033[38;5;208mChat ID: \033[0m" << packet.data << std::endl;
+                QByteArray byteArray = packet.data;
+                _chat_id = byteArray.toInt();
+                emit anonymousJoined();
             } else if (packet.response_header.response_type == ResponseType::GET_CHAT_LIST_SUCCESS) {
                 response_type = "GET_CHAT_LIST_SUCCESS";
                 write_buff(data);
@@ -125,6 +135,7 @@ void *client::receive_message_p(void *arg) {
                     _chat_list.clear();
                     process_chat_list(_buff);
                     clear_buff();
+                    emit authSuccess(_chat_list, _friend_list);
                 }
             } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_SUCCESS) {
                 response_type = "ADD_TO_GROUP_CHAT_SUCCESS";
@@ -155,6 +166,13 @@ void *client::receive_message_p(void *arg) {
                 if (packet.fin == 1) {
                     process_chat_history(_buff);
                     clear_buff();
+
+                    std::list<ChatMessage> chat_history = _chat_map[_chat_id];
+
+                    std::list<ChatMessage>::iterator i;
+                    for (i = chat_history.begin(); i != chat_history.end(); ++i) {
+                        emit chatHistory(*i, idToName(i->sender_id));
+                    }
                 }
             } else {
                 response_type = "UNKOWN";
@@ -215,18 +233,22 @@ void *client::receive_message_p(void *arg) {
         else if (packet.type == MessageType::PUSH) {
             // print all data of packet for debug
             std::string push_type;
-            if (packet.push_header.push_type == PushType::FRIEND_REQUEST) {
+            if (packet.push_header.push_type == PushType::FRIEND_REQUEST) {                         //RECEIVE FRIEND REQUEST
                 auto [user_id, display_name] = parse_user_info_data(packet.data);
                 push_type = "FRIEND_REQUEST";
                 std::cout << "\033[34mFrom server:\033[0m Friend request from " << std::endl;
                 std::cout << "  \033[38;5;208mDisplay name: \033[0m" << display_name << std::endl;
                 std::cout << "  \033[38;5;208mID          : \033[0m" << user_id << std::endl;
+                emit recvFriendRequest(display_name, user_id);
             } else if (packet.push_header.push_type == PushType::FRIEND_ACCEPT) {
                 auto [user_id, display_name] = parse_user_info_data(packet.data);
                 push_type = "FRIEND_ACCEPT";
                 std::cout << "\033[34mFrom server:\033[0m New friend" << std::endl;
                 std::cout << "  \033[38;5;208mDisplay name: \033[0m" << display_name << std::endl;
                 std::cout << "  \033[38;5;208mID          : \033[0m" << user_id << std::endl;
+                emit resetUI();
+                send_request_message("R F L");
+                send_request_message("R C L");
             } else if (packet.push_header.push_type == PushType::FRIEND_REJECT) {
                 push_type = "FRIEND_REJECT";
                 std::cout << "\033[34mFrom server:\033[0m Friend request not accepted" << std::endl;
@@ -410,16 +432,20 @@ void client::Authenticate(QString username, QString password) {
 //    std::string buff = encode_auth_data(username.toStdString(), password.toStdString());
 //    std::cerr << buff << std::endl;
     send_request_message(buff);
-    receive_message();
+    if (firstLog == true) {
+        receive_message();
+    }
 
 //    connect(qsocket, SIGNAL(readyRead()), this, SLOT(receive_message()));
 }
 
-void client::SignUp(QString username, QString password) {
-    std::string buff = "R R " + username.toStdString() + " " + password.toStdString();
+void client::SignUp(QString username, QString password, QString dispname) {
+    std::string buff = "R R " + username.toStdString() + " " + password.toStdString() + " " + dispname.toStdString();
     std::cerr << "received sign up info" << std::endl;
     send_request_message(buff);
-    receive_message();
+    if (firstLog == true) {
+        receive_message();
+    }
 }
 
 void client::send_chat_message(std::string buff, int chat_id, ChatType chat_type, DataType data_type) {
@@ -546,8 +572,18 @@ void client::receive_message() {
         } else if (packet.response_header.response_type == ResponseType::LOGIN_SUCCESS) {                 //Login SUCESSFULLY
             response_type = "LOGIN_SUCCESS";
             std::tie(_user_id, _display_name) = parse_user_info_data(packet.data);
+            if (firstLog == true) {
+                emit authSuccess1st();
+                firstLog = false;
+            }
+            std::cerr << "not process friend yet" << std::endl;
+            send_request_message("R F L");
+            receive_message();
+            std::cerr << "not process chat yet" << std::endl;
             send_request_message("R C L");
             receive_message();
+            std::cerr << "processed all" << std::endl;
+
         } else if (packet.response_header.response_type == ResponseType::ERROR) {
             response_type = "ERROR";
         } else if (packet.response_header.response_type == ResponseType::CREATE_PRIVATE_CHAT_SUCCESS) {
@@ -574,7 +610,10 @@ void client::receive_message() {
                 _chat_list.clear();
                 process_chat_list(_buff);
                 clear_buff();
-                emit authSuccess(_chat_list);
+                std::cerr << "chat list processed" << std::endl;
+                emit authSuccess(_chat_list, _friend_list);
+                std::cerr << "chat list sent" << std::endl;
+
             }
         } else if (packet.response_header.response_type == ResponseType::ADD_TO_GROUP_CHAT_SUCCESS) {
             response_type = "ADD_TO_GROUP_CHAT_SUCCESS";
@@ -584,6 +623,11 @@ void client::receive_message() {
             response_type = "LEAVE_GROUP_CHAT_SUCCESS";
         } else if (packet.response_header.response_type == ResponseType::GET_GROUP_CHAT_MEMBERS_SUCCESS) {
             response_type = "GET_GROUP_CHAT_MEMBERS_SUCCESS";
+            write_buff(data);
+            if (packet.fin == 1) {
+                process_group_members_list(_buff);
+                clear_buff();
+            }
         } else if (packet.response_header.response_type == ResponseType::GET_CHAT_MESSAGES_SUCCESS) {
             response_type = "GET_CHAT_MESSAGES_SUCCESS";
         } else {
@@ -680,6 +724,33 @@ void client::receive_message() {
     else {
         std::cout << "Invalid message type" << std::endl;
     }
+}
+
+void client::addFriend(QString name){
+    std::string buff = "R F R " + name.toStdString();
+    send_request_message(buff);
+}
+
+void client::accFriend(int id) {
+    std::string buff = "R F A " + QString::number(id).toStdString();
+    std::cerr << buff << std::endl;
+    send_request_message(buff);
+    buff = "R C P " + QString::number(id).toStdString();
+    send_request_message(buff);
+    buff = "R F L";
+    send_request_message(buff);
+    buff = "R C L";
+    send_request_message(buff);
+}
+
+void client::denyFriend(int id) {
+    std::string buff = "R F J " + QString::number(id).toStdString();
+    send_request_message(buff);
+}
+
+void client::anonymousChatInit() {
+    std::string buff = "R A C";
+    send_request_message(buff);
 }
 
 void client::LogOut() {
@@ -842,6 +913,30 @@ void client::send_request_message(std::string buff) {
         //                                                                                                 ", " << packet.data_length <<
         //                                                                                                 ", " << packet.data << ")" << std::endl;
     }
+}
+
+QString client::idToName(int id) {
+    if (id == _user_id) return "Me";
+
+    for (Friend fr : _friend_list) {
+        if (fr.id == id) {
+            return fr.disp_name.c_str();
+        }
+    }
+
+    QString res = "Non-Friend (id = %1 )";
+
+    return res.arg(id);
+}
+
+int client::nameToID(QString name) {
+    for (Friend fr : _friend_list) {
+        if (fr.disp_name.c_str() == name) {
+            return fr.id;
+        }
+    }
+
+    return -1;
 }
 
 int client::process_chat_packet(MessagePacket& p) {
@@ -1072,6 +1167,16 @@ void client::setChat(QString chat_name){
         }
     }
 
+    QString message = "R M ";
+
+    QString buff = message.append(QString::number(_chat_id));
+    buff = buff.append(" ");
+    buff = buff.append(QString::number(DEFAULT_CHAT_HISTORY));
+    buff = buff.append(" 1");
+
+    std::cerr << buff.toStdString() << std::endl;
+
+    send_request_message(buff.toStdString());
 }
 
 void client::sendMessage(QString packet) {
@@ -1126,6 +1231,17 @@ void client::sendMessage(QString packet) {
 //            std::cerr << "pack in stream but not sent" << std::endl;
 //    }
 
+}
+
+void client::addGroup(QString gname,std::vector<QString> userList) {
+    QString buff = "R C G " + gname + " ";
+    buff = buff.append(QString::number(userList.size()));
+    std::vector<QString>::iterator i;
+    for (i = userList.begin(); i != userList.end(); i++) {
+        buff = buff.append(" ");
+        buff = buff.append(QString::number(nameToID(*i)));
+    }
+    send_request_message(buff.toStdString());
 }
 
 QDataStream &operator<<(QDataStream &out, const MessagePacket &dataStruct)
